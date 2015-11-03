@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="AnalyseWithCppCheck" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="CppCheckTask" AssemblyFile="$(MSBuildThisFileDirectory)CppCheckTask.dll"/>
+
+    <PropertyGroup>
+        <CppCheckPath               Condition="'$(CppCheckPath)' == ''">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPath>
+        <CppCheckOptions            Condition="'$(CppCheckOptions)' == ''">--inline-suppr;--enable=all;-j 8</CppCheckOptions>
+		<CppCheckDefines            Condition="'$(CppCheckDefines)' == ''">__cplusplus</CppCheckDefines>
+        <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
+        <CppCheckOutputType         Condition="'$(CppCheckOutputType)' == ''">xml-version-1</CppCheckOutputType>
+        <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-cppcheck</CppCheckOutputPath>
+        <CppCheckTaskEnabled        Condition="'$(CppCheckTaskEnabled)' == ''">false</CppCheckTaskEnabled>
+    </PropertyGroup>
+
+    <Target Name="AnalyseWithCppCheck" AfterTargets="AfterBuild" Condition="'$(CppCheckTaskEnabled)' == 'true'">
+        <Message Text="ProjectPathToAnalyse = $(ProjectDir)"/>
+		<Message Text="SolutionPathToAnalyse = $(SolutionDir)\$(SolutionName).sln"/>
+        <CppCheckTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      ProjectPathToAnalyse="$(ProjectDir)"
+                      ProjectNameToAnalyse="$(MSBuildProjectName)"
+                      CppCheckPath="$(CppCheckPath)"
+                      CppCheckOptions="$(CppCheckOptions)"
+					  CppCheckDefines="$(CppCheckDefines)"
+                      CppCheckIgnores="$(CppCheckIgnores)"
+                      CppCheckOutputType="$(CppCheckOutputType)"
+                      CppCheckOutputPath="$(CppCheckOutputPath)"
+                      />
+    </Target>
+</Project>

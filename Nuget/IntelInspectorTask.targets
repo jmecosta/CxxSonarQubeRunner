@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="InspectBinary" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="IntelInspectorTask" AssemblyFile="$(MSBuildThisFileDirectory)InspectorTask.dll" />
+  
+  <PropertyGroup>
+    <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2015_DIR=C:\Program Files (x86)\Intel\Inspector XE 2015</ExecutableEnvironment>
+    <PathToIntelInspector       Condition="'$(PathToIntelInspector)' == ''">C:\Program Files (x86)\Intel\Inspector XE 2015</PathToIntelInspector>
+    <ResourceLeaks              Condition="'$(ResourceLeaks)' == ''">true</ResourceLeaks>
+    <StackDepth                 Condition="'$(StackDepth)' == ''">1</StackDepth>
+    <AnalysisType               Condition="'$(AnalysisType)' == ''">mi1</AnalysisType>
+    <ResultFile                 Condition="'$(ResultFile)' == ''">$(SolutionDir)\sonarcpp\externalrules-result\intel-result-$(MSBuildProjectName).xml</ResultFile>       
+    <IntelInspectorTaskEnabled  Condition="'$(IntelInspectorTaskEnabled)' == ''">false</IntelInspectorTaskEnabled>  
+  </PropertyGroup>
+  
+  <Target Name="InspectBinary" AfterTargets="AfterBuild" Condition="'$(IntelInspectorTaskEnabled)' == 'true'">
+      <IntelInspectorTask StackDepth="$(StackDepth)"
+                          AnalysisType="$(UserAnalysisType)"
+                          ExecutableToRun="$(OutDir)$(RootNamespace).exe"
+                          ExecutableEnvironment="$(ExecutableEnvironment)"
+                          PathToIntelInspector="$(PathToIntelInspector)"
+                          ResourceLeaks="$(ResourceLeaks)"
+                          ResultFile="$(ResultFile)"
+                          />
+  </Target>
+</Project>

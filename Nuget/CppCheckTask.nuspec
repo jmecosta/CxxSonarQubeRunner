@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>CppCheckTask</id>
+        <version>1.0.4</version>
+        <authors>Tekla</authors>
+        <owners>Tekla</owners>
+        <licenseUrl>http://www.tekla.com/end-user-license-agreement</licenseUrl>
+        <projectUrl>http://tekla.com</projectUrl>
+        <iconUrl>http://tekla.cachefly.net/cdn/farfuture/AdKO-3KN3Ky6TjBryc_NBj5xAj-QEgBZO8kecdpkuJA/mtime:1398248216/sites/all/themes/custom/tekla_omega/logo.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Analysis: CppCheck Task</description>
+        <releaseNotes>Initial Package.</releaseNotes>
+        <copyright>Tekla Copyright 2015</copyright>
+        <tags>.Net Tekla</tags>
+    </metadata>
+    <files>
+        <file src="..\BuildDrop\CppCheckTask.dll" target="build" />
+        <file src="CppCheckTask.targets" target="build" />
+        <file src="..\BuildDrop\FSharp*.*" target="build" />
+        <file src="..\BuildDrop\Executor.dll" target="build" />
+        <file src="..\BuildDrop\MsbuildTaskUtils.dll" target="build" />
+    </files>
+</package>

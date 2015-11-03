@@ -1,0 +1,32 @@
+version: '{build}'
+install:
+  - ps: |
+      If ($env:Platform -Match "x86") {
+        $env:PCRE_PLATFORM="Win32"
+        $env:JAVA_HOME="c:/Program Files (x86)/Java/jdk1.8.0"
+        $env:MSBuildDir="C:/Program Files (x86)/MSBuild/14.0/Bin/msbuild.exe"
+        $env:VCVARS_PLATFORM="x86"
+        $env:LANG_PLATFORM=""
+      } Else {
+        $env:PCRE_PLATFORM="x64"
+        $env:JAVA_HOME="c:/Program Files/Java/jdk1.8.0"
+        $env:MSBuildDir="C:/Program Files/MSBuild/14.0/Bin/msbuild.exe"
+        $env:VCVARS_PLATFORM="amd64"
+        $env:LANG_PLATFORM="-x64"
+      }	  
+  - cmd: appveyor DownloadFile https://github.com/nunit/nunit/releases/download/3.0.0-beta-3/nunit-3.0.0-beta-3.zip
+  - cmd: 7z x -oC:\Tools\NUnit3 nunit-3.0.0-beta-3.zip > NUL
+  - cmd: SET PATH=C:\Tools\NUnit3\bin;%PATH%
+  - cmd: SET
+build_script:
+  - msbuild MSBuildTasks.sln /p:Configuration=Release
+after_test:
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\GtestRunnerTask.nuspec
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\RatsTask.nuspec
+  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\VeraTask.nuspec
+artifacts:
+  - path: '*.nupkg'
+    name: sonar-cxx-msbuild-tasks-nugets

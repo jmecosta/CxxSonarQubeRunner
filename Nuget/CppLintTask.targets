@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="AnalyseWithCpplint" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="CpplintTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintTask.dll"/>
+
+    <PropertyGroup>
+        <PythonPath                   Condition="'$(PythonPath)' == ''">C:\Python27\python.exe</PythonPath>
+        <CppLintPath                   Condition="'$(CppLintPath)' == ''">$(MSBuildThisFileDirectory)\cpplint\cpplint_mod.py</CppLintPath>
+        <CppLintOptions                Condition="'$(CppLintOptions)' == ''"></CppLintOptions>
+        <CppLintEnvironment                Condition="'$(CppLintEnvironment)' == ''"></CppLintEnvironment>
+        <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
+        <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</CppLintOutputPath>
+        <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
+        <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">false</CppLintTaskEnabled>
+    </PropertyGroup>
+
+    <Target Name="AnalyseWithCpplint" AfterTargets="AfterBuild" Condition="'$(CppLintTaskEnabled)' == 'true'">
+        <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
+        <CpplintTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      ProjectNameToAnalyse="$(MSBuildProjectName)"
+                      PythonPath="$(PythonPath)"
+                      CppLintPath="$(CppLintPath)"
+                      CppLintOptions="$(CppLintOptions)"
+                      CppLintEnvironment="$(CppLintEnvironment)"
+                      CppLintIgnores="$(CppLintIgnores)"
+                      CppLintOutputType="$(CppLintOutputType)"
+                      CppLintOutputPath="$(CppLintOutputPath)"
+                      PathReplacementStrings="$(PathReplacementStrings)"
+                      />
+    </Target>
+</Project>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="11" failures="0" disabled="1" errors="0" timestamp="2013-06-29T09:23:31" time="8.144" name="AllTests">
+  <testsuite name="CM_toolFileSystemJapaneseTest" tests="6" failures="0" disabled="0" errors="0" time="0">
+    <testcase name="testFileSystemGets_FilesWithSuffixFromSubFolder" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+    <testcase name="testFileSystem_GetFullPathTo" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+    <testcase name="testTransform" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+    <testcase name="testFileSystemGetsAllFilesFromAllFolders" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+    <testcase name="testFileSystemGetsAllFilesFromSubFolder" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+    <testcase name="testFileSystemGetsAllFilesFromSubFolder_FailsWithNonJapaneseLocale" status="notrun" time="0" classname="CM_toolFileSystemJapaneseTest" />
+  </testsuite>
+  <testsuite name="MD_cieExportLibraryTest" tests="4" failures="0" disabled="1" errors="0" time="0.01">
+    <testcase name="ExportLibraryCreatesLibrary2Database" status="run" time="0.002" classname="MD_cieExportLibraryTest" />
+    <testcase name="ExportLibraryDestroysLibrary2Database" status="run" time="0.003" classname="MD_cieExportLibraryTest" />
+    <testcase name="ExportLibrarySavesDbToFile" status="run" time="0.005" classname="MD_cieExportLibraryTest" />
+    <testcase name="DISABLED_ExportLibraryCopiesJointFromLibrary" status="notrun" time="0" classname="MD_cieExportLibraryTest" />
+  </testsuite>
+  <testsuite name="MD_funConnectionImportTest" tests="1" failures="0" disabled="0" errors="0" time="0">
+    <testcase name="SetAndGetParametersNumberTest" status="run" time="0" classname="MD_funConnectionImportTest" />
+  </testsuite>
+</testsuites>

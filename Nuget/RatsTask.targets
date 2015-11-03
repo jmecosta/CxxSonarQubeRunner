@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="AnalyseWithRats" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <UsingTask TaskName="RatsTask" AssemblyFile="$(MSBuildThisFileDirectory)RatsTask.dll"/>
+
+    <PropertyGroup>
+        <RatsPath               Condition="'$(RatsPath)' == ''">$(MSBuildThisFileDirectory)rats\rats.exe</RatsPath>
+        <RatsOptions            Condition="'$(RatsOptions)' == ''"></RatsOptions>
+        <RatsIgnores            Condition="'$(RatsIgnores)' == ''"></RatsIgnores>
+        <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
+        <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-rats</RatsOutputPath>
+        <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
+        <RatsTaskEnabled        Condition="'$(RatsTaskEnabled)' == ''">false</RatsTaskEnabled>
+    </PropertyGroup>
+
+    <Target Name="AnalyseWithRats" AfterTargets="AfterBuild" Condition="'$(RatsTaskEnabled)' == 'true'">
+        <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
+        <RatsTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      ProjectNameToAnalyse="$(MSBuildProjectName)"
+                      RatsPath="$(RatsPath)"
+                      RatsOptions="$(RatsOptions)"
+                      RatsIgnores="$(RatsIgnores)"
+                      RatsOutputType="$(RatsOutputType)"
+                      RatsOutputPath="$(RatsOutputPath)"
+                      PathReplacementStrings="$(PathReplacementStrings)"
+                      />
+    </Target>
+</Project>
