@@ -18,15 +18,16 @@ install:
   - cmd: 7z x -oC:\Tools\NUnit3 nunit-3.0.0-beta-3.zip > NUL
   - cmd: SET PATH=C:\Tools\NUnit3\bin;%PATH%
   - cmd: SET
+  - cmd: nuget\nuget.exe restore
 build_script:
   - msbuild MSBuildTasks.sln /p:Configuration=Release
 after_test:
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\GtestRunnerTask.nuspec
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\RatsTask.nuspec
-  - cmd: ProjectCheckerRunner\nuget\nuget.exe pack  Nuget\VeraTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\GtestRunnerTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
