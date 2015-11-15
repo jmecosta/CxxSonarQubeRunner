@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <UsingTask TaskName="CpplintTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintTask.dll"/>
+    <UsingTask TaskName="VeraTask" AssemblyFile="$(MSBuildThisFileDirectory)VeraTask.dll"/>
+    <UsingTask TaskName="RatsTask" AssemblyFile="$(MSBuildThisFileDirectory)RatsTask.dll"/>
+    <UsingTask TaskName="CppCheckTask" AssemblyFile="$(MSBuildThisFileDirectory)CppCheckTask.dll"/>
+
+    <PropertyGroup>
+        <PythonPath                   Condition="'$(PythonPath)' == ''">c:\tools\Python2\Python.exe</PythonPath>
+        <CppLintPath                   Condition="'$(CppLintPath)' == ''">$(MSBuildThisFileDirectory)\cpplint_mod.py</CppLintPath>
+        <CppLintOptions                Condition="'$(CppLintOptions)' == ''"></CppLintOptions>
+        <CppLintEnvironment                Condition="'$(CppLintEnvironment)' == ''"></CppLintEnvironment>
+        <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
+        <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-other</CppLintOutputPath>
+        <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
+        <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">true</CppLintTaskEnabled>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <VeraPath               Condition="'$(VeraPath)' == ''">C:\Program Files (x86)\vera++\bin\vera++.exe</VeraPath>
+        <VeraOptions            Condition="'$(VeraOptions)' == ''">-nodup -showrules</VeraOptions>
+        <VeraIgnores            Condition="'$(VeraIgnores)' == ''"></VeraIgnores>
+        <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
+        <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-vera++</VeraOutputPath>
+        <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
+        <VeraTaskEnabled        Condition="'$(VeraTaskEnabled)' == ''">true</VeraTaskEnabled>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <RatsPath               Condition="'$(RatsPath)' == ''">$(MSBuildThisFileDirectory)RATS\rats.exe</RatsPath>
+        <RatsOptions            Condition="'$(RatsOptions)' == ''"></RatsOptions>
+        <RatsIgnores            Condition="'$(RatsIgnores)' == ''"></RatsIgnores>
+        <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
+        <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-rats</RatsOutputPath>
+        <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
+        <RatsTaskEnabled        Condition="'$(RatsTaskEnabled)' == ''">true</RatsTaskEnabled>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CppCheckPath               Condition="'$(CppCheckPath)' == ''">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPath>
+        <CppCheckOptions            Condition="'$(CppCheckOptions)' == ''">--inline-suppr;--enable=all;-j 8</CppCheckOptions>
+        <CppCheckDefines            Condition="'$(CppCheckDefines)' == ''">__cplusplus</CppCheckDefines>
+        <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
+        <CppCheckOutputType         Condition="'$(CppCheckOutputType)' == ''">xml-version-1</CppCheckOutputType>
+        <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-cppcheck</CppCheckOutputPath>
+        <CppCheckTaskEnabled        Condition="'$(CppCheckTaskEnabled)' == ''">true</CppCheckTaskEnabled>
+    </PropertyGroup>
+    
+    <Target Name="Cpplint" Condition="'$(CppLintTaskEnabled)' == 'true'">
+        <Message Text="Cpplint = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
+        <CpplintTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      PythonPath="$(PythonPath)"
+                      CppLintPath="$(CppLintPath)"
+                      CppLintOptions="$(CppLintOptions)"
+                      CppLintEnvironment="$(CppLintEnvironment)"
+                      CppLintIgnores="$(CppLintIgnores)"
+                      CppLintOutputType="$(CppLintOutputType)"
+                      CppLintOutputPath="$(CppLintOutputPath)"
+                      PathReplacementStrings="$(PathReplacementStrings)"
+                      />
+    </Target>
+    <Target Name="Vera" Condition="'$(VeraTaskEnabled)' == 'true'">
+        <Message Text="Vera = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
+        <VeraTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      VeraPath="$(VeraPath)"
+                      VeraOptions="$(VeraOptions)"
+                      VeraIgnores="$(VeraIgnores)"
+                      VeraOutputType="$(VeraOutputType)"
+                      VeraOutputPath="$(VeraOutputPath)"
+                      PathReplacementStrings="$(PathReplacementStrings)"
+                      />
+    </Target>
+    <Target Name="Rats" Condition="'$(RatsTaskEnabled)' == 'true'">
+        <Message Text="Rats = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
+        <RatsTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      RatsPath="$(RatsPath)"
+                      RatsOptions="$(RatsOptions)"
+                      RatsIgnores="$(RatsIgnores)"
+                      RatsOutputType="$(RatsOutputType)"
+                      RatsOutputPath="$(RatsOutputPath)"
+                      PathReplacementStrings="$(PathReplacementStrings)"
+                      />
+    </Target>
+    <Target Name="CppCheck" Condition="'$(CppCheckTaskEnabled)' == 'true'">
+        <Message Text="CppCheck = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
+        <CppCheckTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+                      CppCheckPath="$(CppCheckPath)"
+                      CppCheckOptions="$(CppCheckOptions)"
+					  CppCheckDefines="$(CppCheckDefines)"
+                      CppCheckIgnores="$(CppCheckIgnores)"
+                      CppCheckOutputType="$(CppCheckOutputType)"
+                      CppCheckOutputPath="$(CppCheckOutputPath)"
+                      />
+    </Target>
+    
+    <Target Name="GenerateCode" BeforeTargets="Build">
+        <Message Text="CxxMsbuildRunner Will Run ====================" Importance="high" />
+    </Target>
+
+    <Target Name="RunCodeAnalysis" AfterTargets="Build" DependsOnTargets="Cpplint;Rats;CppCheck;Vera">
+        <Message Text="Code Analysis Done" Importance="high" />
+    </Target>
+
+</Project>

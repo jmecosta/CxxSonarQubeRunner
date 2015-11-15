@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CppTasks", "CppTasks", "{9A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{87CA7057-3A23-4358-B185-F2128016264F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CxxSonarQubeMsbuidRunner", "CxxSonarQubeMsbuidRunner\CxxSonarQubeMsbuidRunner.fsproj", "{7A7AB3AA-73AC-4C14-BAF5-3819C43FB6FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,10 @@ Global
 		{E4587340-6DFF-4419-8C0F-712CCD0C94A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4587340-6DFF-4419-8C0F-712CCD0C94A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4587340-6DFF-4419-8C0F-712CCD0C94A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A7AB3AA-73AC-4C14-BAF5-3819C43FB6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A7AB3AA-73AC-4C14-BAF5-3819C43FB6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A7AB3AA-73AC-4C14-BAF5-3819C43FB6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A7AB3AA-73AC-4C14-BAF5-3819C43FB6FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

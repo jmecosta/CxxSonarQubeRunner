@@ -19,6 +19,7 @@ open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
 open MSBuild.Tekla.Tasks.Executor
+open FSharp.Collections.ParallelSeq
 
 type RatsError = XmlProvider<"""<?xml version="1.0"?><rats_output>
 <stats>
@@ -68,8 +69,8 @@ entropy should be used.
 type RatsTask() as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
-    let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
     let _ratsExec = "rats.exe"
+    let syncLock = new System.Object()
 
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set
@@ -127,7 +128,24 @@ type RatsTask() as this =
 
         builder.ToString()
 
-    member x.ExecuteRats executor cmdLineArgs ouputFilePath =
+    member x.ExecuteRats cmdLineArgs =
+
+        let mutable ouputFilePath = ""
+        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
+        
+        lock syncLock (
+            fun () -> 
+                let getReportName = 
+                    if not(x.ProjectNameToAnalyse = "") then 
+                        x.ProjectNameToAnalyse
+                    else
+                        Path.GetFileNameWithoutExtension(x.SolutionPathToAnalyse)
+
+                ouputFilePath <- Path.Combine(x.RatsOutputPath, (sprintf "rats-result-%s-%i.xml" getReportName this.counter))
+                this.counter <- this.counter + 1
+            )
+                     
+
         // set environment
         let env = Map.ofList [("RATS_INPUT", x.RatsPath)]
 
@@ -207,13 +225,10 @@ type RatsTask() as this =
                 Directory.CreateDirectory(x.RatsOutputPath) |> ignore
 
             let iterateOverFiles (file : string) = 
-                let reportName = sprintf "rats-result-%s-%i.xml" getReportName this.counter
-                let xml_file = Path.Combine(x.RatsOutputPath, reportName)
-
                 let arguments = x.generateCommandLineArgs(file)
                 if file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString()) then
                     logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
-                    x.ExecuteRats executor arguments xml_file |> ignore
+                    x.ExecuteRats arguments |> ignore
                     this.counter <- this.counter + 1
                 ()
 
@@ -223,7 +238,7 @@ type RatsTask() as this =
                 elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
                     projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> Seq.iter (fun x -> iterateOverProjectFiles x)
+            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "Rats End: %u ms" stopWatchTotal.ElapsedMilliseconds)
@@ -235,6 +250,5 @@ type RatsTask() as this =
 
     interface ICancelableTask with
         member this.Cancel() =
-            (executor :> ICommandExecutor).CancelExecution |> ignore
             Environment.Exit(0)
             ()

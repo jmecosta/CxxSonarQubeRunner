@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>7a7ab3aa-73ac-4c14-baf5-3819c43fb6fb</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CxxSonarQubeMsbuidRunner</RootNamespace>
+    <AssemblyName>CxxSonarQubeMsbuidRunner</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <Name>CxxSonarQubeMsbuidRunner</Name>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Debug\CxxSonarQubeMsbuidRunner.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>/m:D:\prod\structures\Core\Common\Common.sln /d:asdas=asdasda /d:as1sdas=12231 /d:sonar.host.url=http://jocs6:9000 /d:sonar.login=admin /d:sonar.password=admin</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DocumentationFile>bin\Release\CxxSonarQubeMsbuidRunner.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>/s:D:\prod\structures\Core\Common\Common.sln</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets')">
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" />
+  <ItemGroup>
+    <Compile Include="HelpersMethods.fs" />
+    <Compile Include="InstallationModule.fs" />
+    <Compile Include="SonarRunnerPhases.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
+    <EmbeddedResource Include="after.solution.sln.targets" />
+    <None Include="Elevate.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Elevate64.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Data">
+      <HintPath>..\packages\FSharp.Data.2.2.5\lib\net40\FSharp.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <ProjectReference Include="..\Common\CommandExecutor\CommandExecutor.fsproj">
+      <Name>CommandExecutor</Name>
+      <Project>{9b154406-0af6-45a9-bf32-9c5c23822b6b}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\CppCheckTask\CppCheckTask.fsproj">
+      <Name>CppCheckTask</Name>
+      <Project>{03e5f1fe-0719-483b-b75c-a6acc8b5e39f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\CppLintTask\CppLintTask.fsproj">
+      <Name>CppLintTask</Name>
+      <Project>{f1d22b38-182b-4003-8865-ede0e918fa01}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\GtestXunitConverterTask\GtestRunnerTask.fsproj">
+      <Name>GtestRunnerTask</Name>
+      <Project>{72a6efc3-13ff-4653-918f-5d7d36b94426}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\InspectorTask\InspectorTask.fsproj">
+      <Name>InspectorTask</Name>
+      <Project>{e492e92a-9707-4283-95b6-0d0e871cc02c}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\RatsTask\RatsTask.fsproj">
+      <Name>RatsTask</Name>
+      <Project>{d95f41d9-def8-4bd4-aceb-c1107b004da6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\CppTasks\VeraTask\VeraTask.fsproj">
+      <Name>VeraTask</Name>
+      <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

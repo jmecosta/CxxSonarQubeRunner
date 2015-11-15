@@ -18,6 +18,7 @@ open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
 open MSBuild.Tekla.Tasks.Executor
+open FSharp.Collections.ParallelSeq
 
 type VeraErrorX(filename:string, line:string, severity:string, message:string, source:string) =
     member val filename = filename
@@ -29,8 +30,8 @@ type VeraErrorX(filename:string, line:string, severity:string, message:string, s
 type VeraTask() as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
-    let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
     let _VeraExec = "Vera.exe"
+    let syncLock = new System.Object()
 
     member val totalViolations : int = 0 with get, set
     member val buildok : bool = true with get, set
@@ -86,7 +87,22 @@ type VeraTask() as this =
 
         builder.ToString()
 
-    member x.ExecuteVera executor filepath ouputFilePath =
+    member x.ExecuteVera filepath =
+        let mutable ouputFilePath = ""
+        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
+        
+        lock syncLock (
+            fun () -> 
+                let getReportName = 
+                    if not(x.ProjectNameToAnalyse = "") then 
+                        x.ProjectNameToAnalyse
+                    else
+                        Path.GetFileNameWithoutExtension(x.SolutionPathToAnalyse)
+
+                ouputFilePath <- Path.Combine(x.VeraOutputPath, (sprintf "vera-result-%s-%i.xml" getReportName this.counter))
+                this.counter <- this.counter + 1
+            )
+
         // set environment
         let mutable env = Map.ofList []
         let mutable returncode = 1
@@ -191,11 +207,9 @@ type VeraTask() as this =
                         ""
 
                 if not(skip) && IsSupported(file) then
-                    let reportName = sprintf "vera-result-%s-%i.xml" getReportName this.counter
-                    let xml_file = Path.Combine(x.VeraOutputPath, reportName)
                     let arguments = x.generateCommandLineArgs(file)
                     logger.LogMessage(sprintf "Vera++Command: %s %s" x.VeraPath arguments)
-                    x.ExecuteVera executor file xml_file |> ignore
+                    x.ExecuteVera file |> ignore
                     this.counter <- this.counter + 1                        
                     ()
 
@@ -205,7 +219,7 @@ type VeraTask() as this =
                 elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
                     projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> Seq.iter (fun x -> iterateOverProjectFiles x)
+            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "Vera End: %u ms" stopWatchTotal.ElapsedMilliseconds)
@@ -217,6 +231,5 @@ type VeraTask() as this =
 
     interface ICancelableTask with
         member this.Cancel() =
-            (executor :> ICommandExecutor).CancelExecution |> ignore
             Environment.Exit(0)
             ()

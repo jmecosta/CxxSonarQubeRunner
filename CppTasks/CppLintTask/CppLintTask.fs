@@ -18,6 +18,7 @@ open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
 open MSBuild.Tekla.Tasks.Executor
+open FSharp.Collections.ParallelSeq
 
 type CppLintErrorX(filename:string, line:string, severity:string, message:string, id:string) =
     member val filename = filename
@@ -29,8 +30,8 @@ type CppLintErrorX(filename:string, line:string, severity:string, message:string
 type CppLintTask() as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
-    let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
     let _CppLintExec = "CppLint.exe"
+    let syncLock = new System.Object()
 
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set
@@ -101,7 +102,22 @@ type CppLintTask() as this =
 
         builder.ToString()
 
-    member x.ExecuteCppLint executor filepath ouputFilePath =
+    member x.ExecuteCppLint filepath =
+        let mutable ouputFilePath = ""
+        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
+        
+        lock syncLock (
+            fun () -> 
+                let getReportName = 
+                    if not(x.ProjectNameToAnalyse = "") then 
+                        x.ProjectNameToAnalyse
+                    else
+                        Path.GetFileNameWithoutExtension(x.SolutionPathToAnalyse)
+
+                ouputFilePath <- Path.Combine(x.CppLintOutputPath, (sprintf "cpplint-result-%s-%i.xml" getReportName this.counter))
+                this.counter <- this.counter + 1
+            )
+                            
         // set environment
         let mutable env = Map.ofList []
  
@@ -118,8 +134,8 @@ type CppLintTask() as this =
         let mutable tries = 3
         let mutable returncode = 1
 
-        while tries > 0  && returncode > 0 do
-            (executor :> ICommandExecutor).ResetData()
+        while tries > 0  && returncode > 0 do            
+            logger.LogMessage(sprintf "[CPPLINT : EXECUTE %i] %s %s in report: %s" tries x.PythonPath (x.generateCommandLineArgs(filepath)) ouputFilePath)
             returncode <- (executor :> ICommandExecutor).ExecuteCommand(x.PythonPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
             if not((executor :> ICommandExecutor).GetErrorCode = ReturnCode.Ok) then
                 tries <- tries - 1
@@ -227,28 +243,17 @@ type CppLintTask() as this =
                     let pathignore = Path.Combine(Directory.GetParent(x.SolutionPathToAnalyse).ToString(), ignore.Trim())
                     if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
 
-                let getReportName = 
-                    if not(x.ProjectNameToAnalyse = "") then 
-                        x.ProjectNameToAnalyse
-                    else
-                        ""
-
                 if not(skip) then
-                    let reportName = sprintf "cpplint-result-%s-%i.xml" getReportName this.counter
-                    let xml_file = Path.Combine(x.CppLintOutputPath, reportName)
                     let arguments = x.generateCommandLineArgs(file)
-                    logger.LogMessage(sprintf "CppLint Command: %s %s" x.PythonPath arguments)
-                    x.ExecuteCppLint executor file xml_file |> ignore
-                    this.counter <- this.counter + 1
+                    logger.LogMessage(sprintf "[ToolExecute] CppLint Command: %s %s" x.PythonPath arguments)
+                    x.ExecuteCppLint file |> ignore
+                    
                 ()
 
             let iterateOverProjectFiles(projectFile : ProjectFiles) =
-                if x.ProjectNameToAnalyse = "" then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
-                elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
+                projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> Seq.iter (fun x -> iterateOverProjectFiles x)
+            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "CppLint End: %u ms" stopWatchTotal.ElapsedMilliseconds)
@@ -260,6 +265,5 @@ type CppLintTask() as this =
 
     interface ICancelableTask with
         member this.Cancel() =
-            (executor :> ICommandExecutor).CancelExecution |> ignore
             Environment.Exit(0)
             ()
