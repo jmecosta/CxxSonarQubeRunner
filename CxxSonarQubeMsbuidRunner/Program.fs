@@ -123,7 +123,8 @@ let GetArgumentClass(additionalArguments : string, content : string [], home : s
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPath", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.other.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.other.reportPath", GetPathFromHome(".cxxresults/reports-other/*.xml"))
-
+    if not(arguments.ContainsKey("sonar.cxx.compiler.reportPath")) then
+        arguments <- arguments.Add("sonar.cxx.compiler.reportPath", GetPathFromHome(".cxxresults/BuildLog.txt"))
     arguments
 
 let PatchMSbuildSonarRunnerTargetsFiles(targetFile : string) =

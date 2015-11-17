@@ -26,8 +26,8 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
             outFile.WriteLine(e.Data)
 
     let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" sonarQubeTempPath 
-    printf  "[Execute] : msbuild %s \r\n" (solution + " /v:detailed " + sonarQubeTempPathProp + " " + arguments)    
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /v:detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, Environment.CurrentDirectory)
+    printf  "[Execute] : msbuild %s \r\n" (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)    
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, Environment.CurrentDirectory)
     returncode
 
 let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
