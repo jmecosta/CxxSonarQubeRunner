@@ -22,7 +22,7 @@ install:
   - cmd: nuget\nuget.exe restore
 
 build_script:
-  - %MSBuildDir% MSBuildTasks.sln /p:Configuration=Release
+  - msbuild MSBuildTasks.sln /p:Configuration=Release
   
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
