@@ -234,7 +234,11 @@ let main argv =
                         with
                         | _ -> "/d:sonar.host.url=" + (GetPropertyFromFile(propetiesFile, "host.url"))
                     else
-                        "/d:sonar.host.url=" + (GetPropertyFromFile(propetiesFile, "host.url"))
+                        let url = (GetPropertyFromFile(propetiesFile, "host.url"))
+                        if url = "" then
+                            "/d:sonar.host.url=http://localhost:9000"
+                        else
+                            "/d:sonar.host.url=" + url
 
                 let key = 
                     if arguments.ContainsKey("k") then
