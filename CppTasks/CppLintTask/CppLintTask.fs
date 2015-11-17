@@ -138,8 +138,10 @@ type CppLintTask(executorIn : ICommandExecutor) as this =
         let mutable tries = 3
         let mutable returncode = 1
 
-        while tries > 0  && returncode > 0 do            
-            logger.LogMessage(sprintf "[CPPLINT : EXECUTE %i] %s %s in report: %s" tries x.PythonPath (x.generateCommandLineArgs(filepath)) ouputFilePath)
+        while tries > 0  && returncode > 0 do          
+            if this.BuildEngine <> null then  
+                logger.LogMessage(sprintf "[CPPLINT : EXECUTE %i] %s %s in report: %s" tries x.PythonPath (x.generateCommandLineArgs(filepath)) ouputFilePath)
+
             returncode <- executor.ExecuteCommand(x.PythonPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
             if not(executor.GetErrorCode = ReturnCode.Ok) then
                 tries <- tries - 1
