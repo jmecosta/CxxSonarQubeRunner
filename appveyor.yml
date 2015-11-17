@@ -1,4 +1,10 @@
 version: '{build}'
+
+environment:
+  matrix:
+  - Configuration: Release
+  - Configuration: Debug
+  
 install:
   - ps: |
       If ($env:Platform -Match "x86") {
@@ -19,8 +25,7 @@ install:
   - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Tools\NUnit3\bin;%PATH%
   - cmd: SET
   - cmd: nuget\nuget.exe restore
-build_script:
-  - msbuild MSBuildTasks.sln /p:Configuration=Release
+
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
@@ -28,7 +33,7 @@ after_test:
   - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
-  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\CxxSonarQubeMsbuidRunner\bin\Release\*.*
+  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\CxxSonarQubeMsbuidRunner\bin\Release\*.*  
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
