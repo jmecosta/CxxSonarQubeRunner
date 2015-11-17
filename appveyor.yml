@@ -28,7 +28,9 @@ after_test:
   - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
+  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip CxxSonarQubeMsbuidRunner\bin\Release\*.*
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
-  - path: 'CxxSonarQubeMsbuidRunner\bin\Release\*.*'
+  - path: 'CxxSonarQubeMsbuidRunner.zip'
+    name: CxxSonarQubeMsbuidRunner
