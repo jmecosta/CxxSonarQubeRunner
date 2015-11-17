@@ -31,3 +31,4 @@ after_test:
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
+  - path: 'CxxSonarQubeMsbuidRunner\bin\Release\*.*'
