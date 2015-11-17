@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>GtestXunitConverterTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <NuGetPackageImportStamp>0beb4f5b</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
