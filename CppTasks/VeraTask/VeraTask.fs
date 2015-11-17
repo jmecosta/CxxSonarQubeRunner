@@ -33,6 +33,8 @@ type VeraTask(executorIn : ICommandExecutor) as this =
     let _VeraExec = "Vera.exe"
     let syncLock = new System.Object()
 
+    new() = VeraTask(null)
+
     member val totalViolations : int = 0 with get, set
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set

@@ -27,11 +27,14 @@ type CppLintErrorX(filename:string, line:string, severity:string, message:string
     member val message = message
     member val id = id
 
-type CppLintTask(executorIn : ICommandExecutor) as this =
+type CppLintTask(executorIn : ICommandExecutor) as this =    
     inherit Task()
+
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _CppLintExec = "CppLint.exe"
     let syncLock = new System.Object()
+
+    new() = CppLintTask(null)
 
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set

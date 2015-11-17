@@ -72,6 +72,8 @@ type RatsTask(executorIn : ICommandExecutor) as this =
     let _ratsExec = "rats.exe"
     let syncLock = new System.Object()
 
+    new() = RatsTask(null)
+
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set
     member val ToOutputData : string list = [] with get, set
