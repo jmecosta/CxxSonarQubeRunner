@@ -12,14 +12,14 @@ open MSBuild.Tekla.Tasks.Executor
 
 type RatsTest() =
     let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
-    let tempFile = Path.Combine(executingPath, "out.xml")
     let lines = List.ofArray(File.ReadAllLines(Path.Combine(executingPath, "rats-report.txt")))
     let mockLogger = Mock<TaskLoggingHelper>().Create()
+    let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
 
     [<TearDown>]
     member test.TearDown() =
-        if File.Exists(tempFile) then
-            File.Delete(tempFile)
+        if File.Exists(Path.Combine(executingPath, "rats-result--0.xml")) then
+            File.Delete(Path.Combine(executingPath, "rats-result--0.xml"))
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with empty lines`` () = 
@@ -46,7 +46,8 @@ type RatsTest() =
 
         let task = RatsTask(mockExecutor)
         task.RatsOutputType <- "xml"
+        task.RatsOutputPath <- executingPath
 
         Assert.That(task.ExecuteRats "foo bar", Is.True)
-        Assert.That((File.Exists(tempFile)), Is.True)
-        Assert.That(File.ReadAllLines(tempFile).Length, Is.EqualTo(41))
+        Assert.That((File.Exists(Path.Combine(executingPath, "rats-result--0.xml"))), Is.True)
+        Assert.That(File.ReadAllLines(Path.Combine(executingPath, "rats-result--0.xml")).Length, Is.EqualTo(41))

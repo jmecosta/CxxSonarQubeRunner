@@ -13,13 +13,12 @@ open System.IO
 
 type VeraTest() =
     let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
-    let tempFile = Path.Combine(executingPath, "out.xml")
     let mockLogger = Mock<TaskLoggingHelper>().Create()
 
     [<TearDown>]
     member test.TearDown() =
-        if File.Exists(tempFile) then
-            File.Delete(tempFile)
+        if File.Exists(Path.Combine(executingPath, "vera-result-test-0.xml")) then
+            File.Delete(Path.Combine(executingPath, "vera-result-test-0.xml"))
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with empty lines`` () = 
@@ -51,8 +50,9 @@ type VeraTest() =
 
         let task = VeraTask(mockExecutor)
         task.VeraOutputType <- "xml"
+        task.VeraOutputPath <- executingPath
         task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"
 
         Assert.That((task.ExecuteVera "filepath"), Is.True)
-        Assert.That(File.Exists(tempFile), Is.True)
-        Assert.That(File.ReadAllLines(tempFile).Length, Is.EqualTo(10))
+        Assert.That(File.Exists(Path.Combine(executingPath, "vera-result-test-0.xml")), Is.True)
+        Assert.That(File.ReadAllLines(Path.Combine(executingPath, "vera-result-test-0.xml")).Length, Is.EqualTo(10))
