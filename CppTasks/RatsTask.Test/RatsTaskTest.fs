@@ -23,8 +23,6 @@ type RatsTest() =
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with empty lines`` () = 
-        let task = RatsTask()
-        task.RatsOutputType <- "vs7"
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -32,12 +30,13 @@ type RatsTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteRats mockExecutor "foo bar" "out.xml"), Is.True)
+        let task = RatsTask(mockExecutor)
+        task.RatsOutputType <- "vs7"
+
+        Assert.That((task.ExecuteRats "foo bar"), Is.True)
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with lines`` () = 
-        let task = RatsTask()
-        task.RatsOutputType <- "xml"
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -45,6 +44,9 @@ type RatsTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteRats mockExecutor "foo bar" tempFile), Is.True)
+        let task = RatsTask(mockExecutor)
+        task.RatsOutputType <- "xml"
+
+        Assert.That(task.ExecuteRats "foo bar", Is.True)
         Assert.That((File.Exists(tempFile)), Is.True)
         Assert.That(File.ReadAllLines(tempFile).Length, Is.EqualTo(41))

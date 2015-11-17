@@ -21,8 +21,6 @@ type CppLintTest() =
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with empty lines`` () = 
-        let task = CppLintTask()
-        task.CppLintOutputType <- "vs7"
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -30,16 +28,16 @@ type CppLintTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteCppLint mockExecutor "foo bar" "out.xml"), Is.True)
+        let task = CppLintTask(mockExecutor)
+        task.CppLintOutputType <- "vs7"
+
+        Assert.That((task.ExecuteCppLint "foo bar"), Is.True)
 
     [<Test>]
     member test.``Run return 0 when run ok with xml`` () = 
         let data = ["E:\SRC\Project\file.cpp:7:  IllegalIncludeDirectories: Include File is illegal in this Project: main_assert_trap.hpp  [bla/include_files-1] [1]";
                 "Done processing E:\SRC\Project\file.cpp";
                 "Total errors found: 1"]
-        let task = CppLintTask()
-        task.CppLintOutputType <- "xml"
-        task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -47,6 +45,10 @@ type CppLintTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteCppLint mockExecutor "filepath" tempFile), Is.True)
+        let task = CppLintTask(mockExecutor)
+        task.CppLintOutputType <- "xml"
+        task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"
+
+        Assert.That((task.ExecuteCppLint "filepath"), Is.True)
         Assert.That(File.Exists(tempFile), Is.True)
         Assert.That(File.ReadAllLines(tempFile).Length, Is.EqualTo(4))

@@ -14,6 +14,7 @@ type ReturnCode =
    | Timeout = 1
    | NokAppSpecific = 2
 
+[<AllowNullLiteral>]
 type ICommandExecutor = 
   abstract member GetStdOut : list<string>
   abstract member GetStdError : list<string>

@@ -27,7 +27,7 @@ type VeraErrorX(filename:string, line:string, severity:string, message:string, s
     member val message = message
     member val source = source
 
-type VeraTask() as this =
+type VeraTask(executorIn : ICommandExecutor) as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _VeraExec = "Vera.exe"
@@ -89,7 +89,11 @@ type VeraTask() as this =
 
     member x.ExecuteVera filepath =
         let mutable ouputFilePath = ""
-        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
+        let executor : ICommandExecutor =
+            if executorIn = null then
+                (new CommandExecutor(logger, int64(1500000))) :> ICommandExecutor
+            else
+                executorIn
         
         lock syncLock (
             fun () -> 
@@ -106,15 +110,15 @@ type VeraTask() as this =
         // set environment
         let mutable env = Map.ofList []
         let mutable returncode = 1
-        (executor :> ICommandExecutor).ResetData()
-        returncode <- (executor :> ICommandExecutor).ExecuteCommand(x.VeraPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
-        if not((executor :> ICommandExecutor).GetErrorCode = ReturnCode.Ok) || returncode > 0 then
+        executor.ResetData()
+        returncode <- executor.ExecuteCommand(x.VeraPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
+        if not(executor.GetErrorCode = ReturnCode.Ok) || returncode > 0 then
             if this.BuildEngine = null then
                 Console.WriteLine("Vera: Failed")
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do Console.WriteLine(i)
+                executor.GetStdError |> fun s -> for i in s do Console.WriteLine(i)
             else
                 logger.LogWarning("Vera: Cannot Analyse: " + x.generateCommandLineArgs(filepath))
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do logger.LogWarning(i)
+                executor.GetStdError |> fun s -> for i in s do logger.LogWarning(i)
         else
             let getVeraWarningFromLine(line:string) =
                 let linerelative = line.Replace(Directory.GetParent(x.SolutionPathToAnalyse).ToString(), "")
@@ -150,7 +154,7 @@ type VeraTask() as this =
                 addLine("""<checkstyle version="5.0">""")
                 let fileNameLine = sprintf """<file name="%s">""" filepath
                 addLine(fileNameLine)
-                (executor :> ICommandExecutor).GetStdError |> Seq.iter (fun x -> writeError(x))
+                executor.GetStdError |> Seq.iter (fun x -> writeError(x))
                 addLine("""</file>""")
                 addLine("""</checkstyle>""")
             else
@@ -163,7 +167,7 @@ type VeraTask() as this =
                     else
                         logger.LogWarning("", veraelement.severity, "", filepath, Convert.ToInt32(veraelement.line), 0, 0, 0, veraelement.message)
 
-                let lines = (executor :> ICommandExecutor).GetStdError
+                let lines = executor.GetStdError
 
                 if lines <> List.Empty then
                     lines |> Seq.iter (fun x -> WriteToVsOUtput(x))

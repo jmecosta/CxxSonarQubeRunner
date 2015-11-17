@@ -66,7 +66,7 @@ entropy should be used.
 </timing>
 </rats_output>""">
 
-type RatsTask() as this =
+type RatsTask(executorIn : ICommandExecutor) as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _ratsExec = "rats.exe"
@@ -131,8 +131,12 @@ type RatsTask() as this =
     member x.ExecuteRats cmdLineArgs =
 
         let mutable ouputFilePath = ""
-        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
-        
+        let executor : ICommandExecutor =
+            if executorIn = null then
+                (new CommandExecutor(logger, int64(1500000))) :> ICommandExecutor
+            else
+                executorIn
+
         lock syncLock (
             fun () -> 
                 let getReportName = 
@@ -153,21 +157,21 @@ type RatsTask() as this =
         let mutable returncode = 1
 
         while tries > 0  && returncode > 0 do
-            (executor :> ICommandExecutor).ResetData()
-            returncode <- (executor :> ICommandExecutor).ExecuteCommand(x.RatsPath, cmdLineArgs, env, Environment.CurrentDirectory)
-            if not((executor :> ICommandExecutor).GetErrorCode = ReturnCode.Ok) || returncode > 0 then
+            executor.ResetData()
+            returncode <- executor.ExecuteCommand(x.RatsPath, cmdLineArgs, env, Environment.CurrentDirectory)
+            if not(executor.GetErrorCode = ReturnCode.Ok) || returncode > 0 then
                 tries <- tries - 1
 
         if tries = 0 then
             this.buildok <- false
             if this.BuildEngine = null then
                 Console.WriteLine("Rats: Number of tries exceeded")
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do Console.WriteLine(i)
+                executor.GetStdError |> fun s -> for i in s do Console.WriteLine(i)
             else
                 logger.LogError("Rats: Number of tries exceeded")
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do logger.LogError(i)
+                executor.GetStdError |> fun s -> for i in s do logger.LogError(i)
 
-            (executor :> ICommandExecutor).GetStdOut |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else logger.LogError(i)
+            executor.GetStdOut |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else logger.LogError(i)
             false
         else
             if not(x.RatsOutputType = "vs7") then
@@ -185,9 +189,9 @@ type RatsTask() as this =
                         wr.WriteLine(line)
                     this.totalViolations <- this.totalViolations + 1
 
-                (executor :> ICommandExecutor).GetStdOut |> Seq.iter (fun x -> addLine(x))
+                executor.GetStdOut |> Seq.iter (fun x -> addLine(x))
             else
-                let lines = (executor :> ICommandExecutor).GetStdOut
+                let lines = executor.GetStdOut
                 if lines <> List.Empty then
                     let datastr = lines |> List.reduce (+)
 

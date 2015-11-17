@@ -27,7 +27,7 @@ type CppLintErrorX(filename:string, line:string, severity:string, message:string
     member val message = message
     member val id = id
 
-type CppLintTask() as this =
+type CppLintTask(executorIn : ICommandExecutor) as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _CppLintExec = "CppLint.exe"
@@ -104,7 +104,11 @@ type CppLintTask() as this =
 
     member x.ExecuteCppLint filepath =
         let mutable ouputFilePath = ""
-        let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))
+        let executor : ICommandExecutor = 
+            if executorIn = null then
+                (new CommandExecutor(logger, int64(1500000))) :> ICommandExecutor
+            else
+                executorIn
         
         lock syncLock (
             fun () -> 
@@ -136,8 +140,8 @@ type CppLintTask() as this =
 
         while tries > 0  && returncode > 0 do            
             logger.LogMessage(sprintf "[CPPLINT : EXECUTE %i] %s %s in report: %s" tries x.PythonPath (x.generateCommandLineArgs(filepath)) ouputFilePath)
-            returncode <- (executor :> ICommandExecutor).ExecuteCommand(x.PythonPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
-            if not((executor :> ICommandExecutor).GetErrorCode = ReturnCode.Ok) then
+            returncode <- executor.ExecuteCommand(x.PythonPath, x.generateCommandLineArgs(filepath), env, Environment.CurrentDirectory)
+            if not(executor.GetErrorCode = ReturnCode.Ok) then
                 tries <- tries - 1
             else
                 returncode <- 0
@@ -147,12 +151,12 @@ type CppLintTask() as this =
             this.buildok <- false
             if this.BuildEngine = null then
                 Console.WriteLine("CppLint: Number of tries exceeded")
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do Console.WriteLine(i)
+                executor.GetStdError |> fun s -> for i in s do Console.WriteLine(i)
             else
                 logger.LogError("CppLint: Number of tries exceeded")
-                (executor :> ICommandExecutor).GetStdError |> fun s -> for i in s do logger.LogError(i)
+                executor.GetStdError |> fun s -> for i in s do logger.LogError(i)
 
-            (executor :> ICommandExecutor).GetStdOut |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else logger.LogError(i)
+            executor.GetStdOut |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else logger.LogError(i)
             false
         else
             let getCppLintWarningFromLine(line:string) =
@@ -195,7 +199,7 @@ type CppLintTask() as this =
                     
                 addLine("""<?xml version="1.0" encoding="UTF-8"?>""")
                 addLine("""<results>""")
-                (executor :> ICommandExecutor).GetStdError |> Seq.iter (fun x -> writeError(x))
+                executor.GetStdError |> Seq.iter (fun x -> writeError(x))
                 addLine("""</results>""")
             else
                 let WriteToVsOUtput(line:string)= 
@@ -209,7 +213,7 @@ type CppLintTask() as this =
                     with
                     | ex -> ()
 
-                let lines = (executor :> ICommandExecutor).GetStdError
+                let lines = executor.GetStdError
 
                 if lines <> List.Empty then
                     lines |> Seq.iter (fun x -> WriteToVsOUtput(x))

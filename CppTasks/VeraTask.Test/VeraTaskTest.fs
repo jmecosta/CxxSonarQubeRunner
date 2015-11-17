@@ -23,8 +23,7 @@ type VeraTest() =
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with empty lines`` () = 
-        let task = VeraTask()
-        task.VeraOutputType <- "vs7"
+
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -32,7 +31,9 @@ type VeraTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteVera mockExecutor "foo bar" "out.xml"), Is.True)
+        let task = VeraTask(mockExecutor)
+        task.VeraOutputType <- "vs7"
+        Assert.That((task.ExecuteVera "foo bar"), Is.True)
 
     [<Test>]
     member test.``Run return 0 when run ok with xml`` () = 
@@ -41,9 +42,6 @@ type VeraTest() =
                 "E:\SRC\Project\file.cpp:88: (T008) keyword 'if' not followed by a single space";
                 "E:\SRC\Project\file.cpp:93: (T008) keyword 'if' not followed by a single space";
                 "E:\SRC\Project\file.cpp:202: (L003) trailing empty line(s)";]
-        let task = VeraTask()
-        task.VeraOutputType <- "xml"
-        task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"
         let mockExecutor =
             Mock<ICommandExecutor>()
                 .Setup(fun x -> <@ x.ExecuteCommand(any(), any(), any(), any()) @>).Returns(0)
@@ -51,6 +49,10 @@ type VeraTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        Assert.That((task.ExecuteVera mockExecutor "filepath" tempFile), Is.True)
+        let task = VeraTask(mockExecutor)
+        task.VeraOutputType <- "xml"
+        task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"
+
+        Assert.That((task.ExecuteVera "filepath"), Is.True)
         Assert.That(File.Exists(tempFile), Is.True)
         Assert.That(File.ReadAllLines(tempFile).Length, Is.EqualTo(10))
