@@ -24,3 +24,11 @@ Easy execution of static analysis tools that run outside cxx plugin.
 5. RatsTask - sonarcpp\reports-rats
 6. VeraTask - sonarcpp\reports-vera++
 
+## CxxSonarQubeMsbuidRunner
+This is a wrapper around SonarQube Msbuild Runner, the input is the same as in the original. with a few more options to support the wrapper.
+
+Download Latest From: https://ci.appveyor.com/api/buildjobs/avy5n4j6j386ftls/artifacts/CxxSonarQubeMsbuidRunner.zip
+
+To use:
+1. Run CxxSonarQubeMsbuidRunner.exe /h to see the usage
+2. Example: CxxSonarQubeMsbuidRunner.exe /k:key /n:name /v:work /p:solution.sln
