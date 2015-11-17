@@ -5,19 +5,19 @@ install:
       If ($env:Platform -Match "x86") {
         $env:PCRE_PLATFORM="Win32"
         $env:JAVA_HOME="c:/Program Files (x86)/Java/jdk1.8.0"
-        $env:MSBuildDir="C:/Program Files (x86)/MSBuild/14.0/Bin/msbuild.exe"
+        $env:MSBuildDir="C:/Program Files (x86)/MSBuild/14.0/Bin"
         $env:VCVARS_PLATFORM="x86"
         $env:LANG_PLATFORM=""
       } Else {
         $env:PCRE_PLATFORM="x64"
         $env:JAVA_HOME="c:/Program Files/Java/jdk1.8.0"
-        $env:MSBuildDir="C:/Program Files/MSBuild/14.0/Bin/msbuild.exe"
+        $env:MSBuildDir="C:/Program Files/MSBuild/14.0/Bin"
         $env:VCVARS_PLATFORM="amd64"
         $env:LANG_PLATFORM="-x64"
       }	  
   - cmd: appveyor DownloadFile https://github.com/nunit/nunit/releases/download/3.0.0-beta-3/nunit-3.0.0-beta-3.zip
   - cmd: 7z x -oC:\Tools\NUnit3 nunit-3.0.0-beta-3.zip > NUL
-  - cmd: SET PATH=C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Tools\NUnit3\bin;%PATH%
+  - cmd: SET PATH=%MSBuildDir%;C:\maven\apache-maven-3.2.5\bin;%JAVA_HOME%\bin;C:\Tools\NUnit3\bin;%PATH%
   - cmd: SET
   - cmd: nuget\nuget.exe restore
 
