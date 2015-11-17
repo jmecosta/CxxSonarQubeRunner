@@ -1,3 +1,4 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/dicvukk3la7n57gv/branch/master?svg=true)](https://ci.appveyor.com/project/SonarOpenCommunity/sonar-cxx-msbuild-tasks/branch/master)
 
 # SonarQube C++ Community plugin msbuild tasks 
 
