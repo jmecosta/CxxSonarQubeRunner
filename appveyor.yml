@@ -3,7 +3,6 @@ version: '{build}'
 environment:
   matrix:
   - Configuration: Release
-  - Configuration: Debug
   
 install:
   - ps: |
@@ -33,7 +32,8 @@ after_test:
   - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
-  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\CxxSonarQubeMsbuidRunner\bin\Release\*.*  
+  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\CxxSonarQubeMsbuidRunner\bin\Release\*.*
+  
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
