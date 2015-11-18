@@ -17,8 +17,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
-open MSBuild.Tekla.Tasks.Executor
-open FSharp.Collections.ParallelSeq
+open MsbuildTasks
 
 type CppLintErrorX(filename:string, line:string, severity:string, message:string, id:string) =
     member val filename = filename
@@ -253,16 +252,18 @@ type CppLintTask(executorIn : ICommandExecutor) as this =
                     if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
 
                 if not(skip) then
-                    let arguments = x.generateCommandLineArgs(file)
-                    logger.LogMessage(sprintf "[ToolExecute] CppLint Command: %s %s" x.PythonPath arguments)
-                    x.ExecuteCppLint file |> ignore
+                    let arguments = x.generateCommandLineArgs(file)                   
+                    let extension = Path.GetExtension(file).ToLower()
                     
+                    if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                        logger.LogMessage(sprintf "[ToolExecute] CppLint Command: %s %s" x.PythonPath arguments)
+                        x.ExecuteCppLint file |> ignore                    
                 ()
 
             let iterateOverProjectFiles(projectFile : ProjectFiles) =
                 projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
+            (Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse))) |>  Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "CppLint End: %u ms" stopWatchTotal.ElapsedMilliseconds)

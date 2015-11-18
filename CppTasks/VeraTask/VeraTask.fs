@@ -17,7 +17,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
-open MSBuild.Tekla.Tasks.Executor
+open MsbuildTasks
 open FSharp.Collections.ParallelSeq
 
 type VeraErrorX(filename:string, line:string, severity:string, message:string, source:string) =
@@ -215,8 +215,7 @@ type VeraTask(executorIn : ICommandExecutor) as this =
                 if not(skip) && IsSupported(file) then
                     let arguments = x.generateCommandLineArgs(file)
                     logger.LogMessage(sprintf "Vera++Command: %s %s" x.VeraPath arguments)
-                    x.ExecuteVera file |> ignore
-                    this.counter <- this.counter + 1                        
+                    x.ExecuteVera file |> ignore            
                     ()
 
             let iterateOverProjectFiles(projectFile : ProjectFiles) =

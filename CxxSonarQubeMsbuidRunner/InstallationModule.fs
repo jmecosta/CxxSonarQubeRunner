@@ -4,7 +4,7 @@ open System.IO
 open System
 open System.Net
 open System.IO.Compression
-open MSBuild.Tekla.Tasks.Executor
+open MsbuildTasks
 open System.Diagnostics
 
 let ChocoExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "chocolatey", "choco.exe")

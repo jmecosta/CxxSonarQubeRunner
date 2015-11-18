@@ -17,7 +17,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
-open MSBuild.Tekla.Tasks.Executor
+open MsbuildTasks
 
 type CppCheckError = XmlProvider<"""<error file="E:\\TSSRC\\Common.cpp" line="4" id="missingInclude" severity="style" msg="Not Found" />""">
 

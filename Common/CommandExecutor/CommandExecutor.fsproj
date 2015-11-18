@@ -8,10 +8,10 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9b154406-0af6-45a9-bf32-9c5c23822b6b</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Executor</RootNamespace>
-    <AssemblyName>Executor</AssemblyName>
+    <RootNamespace>MsbuildTasksCommandExecutor</RootNamespace>
+    <AssemblyName>MsbuildTasksCommandExecutor</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>CommandExecutor</Name>
+    <Name>MsbuildTasksCommandExecutor</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>

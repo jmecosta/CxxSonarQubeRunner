@@ -1,4 +1,4 @@
-﻿namespace MSBuild.Tekla.Tasks.Executor
+﻿namespace MsbuildTasks
 
 open System
 open System.IO

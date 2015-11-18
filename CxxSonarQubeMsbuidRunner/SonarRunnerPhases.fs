@@ -1,6 +1,6 @@
 ﻿module SonarRunnerPhases
 
-open MSBuild.Tekla.Tasks.Executor
+open MsbuildTasks
 open System.Diagnostics
 open System
 open System.IO

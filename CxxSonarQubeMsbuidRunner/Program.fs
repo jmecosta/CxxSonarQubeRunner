@@ -6,7 +6,7 @@ open System.Net
 open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Reflection
-open MSBuild.Tekla.Tasks.Executor
+open MsbuildTasks
 open FSharp.Data
 
 type UserSettingsFileType = XmlProvider<"""

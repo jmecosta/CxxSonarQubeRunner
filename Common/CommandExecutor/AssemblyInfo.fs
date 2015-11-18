@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public License along with this program; if not, write to the Free
 // Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 // --------------------------------------------------------------------------------------------------------------------
-namespace MSBuild.Tekla.Tasks.CppCheck
+namespace MsbuildTasks
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -20,11 +20,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("Executor")>]
+[<assembly: AssemblyTitle("MsbuildTasksCommandExecutor")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Tekla Corporation. Tekla is a Trimble Company")>]
-[<assembly: AssemblyProduct("CppCheckTask")>]
+[<assembly: AssemblyProduct("MsbuildTasksCommandExecutor")>]
 [<assembly: AssemblyCopyright("Copyright © 2013 Tekla Corporation. Tekla is a Trimble Company")>]
 [<assembly: AssemblyTrademark("")>]
 
@@ -47,7 +47,7 @@ open System.Runtime.InteropServices
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[<assembly: AssemblyVersion("1.0.2")>]
-[<assembly: AssemblyFileVersion("1.0.2")>]
+[<assembly: AssemblyVersion("1.0.3")>]
+[<assembly: AssemblyFileVersion("1.0.3")>]
 
 ()

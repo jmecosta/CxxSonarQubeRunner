@@ -18,8 +18,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MSBuild.Tekla.Tasks.MsbuildTaskUtils
-open MSBuild.Tekla.Tasks.Executor
-open FSharp.Collections.ParallelSeq
+open MsbuildTasks
 
 type RatsError = XmlProvider<"""<?xml version="1.0"?><rats_output>
 <stats>
@@ -233,9 +232,10 @@ type RatsTask(executorIn : ICommandExecutor) as this =
             let iterateOverFiles (file : string) = 
                 let arguments = x.generateCommandLineArgs(file)
                 if file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString()) then
-                    logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
-                    x.ExecuteRats arguments |> ignore
-                    this.counter <- this.counter + 1
+                    let extension = Path.GetExtension(file).ToLower()
+                    if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                        logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
+                        x.ExecuteRats arguments |> ignore
                 ()
 
             let iterateOverProjectFiles(projectFile : ProjectFiles) =
@@ -244,7 +244,7 @@ type RatsTask(executorIn : ICommandExecutor) as this =
                 elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
                     projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
+            Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse)) |> Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "Rats End: %u ms" stopWatchTotal.ElapsedMilliseconds)
