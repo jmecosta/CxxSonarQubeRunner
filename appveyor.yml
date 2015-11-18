@@ -24,7 +24,8 @@ install:
 build_script:
   - msbuild MSBuildTasks.sln /p:Configuration=Release
   - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\*.*
-  - cmd: 7z a CxxSonarQubeMsbuidRunnerTest.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\**\*.*
+  - cmd: 7z a CxxSonarQubeMsbuidRunnerTest.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\*.*
+  - cmd: 7z a CxxSonarQubeMsbuidRunnerTest.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\testdata\*.*
 
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
