@@ -16,7 +16,7 @@ let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
     if not(String.IsNullOrWhiteSpace(e.Data))  then
         printf  "%s\r\n" e.Data
 
-let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string) =
+let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string, homePath : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     use outFile = new StreamWriter(buildLog, false)
 
@@ -27,7 +27,7 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
 
     let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" sonarQubeTempPath 
     printf  "[Execute] : msbuild %s \r\n" (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)    
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, Environment.CurrentDirectory)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
     returncode
 
 let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
@@ -40,7 +40,7 @@ let BeginPhase(cmd : string, arguments : string, homePath : string, userName : s
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
-let EndPhase(cmd : string, username : string, password : string) =
+let EndPhase(cmd : string, username : string, password : string, homePath : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable idAnalysis = ""
     let mutable urlForChecking = ""
@@ -70,12 +70,12 @@ let EndPhase(cmd : string, username : string, password : string) =
     
 
     printf  "[EndPhase] : %s end\r\n" cmd
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end", Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, Environment.CurrentDirectory)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end", Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then
         if urlForChecking <> "" then
             printf  "[EndPhase] : Check Analysis Results in Server every 2 seconds\r\n"
-            loopTimerCheck()            
+            loopTimerCheck()
             0
         else
             printf  "[EndPhase] : Cannot Check Analysis Resutls in Server, available only for 5.2 or above\r\n"

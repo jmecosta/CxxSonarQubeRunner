@@ -315,11 +315,11 @@ let main argv =
                 
                     DeployCxxTargets(solutionTargetFile, homePath, solutionName)
 
-                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube")) <> 0 then
+                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
                         printf "Failed to build project, check log"
                     else
-                        if SonarRunnerPhases.EndPhase(msbuildRunnerExec, usermame, password) <> 0 then
+                        if SonarRunnerPhases.EndPhase(msbuildRunnerExec, usermame, password, homePath) <> 0 then
                             ret <- 1
                             printf "Failed analyse project, check log"            
             with
