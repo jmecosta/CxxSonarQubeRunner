@@ -18,7 +18,7 @@
         <file src="..\BuildDrop\InspectorTask.dll" target="build" />
         <file src="IntelInspectorTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" />
-        <file src="..\BuildDrop\Executor.dll" target="build" />
+        <file src="..\BuildDrop\MsbuildTasksCommandExecutor.dll" target="build" />
         <file src="..\BuildDrop\MsbuildTaskUtils.dll" target="build" />
     </files>
 </package>

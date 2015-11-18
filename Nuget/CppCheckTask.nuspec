@@ -18,7 +18,7 @@
         <file src="..\BuildDrop\CppCheckTask.dll" target="build" />
         <file src="CppCheckTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" />
-        <file src="..\BuildDrop\Executor.dll" target="build" />
+        <file src="..\BuildDrop\MsbuildTasksCommandExecutor.dll" target="build" />
         <file src="..\BuildDrop\MsbuildTaskUtils.dll" target="build" />
     </files>
 </package>
