@@ -151,7 +151,8 @@ type GtestRunnerTask(logger : TaskLoggingHelper) as this =
 
         let getFileNameFromListOfFile className =
             let checkPresenceOfTest(filePath : string) = 
-                logger.LogMessage(sprintf "Parse Source File: %s" filePath)
+                if this.BuildEngine <> null then
+                    logger.LogMessage(sprintf "Parse Source File: %s" filePath)
                 let lineswithoutspaces = File.ReadAllText(filePath).Replace(" ", "")
                 lineswithoutspaces.Contains("TEST_F(" + className) || lineswithoutspaces.Contains("TEST(" + className)
 
@@ -167,7 +168,8 @@ type GtestRunnerTask(logger : TaskLoggingHelper) as this =
 
         let getTestCaseNameFromListOfFiles(testCaseName:string, filename:string) =
             let checkPresenceOfTestCase(filePath : string) = 
-                logger.LogMessage(sprintf "Parse Source File: %s" filePath)
+                if this.BuildEngine <> null then
+                    logger.LogMessage(sprintf "Parse Source File: %s" filePath)
                 let lineswithoutspaces = File.ReadAllText(filePath).Replace(" ", "")
                 (lineswithoutspaces.Contains("TEST_F(") && lineswithoutspaces.Contains(testCaseName)) ||
                     (lineswithoutspaces.Contains("TEST(") && lineswithoutspaces.Contains(testCaseName))
@@ -307,7 +309,8 @@ type GtestRunnerTask(logger : TaskLoggingHelper) as this =
                         if not(String.IsNullOrEmpty(failedFile)) && File.Exists(failedFile) then
                             x.PreviousMessage <- e.Data
                                         
-            logger.LogMessage(MessageImportance.High, e.Data)
+            if this.BuildEngine <> null then    
+                logger.LogMessage(MessageImportance.High, e.Data)
 
     member x.ExecuteTests executor =
         let env = Map.ofList [("CPPCHECK_INPUT", x.GtestExeFile)]
@@ -347,20 +350,25 @@ type GtestRunnerTask(logger : TaskLoggingHelper) as this =
 
     override x.Execute() =
 
-        this.TestExecutableIsFound.Force()
+        if this.BuildEngine <> null then
+            this.TestExecutableIsFound.Force()
+
         let mutable result = not(logger.HasLoggedErrors)
         if result then
             let stopWatchTotal = Stopwatch.StartNew()
 
             if not(Directory.Exists(x.GtestXunitConverterOutputPath)) then
-                logger.LogMessage(sprintf "Create New Folder: %s " x.GtestXunitConverterOutputPath)
+                if this.BuildEngine <> null then
+                    logger.LogMessage(sprintf "Create New Folder: %s " x.GtestXunitConverterOutputPath)
+
                 Directory.CreateDirectory(x.GtestXunitConverterOutputPath) |> ignore
 
             if not(x.SkipSearchForFileLocation) && not(String.IsNullOrEmpty(x.SolutionPathToAnalyse)) then
                 let solutionHelper = new VSSolutionUtils()
                 let projectHelper = new VSProjectUtils()
                 let iterateOverProjectFiles(projectFile : ProjectFiles) =
-                    logger.LogMessage(sprintf "Get Test Files in: %s Using TextSuffix: %s And ReplacementStrings: %s" projectFile.path x.TestSuffix x.PathReplacementStrings)
+                    if this.BuildEngine <> null then
+                        logger.LogMessage(sprintf "Get Test Files in: %s Using TextSuffix: %s And ReplacementStrings: %s" projectFile.path x.TestSuffix x.PathReplacementStrings)
                     this.testFiles <- this.testFiles @ projectHelper.GetCompilationFiles(projectFile.path, x.TestSuffix, x.PathReplacementStrings)
                 solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> Seq.iter (fun x -> iterateOverProjectFiles x)
                 
