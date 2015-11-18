@@ -24,6 +24,7 @@ install:
 build_script:
   - msbuild MSBuildTasks.sln /p:Configuration=Release
   - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\*.*
+  - cmd: 7z a CxxSonarQubeMsbuidRunnerTest.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\**\*.*
 
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
@@ -40,4 +41,5 @@ artifacts:
   - path: 'CxxSonarQubeMsbuidRunner.zip'
     name: CxxSonarQubeMsbuidRunner
 on_failure:
-  - ps: Get-ChildItem CxxSonarQubeMsbuidRunner.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }  
+  - ps: Get-ChildItem CxxSonarQubeMsbuidRunner.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem CxxSonarQubeMsbuidRunnerTest.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
