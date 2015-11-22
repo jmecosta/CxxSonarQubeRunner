@@ -18,7 +18,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <VeraPath               Condition="'$(VeraPath)' == ''">$(MSBuildThisFileDirectory)VERA\bin\vera++.exe</VeraPath>
+        <VeraPath               Condition="'$(VeraPath)' == ''">$(MSBuildThisFileDirectory)..\MSBuidSonarQube\VERA\bin\vera++.exe</VeraPath>
         <VeraOptions            Condition="'$(VeraOptions)' == ''">-nodup -showrules</VeraOptions>
         <VeraIgnores            Condition="'$(VeraIgnores)' == ''"></VeraIgnores>
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
@@ -28,7 +28,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <RatsPath               Condition="'$(RatsPath)' == ''">$(MSBuildThisFileDirectory)RATS\rats.exe</RatsPath>
+        <RatsPath               Condition="'$(RatsPath)' == ''">$(MSBuildThisFileDirectory)..\MSBuidSonarQube\RATS\rats.exe</RatsPath>
         <RatsOptions            Condition="'$(RatsOptions)' == ''"></RatsOptions>
         <RatsIgnores            Condition="'$(RatsIgnores)' == ''"></RatsIgnores>
         <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
