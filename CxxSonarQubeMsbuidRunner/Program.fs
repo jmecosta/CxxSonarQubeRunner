@@ -291,7 +291,11 @@ let main argv =
                     if arguments.ContainsKey("p") then
                         for arg in arguments.["p"] do
                             if arg <> "" then
-                                args <- args + " /p:" + arg
+                                if arg.Contains(" ") then
+                                    let elems = arg.Split('=')
+                                    args <- args + " /p:" + elems.[0] + "=\"" + elems.[1] + "\""
+                                else
+                                    args <- args + " /p:" + arg
 
                     args.Trim()
 

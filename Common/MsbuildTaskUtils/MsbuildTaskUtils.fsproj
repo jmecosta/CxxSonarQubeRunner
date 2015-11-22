@@ -8,10 +8,10 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>MsbuildTaskUtils</RootNamespace>
-    <AssemblyName>MsbuildTaskUtils</AssemblyName>
+    <RootNamespace>MsbuildTasksUtils</RootNamespace>
+    <AssemblyName>MsbuildTasksUtils</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>MsbuildTaskUtils</Name>
+    <Name>MsbuildTasksUtils</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
@@ -57,15 +57,17 @@
     <Compile Include="TypeProviders.fs" />
     <Compile Include="VSSolutionUtils.fs" />
     <None Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Data">
+    <Reference Include="FSharp.Data, Version=2.2.5.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
       <Private>True</Private>
+      <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="mscorlib" />

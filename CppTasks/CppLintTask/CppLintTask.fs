@@ -16,7 +16,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MSBuild.Tekla.Tasks.MsbuildTaskUtils
+open MsbuildTasksUtils
 open MsbuildTasks
 
 type CppLintErrorX(filename:string, line:string, severity:string, message:string, id:string) =

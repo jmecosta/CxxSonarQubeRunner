@@ -1,4 +1,4 @@
-﻿namespace MSBuild.Tekla.Tasks.MsbuildTaskUtils
+﻿namespace MsbuildTasksUtils
 
 open Microsoft.Build.Construction
 open System.Resources

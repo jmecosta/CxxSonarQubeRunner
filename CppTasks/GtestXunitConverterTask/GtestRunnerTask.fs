@@ -17,7 +17,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MSBuild.Tekla.Tasks.MsbuildTaskUtils
+open MsbuildTasksUtils
 open MsbuildTasks
 
 type GtestXmlReport = XmlProvider<"""<?xml version="1.0" encoding="UTF-8"?>

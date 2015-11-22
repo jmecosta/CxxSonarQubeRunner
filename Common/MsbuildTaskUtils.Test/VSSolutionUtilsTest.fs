@@ -1,7 +1,7 @@
 ﻿namespace MsbuildTaskUtils.Test
 
 open NUnit.Framework
-open MSBuild.Tekla.Tasks.MsbuildTaskUtils
+open MsbuildTasksUtils
 open System.IO
 
 type VSSolutionUtilsTest() = 

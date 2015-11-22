@@ -1,4 +1,4 @@
-﻿namespace MSBuild.Tekla.Tasks.MsbuildTaskUtils
+﻿namespace MsbuildTasksUtils
 
 open FSharp.Data
 open System.Xml.Linq
