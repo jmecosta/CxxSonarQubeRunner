@@ -260,13 +260,13 @@ let main argv =
                         "/v:" + (GetPropertyFromFile(propetiesFile, "projectVersion"))
 
                 let msbuildPath = 
-                    if arguments.ContainsKey("X") then
+                    if arguments.ContainsKey("x") then
                         arguments.["x"] |> Seq.head
                     else
                         @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
 
                 let msbuildTarget = 
-                    if arguments.ContainsKey("T") then
+                    if arguments.ContainsKey("t") then
                         "/t:" + (arguments.["t"] |> Seq.head)
                     else
                         "/t:Rebuild"
