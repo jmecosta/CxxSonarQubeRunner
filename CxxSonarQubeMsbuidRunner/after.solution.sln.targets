@@ -18,7 +18,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <VeraPath               Condition="'$(VeraPath)' == ''">C:\Program Files (x86)\vera++\bin\vera++.exe</VeraPath>
+        <VeraPath               Condition="'$(VeraPath)' == ''">$(MSBuildThisFileDirectory)VERA\bin\vera++.exe</VeraPath>
         <VeraOptions            Condition="'$(VeraOptions)' == ''">-nodup -showrules</VeraOptions>
         <VeraIgnores            Condition="'$(VeraIgnores)' == ''"></VeraIgnores>
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
