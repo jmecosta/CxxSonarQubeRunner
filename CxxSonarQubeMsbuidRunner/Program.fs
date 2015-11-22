@@ -50,7 +50,8 @@ let ShowHelp() =
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /R|/r:<msbuild sonarqueb runner -> 1.0.2>")
         Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000 -> 1.0.2>")
-        Console.WriteLine ("    /T|/t:<path for msbuild: default C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe>")
+        Console.WriteLine ("    /X|/x:<path for msbuild: default C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe>")
+        Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
 
 let GetPropertyFromFile(content : string [], prop : string) =
     let data = content |> Seq.tryFind (fun c -> c.Trim().StartsWith("sonar." + prop + "="))
@@ -259,10 +260,16 @@ let main argv =
                         "/v:" + (GetPropertyFromFile(propetiesFile, "projectVersion"))
 
                 let msbuildPath = 
-                    if arguments.ContainsKey("T") then
-                        arguments.["v"] |> Seq.head
+                    if arguments.ContainsKey("X") then
+                        arguments.["x"] |> Seq.head
                     else
                         @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+
+                let msbuildTarget = 
+                    if arguments.ContainsKey("T") then
+                        "/t:" + (arguments.["t"] |> Seq.head)
+                    else
+                        "/t:Rebuild"
 
                 let mutable usermame = ""
                 let mutable password = ""
@@ -315,7 +322,7 @@ let main argv =
                 
                     DeployCxxTargets(solutionTargetFile, homePath, solutionName)
 
-                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
+                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
                         printf "Failed to build project, check log"
                     else
