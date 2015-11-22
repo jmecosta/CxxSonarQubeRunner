@@ -27,6 +27,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\CxxSonarQubeMsbuidRunner.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>/k:Common /n:Common /v:work /m:d:\prod\structures\core\common\common.sln /d:sonar.login=admin /dsonar.password=admin /t:"Clean,Build" /p:Platform="Any CPU" /p:TSPlatform=x64</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

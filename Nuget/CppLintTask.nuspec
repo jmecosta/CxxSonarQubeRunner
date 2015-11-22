@@ -20,6 +20,6 @@
         <file src="CppLintTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" />
         <file src="..\BuildDrop\MsbuildTasksCommandExecutor.dll" target="build" />
-        <file src="..\BuildDrop\MsbuildTaskUtils.dll" target="build" />
+        <file src="..\BuildDrop\MsbuildTasksUtils.dll" target="build" />
     </files>
 </package>
