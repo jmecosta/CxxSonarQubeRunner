@@ -141,7 +141,7 @@ let PatchMSbuildSonarRunnerTargetsFiles(targetFile : string) =
         if line.Contains("""<SonarQubeAnalysisFiles Include="@(%(SonarQubeAnalysisFileItems.Identity))" />""") then
             outFile.WriteLine("""<SonarQubeAnalysisFiles Include="$(MSBuildProjectFullPath)" />""")            
 
-let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : string) =
+let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : string, pythonPath : string, cppCheckPath : string) =
     let assembly = Assembly.GetExecutingAssembly()
     let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
     use stream = assembly.GetManifestResourceStream("after.solution.sln.targets")
@@ -159,8 +159,11 @@ let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : s
         if lineToWrite.Contains("""$(SolutionName)""") then
             lineToWrite <- lineToWrite.Replace("$(SolutionName)", solutionName)
 
-        if lineToWrite.Contains("""<PythonPath                   Condition="'$(PythonPath)' == ''">$(MSBuildThisFileDirectory)\Python\Python.exe</PythonPath>""") then
-            lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", InstallationModule.InstallationPathHome + "\\")
+        if lineToWrite.Contains("""<CppCheckPath               Condition="'$(CppCheckPath)' == ''">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPath>""") then
+            lineToWrite <- lineToWrite.Replace("C:\\Program Files (x86)\\Cppcheck\\cppcheck.exe", cppCheckPath)
+
+        if lineToWrite.Contains("""<PythonPath                   Condition="'$(PythonPath)' == ''">c:\tools\Python2\Python.exe</PythonPath>""") then
+            lineToWrite <- lineToWrite.Replace("c:\\tools\\Python2\\Python.exe", pythonPath)
 
         if lineToWrite.Contains("""<CppLintPath                   Condition="'$(CppLintPath)' == ''">$(MSBuildThisFileDirectory)\cpplint_mod.py</CppLintPath>""") then
             lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", InstallationModule.InstallationPathHome + "\\")
@@ -324,7 +327,7 @@ let main argv =
                     let targetFile = Path.Combine(homePath, ".sonarqube", "bin", "Targets", "SonarQube.Integration.targets")
                     PatchMSbuildSonarRunnerTargetsFiles(targetFile)
                 
-                    DeployCxxTargets(solutionTargetFile, homePath, solutionName)
+                    DeployCxxTargets(solutionTargetFile, homePath, solutionName, pythonPath, cppcheck)
 
                     if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
