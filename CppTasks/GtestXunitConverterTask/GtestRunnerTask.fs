@@ -18,7 +18,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MsbuildTasksUtils
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 
 type GtestXmlReport = XmlProvider<"""<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="43" failures="0" disabled="2" errors="0" timestamp="2013-06-29T09:23:30" time="0.348" name="AllTests">

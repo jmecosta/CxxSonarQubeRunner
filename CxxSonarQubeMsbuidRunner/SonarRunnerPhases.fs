@@ -1,6 +1,6 @@
 ﻿module SonarRunnerPhases
 
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 open System.Diagnostics
 open System
 open System.IO

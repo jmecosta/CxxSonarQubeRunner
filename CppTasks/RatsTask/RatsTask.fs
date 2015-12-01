@@ -18,7 +18,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MsbuildTasksUtils
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 
 type RatsError = XmlProvider<"""<?xml version="1.0"?><rats_output>
 <stats>

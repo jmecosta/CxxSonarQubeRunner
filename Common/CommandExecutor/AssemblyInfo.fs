@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public License along with this program; if not, write to the Free
 // Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 // --------------------------------------------------------------------------------------------------------------------
-namespace MsbuildTasks
+namespace MsbuildTasksCommandExecutor
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -47,7 +47,7 @@ open System.Runtime.InteropServices
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[<assembly: AssemblyVersion("1.0.3")>]
-[<assembly: AssemblyFileVersion("1.0.3")>]
+[<assembly: AssemblyVersion("1.1.0")>]
+[<assembly: AssemblyFileVersion("1.1.0")>]
 
 ()

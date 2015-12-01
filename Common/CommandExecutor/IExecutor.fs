@@ -1,4 +1,4 @@
-﻿namespace MsbuildTasks
+﻿namespace MsbuildTasksCommandExecutor
 
 open System
 open System.IO

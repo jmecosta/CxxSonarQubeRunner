@@ -8,7 +8,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open MSBuild.Tekla.Tasks.Rats
 open Foq
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 
 type RatsTest() =
     let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()

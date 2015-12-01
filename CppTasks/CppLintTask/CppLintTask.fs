@@ -17,7 +17,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MsbuildTasksUtils
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 
 type CppLintErrorX(filename:string, line:string, severity:string, message:string, id:string) =
     member val filename = filename

@@ -17,7 +17,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MsbuildTasksUtils
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 open FSharp.Collections.ParallelSeq
 
 type VeraErrorX(filename:string, line:string, severity:string, message:string, source:string) =

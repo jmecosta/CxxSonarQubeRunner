@@ -9,7 +9,7 @@ open Microsoft.Build.Utilities
 open NUnit.Framework
 open Foq
 
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 open MSBuild.Tekla.Tasks.CppCheck
 
 type CppCheckTaskTest() = 

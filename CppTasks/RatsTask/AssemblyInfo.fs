@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public License along with this program; if not, write to the Free
 // Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 // --------------------------------------------------------------------------------------------------------------------
-namespace MsbuildTasksUtils
+namespace MSBuild.Tekla.Tasks.RatsTask
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -20,11 +20,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("MsbuildTasksUtils")>]
+[<assembly: AssemblyTitle("RatsTask")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("Tekla Corporation. Tekla is a Trimble Company")>]
-[<assembly: AssemblyProduct("MsbuildTasksUtils")>]
+[<assembly: AssemblyProduct("RatsTask")>]
 [<assembly: AssemblyCopyright("Copyright © 2013 Tekla Corporation. Tekla is a Trimble Company")>]
 [<assembly: AssemblyTrademark("")>]
 
@@ -34,7 +34,7 @@ open System.Runtime.InteropServices
 [<assembly: ComVisible(false)>]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[<assembly: Guid("3433041F-D157-46E1-B60A-6589A4F0CC6A")>]
+[<assembly: Guid("3433041F-D157-46E1-B60A-7589A4D0DC6A")>]
 
 
 // Version information for an assembly consists of the following four values:

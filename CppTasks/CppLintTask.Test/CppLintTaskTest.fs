@@ -8,7 +8,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open MSBuild.Tekla.Tasks.CppLint
 open Foq
-open MsbuildTasks
+open MsbuildTasksCommandExecutor
 
 type CppLintTest() =
     let mockLogger = Mock<TaskLoggingHelper>().Create()
