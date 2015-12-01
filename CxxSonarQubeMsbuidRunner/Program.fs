@@ -141,7 +141,7 @@ let PatchMSbuildSonarRunnerTargetsFiles(targetFile : string) =
         if line.Contains("""<SonarQubeAnalysisFiles Include="@(%(SonarQubeAnalysisFileItems.Identity))" />""") then
             outFile.WriteLine("""<SonarQubeAnalysisFiles Include="$(MSBuildProjectFullPath)" />""")            
 
-let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : string, pythonPath : string, cppCheckPath : string) =
+let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : string, pythonPath : string, cppCheckPath : string, ratsPath : string, veraPath : string) =
     let assembly = Assembly.GetExecutingAssembly()
     let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
     use stream = assembly.GetManifestResourceStream("after.solution.sln.targets")
@@ -168,15 +168,15 @@ let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : s
         if lineToWrite.Contains("""<CppLintPath                   Condition="'$(CppLintPath)' == ''">$(MSBuildThisFileDirectory)\cpplint_mod.py</CppLintPath>""") then
             lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", InstallationModule.InstallationPathHome + "\\")
 
-        if lineToWrite.Contains("""<VeraPath               Condition="'$(VeraPath)' == ''">C:\Program Files (x86)\vera++\bin\vera++.exe</VeraPath>""") then
-            lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", InstallationModule.InstallationPathHome + "\\")
+        if lineToWrite.Contains("""$(MSBuildThisFileDirectory)..\MSBuidSonarQube\VERA\bin\vera++.exe""") then
+            lineToWrite <- lineToWrite.Replace("""$(MSBuildThisFileDirectory)..\MSBuidSonarQube\VERA\bin\vera++.exe""", veraPath)
 
-        if lineToWrite.Contains("""<RatsPath               Condition="'$(RatsPath)' == ''">$(MSBuildThisFileDirectory)RATS\rats.exe</RatsPath>""") then
-            lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", InstallationModule.InstallationPathHome + "\\")
-
+        if lineToWrite.Contains("""$(MSBuildThisFileDirectory)..\MSBuidSonarQube\RATS\rats.exe""") then
+            lineToWrite <- lineToWrite.Replace("""$(MSBuildThisFileDirectory)..\MSBuidSonarQube\RATS\rats.exe""", ratsPath)
+            
         if lineToWrite.Contains("""$(MSBuildThisFileDirectory)""") then            
             lineToWrite <- lineToWrite.Replace("$(MSBuildThisFileDirectory)", executingPath + "\\")
-            
+
         outFile.WriteLine(lineToWrite)
     ()
 
@@ -327,7 +327,7 @@ let main argv =
                     let targetFile = Path.Combine(homePath, ".sonarqube", "bin", "Targets", "SonarQube.Integration.targets")
                     PatchMSbuildSonarRunnerTargetsFiles(targetFile)
                 
-                    DeployCxxTargets(solutionTargetFile, homePath, solutionName, pythonPath, cppcheck)
+                    DeployCxxTargets(solutionTargetFile, homePath, solutionName, pythonPath, cppcheck, rats, vera)
 
                     if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
