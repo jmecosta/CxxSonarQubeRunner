@@ -33,10 +33,7 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
 let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     
-    try
-        printf  "[Execute] : %s begin %s\r\n" cmd (arguments.Replace(userPass, "").Replace(userName, ""))
-    with
-    | _ -> printf  "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd arguments
+    printf  "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
@@ -69,8 +66,8 @@ let EndPhase(cmd : string, username : string, password : string, homePath : stri
             raise(new Exception("Failed to execute server analysis"))
     
 
-    printf  "[EndPhase] : %s end\r\n" cmd
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end", Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
+    printf  "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx\r\n" cmd username
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end " + "/d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then
         if urlForChecking <> "" then
