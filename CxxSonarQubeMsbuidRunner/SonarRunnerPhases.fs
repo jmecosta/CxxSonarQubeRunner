@@ -67,7 +67,7 @@ let EndPhase(cmd : string, username : string, password : string, homePath : stri
     
 
     printf  "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx\r\n" cmd username
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end " + "/d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then
         if urlForChecking <> "" then

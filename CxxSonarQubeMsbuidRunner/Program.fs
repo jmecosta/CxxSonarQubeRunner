@@ -180,6 +180,13 @@ let DeployCxxTargets(targetFile : string, solutionDir : string, solutionName : s
         outFile.WriteLine(lineToWrite)
     ()
 
+let WriteFile(file : string, content : Array) =
+    use outFile = new StreamWriter(file)
+    for elem in content do
+        outFile.WriteLine(elem)
+
+    outFile.WriteLine("")
+
 let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
     use outFile = new StreamWriter(file)
     outFile.WriteLine("""<?xml version="1.0" encoding="utf-8" ?>""")
@@ -187,6 +194,7 @@ let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string
     argsPars |> Map.iter (fun c d -> outFile.WriteLine((sprintf """<Property Name="%s">%s</Property>""" c d)))
     sonarProps |> Map.iter (fun c d -> if not(argsPars.ContainsKey(c)) then outFile.WriteLine((sprintf """<Property Name="%s">%s</Property>""" c d)))
     outFile.WriteLine("""</SonarQubeAnalysisProperties>""")
+
 
 [<EntryPoint>]
 let main argv = 
@@ -218,27 +226,27 @@ let main argv =
             let solutionName = Path.GetFileNameWithoutExtension(solution)                                        
             let homePath = Directory.GetParent(solution).ToString()
             let configFile = Path.GetTempFileName()
-            let solutionTargetFile = Path.Combine(homePath, "after." + solutionName + ".sln.targets")        
+            let solutionTargetFile = Path.Combine(homePath, "after." + solutionName + ".sln.targets")   
+            let deprecatedPropertiesFile = Path.Combine(homePath, "sonar-project.properties")
+            let mutable deprecatedPropertiesFileContent = Array.empty
 
             try         
                 let msbuildRunnerExec, (cpplintMod, pythonPath), rats, vera, cppcheck
                         = InstallationModule.InstallTools(arguments)
 
                 // read sonar project files
-                let propetiesFile = 
-                    if File.Exists(Path.Combine(homePath, "sonar-project.properties")) then
-                        File.ReadAllLines(Path.Combine(homePath, "sonar-project.properties"))
-                    else
-                        Array.empty
+                if File.Exists(deprecatedPropertiesFile) then
+                    deprecatedPropertiesFileContent <- File.ReadAllLines(deprecatedPropertiesFile)
+                    File.Delete(deprecatedPropertiesFile)
 
                 let url = 
                     if arguments.ContainsKey("d") then
                         try
-                            ""
+                            "/d:" + (arguments.["d"] |> Seq.find(fun c -> c.StartsWith("sonar.host.url=")))
                         with
-                        | _ -> "/d:sonar.host.url=" + (GetPropertyFromFile(propetiesFile, "host.url"))
+                        | _ -> "/d:sonar.host.url=" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "host.url"))
                     else
-                        let url = (GetPropertyFromFile(propetiesFile, "host.url"))
+                        let url = (GetPropertyFromFile(deprecatedPropertiesFileContent, "host.url"))
                         if url = "" then
                             "/d:sonar.host.url=http://localhost:9000"
                         else
@@ -248,19 +256,19 @@ let main argv =
                     if arguments.ContainsKey("k") then
                         "/k:" + (arguments.["k"] |> Seq.head)
                     else
-                        "/k:" + (GetPropertyFromFile(propetiesFile, "projectKey"))
+                        "/k:" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "projectKey"))
 
                 let name = 
                     if arguments.ContainsKey("n") then
                         "/n:" + (arguments.["n"] |> Seq.head)
                     else
-                        "/n:" + (GetPropertyFromFile(propetiesFile, "projectName"))
+                        "/n:" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "projectName"))
         
                 let version = 
                     if arguments.ContainsKey("v") then
                         "/v:" + (arguments.["v"] |> Seq.head)
                     else
-                        "/v:" + (GetPropertyFromFile(propetiesFile, "projectVersion"))
+                        "/v:" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "projectVersion"))
 
                 let msbuildPath = 
                     if arguments.ContainsKey("x") then
@@ -276,20 +284,22 @@ let main argv =
 
                 let mutable usermame = ""
                 let mutable password = ""
-                let additionalargumentsfromcommandline = 
+                let additionalArgumentsforBeginPhase = 
                     let mutable args = ""
                     if arguments.ContainsKey("d") then
                         for arg in arguments.["d"] do
-                            if arg <> "" then
-                                args <- args + " /d:" + arg
+                            if arg <> "" then                                
                                 if arg.StartsWith("sonar.login") then
                                     usermame <- arg.Replace("sonar.login=", "")
                                 if arg.StartsWith("sonar.password") then
                                     password <- arg.Replace("sonar.password=", "")
 
-                    args.Trim()
+                                if not(arg.StartsWith("sonar.host.url=")) then
+                                    args <- args + " /d:" + arg
 
-                let additionalArgumentsformMsbuild = 
+                    args.Trim() + " " + url 
+
+                let additionalArgumentsForMsbuild = 
                     let mutable args = ""
                     if arguments.ContainsKey("p") then
                         for arg in arguments.["p"] do
@@ -313,13 +323,13 @@ let main argv =
                     else
                         Map.empty
 
-                let cxxClassArguments = GetArgumentClass(additionalargumentsfromcommandline, propetiesFile, homePath)
+                let cxxClassArguments = GetArgumentClass(additionalArgumentsforBeginPhase, deprecatedPropertiesFileContent, homePath)
         
                 WriteUserSettingsFromSonarPropertiesFile(configFile, configurationInProps, cxxClassArguments)
                 
                 Directory.CreateDirectory(Path.Combine(homePath, ".cxxresults")) |> ignore
 
-                let allArguments = key + " " + name + " " + version + " " + url + " " + additionalargumentsfromcommandline + " " + "/s:" + configFile
+                let allArguments = key + " " + name + " " + version + " " + additionalArgumentsforBeginPhase + " " + "/s:" + configFile
                 if SonarRunnerPhases.BeginPhase(msbuildRunnerExec, allArguments, homePath, usermame, password) <> 0 then
                     ret <- 1
                     printf "Failed to execute Begin Phase, check log"
@@ -329,7 +339,7 @@ let main argv =
                 
                     DeployCxxTargets(solutionTargetFile, homePath, solutionName, pythonPath, cppcheck, rats, vera)
 
-                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsformMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
+                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsForMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
                         printf "Failed to build project, check log"
                     else
@@ -346,6 +356,9 @@ let main argv =
 
             if File.Exists(solutionTargetFile) then
                 File.Delete(solutionTargetFile)
+
+            if deprecatedPropertiesFileContent <> Array.empty then
+                WriteFile(deprecatedPropertiesFile, deprecatedPropertiesFileContent)
 
         with
         | ex ->
