@@ -185,8 +185,6 @@ let WriteFile(file : string, content : Array) =
     for elem in content do
         outFile.WriteLine(elem)
 
-    outFile.WriteLine("")
-
 let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
     use outFile = new StreamWriter(file)
     outFile.WriteLine("""<?xml version="1.0" encoding="utf-8" ?>""")
