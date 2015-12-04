@@ -30,5 +30,7 @@ This is a wrapper around SonarQube Msbuild Runner, the input is the same as in t
 Download Latest From: https://ci.appveyor.com/api/buildjobs/avy5n4j6j386ftls/artifacts/CxxSonarQubeMsbuidRunner.zip
 
 To use:
+
 1. Run CxxSonarQubeMsbuidRunner.exe /h to see the usage
+
 2. Example: CxxSonarQubeMsbuidRunner.exe /k:key /n:name /v:work /m:solution.sln
