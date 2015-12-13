@@ -33,7 +33,9 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
 let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     
-    printf  "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))
+    if userPass <> "" then
+        printf  "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))
+
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
