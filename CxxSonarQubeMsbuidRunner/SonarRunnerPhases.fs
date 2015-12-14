@@ -21,7 +21,7 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
 
     let ProcessOutputDataReceivedMSbuild(e : DataReceivedEventArgs) = 
         if not(String.IsNullOrWhiteSpace(e.Data))  then      
-            buffer <- buffer + "\r\n"                    
+            buffer <- buffer + e.Data + "\r\n"                    
             if e.Data.Contains(">Done Building Project ")  || 
                 e.Data.Contains(">Project ")  ||                
                 e.Data.Contains("): error")  || 
@@ -44,22 +44,59 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
 
     returncode
 
-let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
+let BeginPhase(cmd : string, arguments : string, homePath : string, userNameIn : string, userPassIn : string, hostUrlIn : string) =
     let executor = new CommandExecutor(null, int64(1500000))
+    let hostUrl =
+        if hostUrlIn = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
+            "http://localhost:9000"
+        else
+            hostUrlIn
+
+    let userName = 
+        if userNameIn = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "login not specified. using default: admin")
+            "admin"
+        else
+            userNameIn
+
+    let userPass = 
+        if userPassIn = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
+            "admin"
+        else
+            userPassIn
     
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s\r\n" cmd hostUrl userName arguments))
 
-    if userPass <> "" then
-        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))))
-    else
-        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd arguments))
-
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
-let EndPhase(cmd : string, username : string, password : string, homePath : string) =
+let EndPhase(cmd : string, usernamein : string, passwordin : string, homePath : string, hostUrlIn : string) =
+
+    let hostUrl =
+        if hostUrlIn = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
+            "http://localhost:9000"
+        else
+            hostUrlIn
+
+    let username = 
+        if usernamein = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "login not specified. using default: admin")
+            "admin"
+        else
+            usernamein
+
+    let password = 
+        if passwordin = "" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
+            "admin"
+        else
+            passwordin
 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### End Stage  ############") 
@@ -93,7 +130,7 @@ let EndPhase(cmd : string, username : string, password : string, homePath : stri
             raise(new Exception("Failed to execute server analysis"))
     
 
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" cmd username))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx /d:sonar.host.url=%s" cmd username hostUrl))
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then

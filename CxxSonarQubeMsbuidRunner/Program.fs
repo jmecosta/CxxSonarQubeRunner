@@ -237,19 +237,6 @@ let main argv =
                     deprecatedPropertiesFileContent <- File.ReadAllLines(deprecatedPropertiesFile)
                     File.Delete(deprecatedPropertiesFile)
 
-                let url = 
-                    if arguments.ContainsKey("d") then
-                        try
-                            "/d:" + (arguments.["d"] |> Seq.find(fun c -> c.StartsWith("sonar.host.url=")))
-                        with
-                        | _ -> "/d:sonar.host.url=" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "host.url"))
-                    else
-                        let url = (GetPropertyFromFile(deprecatedPropertiesFileContent, "host.url"))
-                        if url = "" then
-                            "/d:sonar.host.url=http://localhost:9000"
-                        else
-                            "/d:sonar.host.url=" + url
-
                 let key = 
                     if arguments.ContainsKey("k") then
                         "/k:" + (arguments.["k"] |> Seq.head)
@@ -282,17 +269,20 @@ let main argv =
 
                 let mutable usermame = ""
                 let mutable password = ""
+                let mutable url = ""
                 let additionalArgumentsforBeginPhase = 
                     let mutable args = ""
                     if arguments.ContainsKey("d") then
                         for arg in arguments.["d"] do
-                            if arg <> "" then                                
-                                if arg.StartsWith("sonar.login") then
-                                    usermame <- arg.Replace("sonar.login=", "")
-                                if arg.StartsWith("sonar.password") then
-                                    password <- arg.Replace("sonar.password=", "")
-
-                                if not(arg.StartsWith("sonar.host.url=")) then
+                            if arg <> "" then
+                                if arg.StartsWith("sonar.login") || arg.StartsWith("sonar.password") ||  arg.StartsWith("sonar.host.url") then
+                                    if arg.StartsWith("sonar.login") then
+                                        usermame <- arg.Replace("sonar.login=", "")
+                                    if arg.StartsWith("sonar.password") then
+                                        password <- arg.Replace("sonar.password=", "")
+                                    if arg.StartsWith("sonar.host.url") then
+                                        url <- arg.Replace("sonar.host.url=", "")
+                                else
                                     args <- args + " /d:" + arg
 
                     args.Trim() + " " + url 
@@ -328,7 +318,7 @@ let main argv =
                 Directory.CreateDirectory(Path.Combine(homePath, ".cxxresults")) |> ignore
 
                 let allArguments = key + " " + name + " " + version + " " + additionalArgumentsforBeginPhase + " " + "/s:" + configFile
-                if SonarRunnerPhases.BeginPhase(msbuildRunnerExec, allArguments, homePath, usermame, password) <> 0 then
+                if SonarRunnerPhases.BeginPhase(msbuildRunnerExec, allArguments, homePath, usermame, password, url) <> 0 then
                     ret <- 1
                     printf "Failed to execute Begin Phase, check log"
                 else
@@ -341,7 +331,7 @@ let main argv =
                         ret <- 1
                         printf "Failed to build project, check log"
                     else
-                        if SonarRunnerPhases.EndPhase(msbuildRunnerExec, usermame, password, homePath) <> 0 then
+                        if SonarRunnerPhases.EndPhase(msbuildRunnerExec, usermame, password, homePath, url) <> 0 then
                             ret <- 1
                             printf "Failed analyse project, check log"            
             with
