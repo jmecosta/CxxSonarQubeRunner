@@ -6,6 +6,15 @@ open System.Web
 open System.IO
 open System.Text
 
+let cprintf(c : ConsoleColor, stringdata:string) = 
+
+    let old = System.Console.ForegroundColor 
+    try 
+        System.Console.ForegroundColor <- c
+        System.Console.WriteLine(stringdata)
+    finally
+        System.Console.ForegroundColor <- old
+        
 let GetRequest(username: string, password:string, url : string) =
     printf "[SERVER CALL] %s\r\n" url
     let req = HttpWebRequest.Create(url) :?> HttpWebRequest 

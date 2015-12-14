@@ -7,7 +7,6 @@ open System.IO
 open System.Threading
 open FSharp.Data 
 
-
 type StatusAnalysis = JsonProvider<"""
 {"task":{"id":"AVEC7PZCplUol9a0gqLe","type":"REPORT","componentId":"AVECef1fplUol9a0gqAc","componentKey":"tekla.structures.core:Common","componentName":"Common","componentQualifier":"TRK","status":"SUCCESS","submittedAt":"2015-11-14T00:17:42+0200","startedAt":"2015-11-14T00:17:44+0200","executedAt":"2015-11-14T00:17:48+0200","executionTimeMs":4291,"logs":true}}
 """>
@@ -18,28 +17,54 @@ let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
 
 let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string, homePath : string) =
     let executor = new CommandExecutor(null, int64(1500000))
-    use outFile = new StreamWriter(buildLog, false)
+    let mutable buffer = ""
 
     let ProcessOutputDataReceivedMSbuild(e : DataReceivedEventArgs) = 
-        if not(String.IsNullOrWhiteSpace(e.Data))  then
-            printf  "%s\r\n" e.Data
-            outFile.WriteLine(e.Data)
+        if not(String.IsNullOrWhiteSpace(e.Data))  then      
+            buffer <- buffer + "\r\n"                    
+            if e.Data.Contains(">Done Building Project ")  || 
+                e.Data.Contains(">Project ")  ||                
+                e.Data.Contains("): error")  || 
+                e.Data.Contains(">Build FAILED.") then
+                if e.Data.Contains("): error")  then
+                    let formatedstring = sprintf "%s" e.Data
+                    HelpersMethods.cprintf(ConsoleColor.Red, formatedstring)
+                else
+                    printf  "%s\r\n" e.Data
 
     let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" sonarQubeTempPath 
-    printf  "[Execute] : msbuild %s \r\n" (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)    
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : msbuild /m %s \r\n" (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
+
+    use outFile = new StreamWriter(buildLog, false)
+    outFile.Write(buffer) |> ignore
+
     returncode
 
 let BeginPhase(cmd : string, arguments : string, homePath : string, userName : string, userPass : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+
     if userPass <> "" then
-        printf  "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))
+        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd (arguments.Replace(userPass, "xxxxxx"))))
+    else
+        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true %s\r\n" cmd arguments))
 
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
 let EndPhase(cmd : string, username : string, password : string, homePath : string) =
+
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### End Stage  ############") 
+    HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable idAnalysis = ""
     let mutable urlForChecking = ""
@@ -64,11 +89,11 @@ let EndPhase(cmd : string, username : string, password : string, homePath : stri
             status <- 0
         else
             let content = HelpersMethods.GetRequest(username, password, urlForChecking.Replace("task?id=" + idAnalysis, "logs?taskId=" + idAnalysis))
-            printf "%s" content
+            HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "%s" content))
             raise(new Exception("Failed to execute server analysis"))
     
 
-    printf  "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx\r\n" cmd username
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" cmd username))
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then
@@ -77,9 +102,9 @@ let EndPhase(cmd : string, username : string, password : string, homePath : stri
             loopTimerCheck()
             0
         else
-            printf  "[EndPhase] : Cannot Check Analysis Resutls in Server, available only for 5.2 or above\r\n"
+            printf  "[EndPhase] : Cannot Check Analysis Resutls in Server, available only for 5.2 or above\r"
             0
     else
-        printf  "[EndPhase] : Failed. Check Log\r\n"
+        HelpersMethods.cprintf(ConsoleColor.Red, "[EndPhase] : Failed. Check Log")
         returncode        
         
