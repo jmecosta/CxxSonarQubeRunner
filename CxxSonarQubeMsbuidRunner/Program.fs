@@ -285,7 +285,7 @@ let main argv =
                                 else
                                     args <- args + " /d:" + arg
 
-                    args.Trim() + " " + url 
+                    args.Trim()
 
                 let additionalArgumentsForMsbuild = 
                     let mutable args = ""
