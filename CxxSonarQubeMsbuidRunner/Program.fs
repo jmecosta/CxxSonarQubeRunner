@@ -50,7 +50,8 @@ let ShowHelp() =
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /R|/r:<msbuild sonarqueb runner -> 1.0.2>")
         Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000 -> 1.0.2>")
-        Console.WriteLine ("    /X|/x:<path for msbuild: default C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe>")
+        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
+        Console.WriteLine ("    /A|/a:<amd64, disabled>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
 
 let GetPropertyFromFile(content : string [], prop : string) =
@@ -255,11 +256,17 @@ let main argv =
                     else
                         "/v:" + (GetPropertyFromFile(deprecatedPropertiesFileContent, "projectVersion"))
 
-                let msbuildPath = 
+                let vsversion = 
                     if arguments.ContainsKey("x") then
                         arguments.["x"] |> Seq.head
                     else
-                        @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+                        "vs15"
+
+                let useamd64 = 
+                    if arguments.ContainsKey("a") then
+                        arguments.["a"] |> Seq.head
+                    else
+                        ""
 
                 let msbuildTarget = 
                     if arguments.ContainsKey("t") then
@@ -327,7 +334,7 @@ let main argv =
                 
                     DeployCxxTargets(solutionTargetFile, homePath, solutionName, pythonPath, cppcheck, rats, vera)
 
-                    if SonarRunnerPhases.RunBuild(msbuildPath, solution, additionalArgumentsForMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
+                    if SonarRunnerPhases.RunBuild(vsversion, useamd64, solution, additionalArgumentsForMsbuild + " " + msbuildTarget, Path.Combine(homePath, ".cxxresults", "BuildLog.txt"), Path.Combine(homePath, ".sonarqube"), homePath) <> 0 then
                         ret <- 1
                         printf "Failed to build project, check log"
                     else

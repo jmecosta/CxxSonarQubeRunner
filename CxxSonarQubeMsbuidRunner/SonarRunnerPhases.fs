@@ -4,6 +4,7 @@ open MsbuildTasksCommandExecutor
 open System.Diagnostics
 open System
 open System.IO
+open System.Text.RegularExpressions
 open System.Threading
 open FSharp.Data 
 
@@ -15,9 +16,71 @@ let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
     if not(String.IsNullOrWhiteSpace(e.Data))  then
         printf  "%s\r\n" e.Data
 
-let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string, homePath : string) =
+let EnvForBuild(vsVersion : string, useAmd64 : bool) = 
+    let buildEnvironmentPlatform =
+        if useAmd64 then
+            "amd64"
+        else
+            ""
+    let buildEnvironmentBatFile =
+        if vsVersion = "vs10" then "C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
+        elif vsVersion = "vs12" then "C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\vcvarsall.bat"
+        elif vsVersion = "vs13" then "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+        elif vsVersion = "vs15" then "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+        else "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+
+    let processOutputDataReceived(e : DataReceivedEventArgs) =
+        if not(String.IsNullOrWhiteSpace(e.Data)) then
+            System.Diagnostics.Debug.WriteLine(e.Data)
+        ()
+
+
+    let startInfo = ProcessStartInfo(FileName = "cmd.exe",
+                                        Arguments = "/c \"" + buildEnvironmentBatFile + "\" " + buildEnvironmentPlatform + " && set",
+                                        WindowStyle = ProcessWindowStyle.Normal,
+                                        UseShellExecute = false,
+                                        RedirectStandardOutput = true,
+                                        RedirectStandardError = true,
+                                        RedirectStandardInput = true,
+                                        CreateNoWindow = true)
+
+    let proc = new Process(StartInfo = startInfo)
+    proc.Start() |> ignore
+
+    let mutable map = Map.empty
+    let output = proc.StandardOutput.ReadToEnd()
+    for line in Regex.Split(output, "\r\n") do
+        if line <> "" then
+            let data = line.Split('=')
+            if data.Length = 2 then
+                map <- map.Add(data.[0], data.[1])
+
+    map
+
+let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
+    if vccompiler.Equals("vs11") then
+        if useMSBuild64 then
+            @"C:\Program Files (x86)\MSBuild\11.0\Bin\amd64\MSBuild.exe"
+        else
+            @"C:\Program Files (x86)\MSBuild\11.0\Bin\MSBuild.exe"
+    elif vccompiler.Equals("vs13") then
+        if useMSBuild64 then
+            @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+        else
+            @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+    elif vccompiler.Equals("vs15") then 
+        if useMSBuild64 then
+            @"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe"
+        else
+            @"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+    else
+        @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
+
+let RunBuild(msbuildversion:string, useamd64:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string, homePath : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
+    let msbuildexec = GetMsbuildExec(msbuildversion, (useamd64 = "amd64"))
+    let environment = EnvForBuild(msbuildversion, (useamd64 = "amd64"))
 
     let ProcessOutputDataReceivedMSbuild(e : DataReceivedEventArgs) = 
         if not(String.IsNullOrWhiteSpace(e.Data))  then      
@@ -36,8 +99,18 @@ let RunBuild(msbuild:string, solution:string, arguments:string, buildLog:string,
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : msbuild /m %s \r\n" (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuild, solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, Map.empty, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s /m %s \r\n" msbuildexec (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
+
+    let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, environment, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
+
+    let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
+
+    for processdata in newcurrentprocess do
+        let wasrunning = currentprocess |> Seq.tryFind (fun c -> processdata.Id = c.Id)
+        match wasrunning with
+        | Some c -> ()
+        | _ -> processdata.Kill()
 
     use outFile = new StreamWriter(buildLog, false)
     outFile.Write(buffer) |> ignore

@@ -22,6 +22,8 @@ type ICommandExecutor =
   abstract member CancelExecution : ReturnCode
   abstract member CancelExecutionAndSpanProcess : string [] -> ReturnCode
   abstract member ResetData : unit -> unit
+  abstract member GetProcessIdsRunning : string -> Process []
+
 
   // no redirection of output
   abstract member ExecuteCommand : string * string * Map<string, string> * string -> int
@@ -32,7 +34,9 @@ type ICommandExecutor =
 
 
 type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
-    let addEnvironmentVariable (startInfo:ProcessStartInfo) a b = startInfo.EnvironmentVariables.Add(a, b)
+    let addEnvironmentVariable (startInfo:ProcessStartInfo) a b =
+        if not(startInfo.EnvironmentVariables.ContainsKey(a)) then
+            startInfo.EnvironmentVariables.Add(a, b)
 
     let KillPrograms(currentProcessName : string) =
         if not(String.IsNullOrEmpty(currentProcessName)) then
@@ -126,6 +130,12 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
 
 
     interface ICommandExecutor with
+
+        member this.GetProcessIdsRunning(processName : string) =
+            System.Diagnostics.Process.GetProcessesByName(processName)
+
+
+            
         member this.GetStdOut =
             this.output
 
