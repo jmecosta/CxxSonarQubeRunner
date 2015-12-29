@@ -99,9 +99,14 @@ let DownloadAndInstallMSIDist(url : string, installationPath : string) =
         File.Delete(tmpPath)
 
 let InstallMsbuildRunner(version : string) =
-    let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
-    Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
-
+    try
+        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner.%s.zip""" version version
+        Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+    with
+    | _ ->   
+        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
+        Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+              
 let InstallCppLint() =
     let mutable pythonPath = Path.Combine(GetPythonPath(), "python.exe")
     if not(File.Exists(pythonPath)) then
