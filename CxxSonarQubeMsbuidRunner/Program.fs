@@ -265,7 +265,7 @@ let main argv =
                     if arguments.ContainsKey("t") then
                         "/t:" + (arguments.["t"] |> Seq.head)
                     else
-                        "/t:Rebuild"
+                        "/t:Clean;Build"
 
                 let mutable usermame = ""
                 let mutable password = ""
