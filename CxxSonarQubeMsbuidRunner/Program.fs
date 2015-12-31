@@ -48,7 +48,7 @@ let ShowHelp() =
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
-        Console.WriteLine ("    /R|/r:<msbuild sonarqueb runner -> 1.0.2>")
+        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.0.2>")
         Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000 -> 1.0.2>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
         Console.WriteLine ("    /A|/a:<amd64, disabled>")
