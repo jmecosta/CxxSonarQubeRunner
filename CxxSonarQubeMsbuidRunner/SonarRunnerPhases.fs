@@ -117,7 +117,7 @@ let RunBuild(msbuildversion:string, useamd64:string, solution:string, arguments:
 
     returncode
 
-let BeginPhase(cmd : string, arguments : string, homePath : string, userNameIn : string, userPassIn : string, hostUrlIn : string) =
+let BeginPhase(cmd : string, arguments : string, homePath : string, userNameIn : string, userPassIn : string, hostUrlIn : string, branch : string) =
     let executor = new CommandExecutor(null, int64(1500000))
     let hostUrl =
         if hostUrlIn = "" then
@@ -139,13 +139,19 @@ let BeginPhase(cmd : string, arguments : string, homePath : string, userNameIn :
             "admin"
         else
             userPassIn
+
+    let branchtopass = 
+        if branch = "" then
+            ""
+        else
+            "/d:sonar.branch=" + branch
     
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s\r\n" cmd hostUrl userName arguments))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" cmd hostUrl userName arguments branchtopass))
 
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
     returncode
 
 let EndPhase(cmd : string, usernamein : string, passwordin : string, homePath : string, hostUrlIn : string) =
@@ -203,7 +209,7 @@ let EndPhase(cmd : string, usernamein : string, passwordin : string, homePath : 
             raise(new Exception("Failed to execute server analysis"))
     
 
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx /d:sonar.host.url=%s" cmd username hostUrl))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" cmd username))
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
     
     if returncode = 0 then

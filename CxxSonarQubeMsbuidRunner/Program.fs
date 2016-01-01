@@ -48,8 +48,8 @@ let ShowHelp() =
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
-        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.0.2>")
-        Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000 -> 1.0.2>")
+        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1>")
+        Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
         Console.WriteLine ("    /A|/a:<amd64, disabled>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
@@ -277,18 +277,21 @@ let main argv =
                 let mutable usermame = ""
                 let mutable password = ""
                 let mutable url = ""
+                let mutable branch = ""
                 let additionalArgumentsforBeginPhase = 
                     let mutable args = ""
                     if arguments.ContainsKey("d") then
                         for arg in arguments.["d"] do
                             if arg <> "" then
-                                if arg.StartsWith("sonar.login") || arg.StartsWith("sonar.password") ||  arg.StartsWith("sonar.host.url") then
+                                if arg.StartsWith("sonar.login") || arg.StartsWith("sonar.password") ||  arg.StartsWith("sonar.host.url") ||  arg.StartsWith("sonar.branch") then
                                     if arg.StartsWith("sonar.login") then
                                         usermame <- arg.Replace("sonar.login=", "")
                                     if arg.StartsWith("sonar.password") then
                                         password <- arg.Replace("sonar.password=", "")
                                     if arg.StartsWith("sonar.host.url") then
                                         url <- arg.Replace("sonar.host.url=", "")
+                                    if arg.StartsWith("sonar.branch") then
+                                        branch <- arg.Replace("sonar.branch=", "")
                                 else
                                     args <- args + " /d:" + arg
 
@@ -325,7 +328,7 @@ let main argv =
                 Directory.CreateDirectory(Path.Combine(homePath, ".cxxresults")) |> ignore
 
                 let allArguments = key + " " + name + " " + version + " " + additionalArgumentsforBeginPhase + " " + "/s:" + configFile
-                if SonarRunnerPhases.BeginPhase(msbuildRunnerExec, allArguments, homePath, usermame, password, url) <> 0 then
+                if SonarRunnerPhases.BeginPhase(msbuildRunnerExec, allArguments, homePath, usermame, password, url, branch) <> 0 then
                     ret <- 1
                     printf "Failed to execute Begin Phase, check log"
                 else

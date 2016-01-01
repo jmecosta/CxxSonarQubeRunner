@@ -139,7 +139,7 @@ let InstallTools(arguments : Map<string,seq<string>>) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "1.0.2"
+            "1.1"
                 
     InstallChocolatey()
     InstallMsbuildRunner(msbuildRunnerVersion),
