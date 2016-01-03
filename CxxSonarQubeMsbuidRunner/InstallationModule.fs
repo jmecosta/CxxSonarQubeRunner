@@ -64,7 +64,7 @@ let InstallChocoPackage(package : string) =
             printf  "%s\r\n" e.Data
     
     let executor = new CommandExecutor(null, int64(1500000))
-    printf  "[Install] : %s install %s -y\r\n" ChocoExe package
+    printf  "[Install] : %s install '%s' -y\r\n" ChocoExe package
     (executor :> ICommandExecutor).ExecuteCommand(Path.Combine(executingPath, "Elevate.exe"),"-wait4exit -noui " + ChocoExe + " install " + package + " -y", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory)
     
 let InstallChocolatey() =
@@ -74,7 +74,7 @@ let InstallChocolatey() =
     
     if not(File.Exists(ChocoExe)) then
         let executor = new CommandExecutor(null, int64(1500000))
-        printf  """[Install] : @powershell -NoProfile -ExecutionPolicy unrestricted -Command \"(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')))"""
+        printf  """[Install] : @powershell -NoProfile -ExecutionPolicy unrestricted -Command \"(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')))\r\n"""
         (executor :> ICommandExecutor).ExecuteCommand("cmd.exe","/c @powershell -NoProfile -ExecutionPolicy unrestricted -Command \"(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1\" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin\"", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory) |> ignore
 
 let DownloadAndInstallZipDist(url : string, swName : string) = 
@@ -111,7 +111,7 @@ let InstallPython() =
     let mutable pythonPath = Path.Combine(GetPythonPath(), "python.exe")
     if not(File.Exists(pythonPath)) then
         if InstallChocoPackage("python2") <> 0 then
-            printf "[Install] Failed to install python, likely it will fail. please install manually python to c:\tools\python2"
+            printf "[Install] Failed to install python, likely it will fail. please install manually python to 'c:/tools/python2' \r\n"
         else
             pythonPath <- "c:\\tools\python2\\python.exe"
 
@@ -132,7 +132,7 @@ let InstallVera() =
 let InstallCppCheck() =
     if not(File.Exists(GetCppCheckPath())) then
         if InstallChocoPackage("cppcheck") <> 0 then           
-            printf "[Install] Failed to install cppcheck, likely it will fail. please install manually python to C:\Program Files (x86)\Cppcheck"
+            printf "[Install] Failed to install cppcheck, likely it will fail. please install manually python to 'C:/Program Files (x86)/Cppcheck'\r\n"
         
     GetCppCheckPath()
 
