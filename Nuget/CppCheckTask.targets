@@ -2,8 +2,11 @@
 <Project DefaultTargets="AnalyseWithCppCheck" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <UsingTask TaskName="CppCheckTask" AssemblyFile="$(MSBuildThisFileDirectory)CppCheckTask.dll"/>
 
-    <PropertyGroup>
-        <CppCheckPath               Condition="'$(CppCheckPath)' == ''">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPath>
+    <PropertyGroup>        
+        <CppCheckPathX86            Condition="Exists('C:\Program Files (x86)\Cppcheck\cppcheck.exe')">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPathX86>
+        <CppCheckPathX64            Condition="Exists('C:\Program Files\Cppcheck\cppcheck.exe')">C:\Program Files\Cppcheck\cppcheck.exe</CppCheckPathX64>        
+        <CppCheckPath               Condition="'$(CppCheckPath)' == '' And '$(CppCheckPathX86)' != ''">$(CppCheckPathX86)</CppCheckPath>
+        <CppCheckPath               Condition="'$(CppCheckPath)' == '' And '$(CppCheckPathX64)' != ''">$(CppCheckPathX64)</CppCheckPath>
         <CppCheckOptions            Condition="'$(CppCheckOptions)' == ''">--inline-suppr;--enable=all;-j 8</CppCheckOptions>
 		<CppCheckDefines            Condition="'$(CppCheckDefines)' == ''">__cplusplus</CppCheckDefines>
         <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
