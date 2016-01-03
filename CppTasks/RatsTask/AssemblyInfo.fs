@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.fs" company="Copyright © 2014 Tekla Corporation. Tekla is a Trimble Company">
+// <copyright file="AssemblyInfo.fs" company="Copyright © 2014 jmecsoftware.com">
 //     Copyright (C) 2013 [Jorge Costa, Jorge.Costa@tekla.com]
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -23,9 +23,9 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTitle("RatsTask")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("Tekla Corporation. Tekla is a Trimble Company")>]
+[<assembly: AssemblyCompany("jmecsoftware.com")>]
 [<assembly: AssemblyProduct("RatsTask")>]
-[<assembly: AssemblyCopyright("Copyright © 2013 Tekla Corporation. Tekla is a Trimble Company")>]
+[<assembly: AssemblyCopyright("Copyright © 2016 jmecsoftware.com")>]
 [<assembly: AssemblyTrademark("")>]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -47,7 +47,7 @@ open System.Runtime.InteropServices
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[<assembly: AssemblyVersion("1.1.0")>]
-[<assembly: AssemblyFileVersion("1.1.0")>]
+[<assembly: AssemblyVersion("1.2.0")>]
+[<assembly: AssemblyFileVersion("1.2.0")>]
 
 ()

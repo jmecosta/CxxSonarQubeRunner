@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.fs" company="Copyright © 2014 Tekla Corporation. Tekla is a Trimble Company">
+// <copyright file="AssemblyInfo.fs" company="Copyright © 2014 jmecsoftware.com">
 //     Copyright (C) 2013 [Jorge Costa, Jorge.Costa@tekla.com]
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -23,9 +23,9 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTitle("CxxSonarQubeMsbuidRunner")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("Tekla Corporation. Tekla is a Trimble Company")>]
+[<assembly: AssemblyCompany("jmecsoftware.com")>]
 [<assembly: AssemblyProduct("CxxSonarQubeMsbuidRunner")>]
-[<assembly: AssemblyCopyright("Copyright © 2015 Tekla Corporation. Tekla is a Trimble Company")>]
+[<assembly: AssemblyCopyright("Copyright © 2015 jmecsoftware.com")>]
 [<assembly: AssemblyTrademark("")>]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
