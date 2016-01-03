@@ -107,7 +107,7 @@ let InstallMsbuildRunner(version : string) =
         let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
         Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
               
-let InstallCppLint() =
+let InstallPython() =
     let mutable pythonPath = Path.Combine(GetPythonPath(), "python.exe")
     if not(File.Exists(pythonPath)) then
         if InstallChocoPackage("python2") <> 0 then
@@ -115,10 +115,13 @@ let InstallCppLint() =
         else
             pythonPath <- "c:\\tools\python2\\python.exe"
 
+    pythonPath
+
+let InstallCppLint() =
     let cpplintMod = Path.Combine(InstallationPathHome, "cpplint_mod.py")
     let wc = new WebClient()
     wc.DownloadFile("""https://raw.githubusercontent.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/master/Nuget/CppLint/cpplint_mod.py""", cpplintMod)
-    cpplintMod, pythonPath
+    cpplintMod
 
 let InstallRats() =    
     Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/rats.zip""", "RATS"), "rats.exe")
@@ -133,19 +136,5 @@ let InstallCppCheck() =
         
     GetCppCheckPath()
 
-
-let InstallTools(arguments : Map<string,seq<string>>) =
-    let msbuildRunnerVersion = 
-        if arguments.ContainsKey("r") then
-            arguments.["r"] |> Seq.head
-        else
-            "1.1"
-                
-    InstallChocolatey()
-    InstallMsbuildRunner(msbuildRunnerVersion),
-    InstallCppLint(),
-    InstallRats(),
-    InstallVera(),
-    InstallCppCheck()
 
 

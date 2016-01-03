@@ -8,6 +8,8 @@ open System.Text.RegularExpressions
 open System.Threading
 open FSharp.Data 
 
+open Options
+
 type StatusAnalysis = JsonProvider<"""
 {"task":{"id":"AVEC7PZCplUol9a0gqLe","type":"REPORT","componentId":"AVECef1fplUol9a0gqAc","componentKey":"tekla.structures.core:Common","componentName":"Common","componentQualifier":"TRK","status":"SUCCESS","submittedAt":"2015-11-14T00:17:42+0200","startedAt":"2015-11-14T00:17:44+0200","executedAt":"2015-11-14T00:17:48+0200","executionTimeMs":4291,"logs":true}}
 """>
@@ -76,11 +78,13 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
     else
         @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
 
-let RunBuild(msbuildversion:string, useamd64:string, solution:string, arguments:string, buildLog:string, sonarQubeTempPath : string, homePath : string) =
+let RunBuild(options : OptionsData) =
+    let arguments = options.PropsForMsbuild + " " + options.Target
+
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
-    let msbuildexec = GetMsbuildExec(msbuildversion, (useamd64 = "amd64"))
-    let environment = EnvForBuild(msbuildversion, (useamd64 = "amd64"))
+    let msbuildexec = GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64"))
+    let environment = EnvForBuild(options.VsVersion, (options.UseAmd64 = "amd64"))
 
     let ProcessOutputDataReceivedMSbuild(e : DataReceivedEventArgs) = 
         if not(String.IsNullOrWhiteSpace(e.Data))  then      
@@ -95,87 +99,104 @@ let RunBuild(msbuildversion:string, useamd64:string, solution:string, arguments:
                 else
                     printf  "%s\r\n" e.Data
 
-    let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" sonarQubeTempPath 
+    let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" options.SonarQubeTempPath 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s /m %s \r\n" msbuildexec (solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s /m %s \r\n" msbuildexec (options.Solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, environment, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, homePath)
+
+    printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found: \r\n"
+    for pro in currentprocess do
+        printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
+
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, options.Solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, environment, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, options.HomePath)
 
     let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
+
+    printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found after running analysis: \r\n"
+    for pro in newcurrentprocess do
+        printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
 
     for processdata in newcurrentprocess do
         let wasrunning = currentprocess |> Seq.tryFind (fun c -> processdata.Id = c.Id)
         match wasrunning with
         | Some c -> ()
-        | _ -> processdata.Kill()
+        | _ -> 
+            printf "Will Kill : %s" (sprintf "%s : %s\r\n" (processdata.Id.ToString()) processdata.ProcessName)
+            processdata.Kill()
+            processdata.WaitForExit(2000) |> ignore
 
-    use outFile = new StreamWriter(buildLog, false)
+    let afterkillproc = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
+    printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found after cleaning up: \r\n"
+    for pro in afterkillproc do
+        printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
+
+    use outFile = new StreamWriter(options.BuildLog, false)
     outFile.Write(buffer) |> ignore
 
     returncode
 
-let BeginPhase(cmd : string, arguments : string, homePath : string, userNameIn : string, userPassIn : string, hostUrlIn : string, branch : string) =
+let BeginPhase(options : OptionsData) =
+    let arguments = options.ProjectKey + " " + options.ProjectName + " " + options.ProjectVersion + " " + options.PropsForBeginStage + " " + "/s:" + options.ConfigFile
     let executor = new CommandExecutor(null, int64(1500000))
     let hostUrl =
-        if hostUrlIn = "" then
+        if options.SonarHost = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
             "http://localhost:9000"
         else
-            hostUrlIn
+            options.SonarHost
 
     let userName = 
-        if userNameIn = "" then
+        if options.SonarUserName = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "login not specified. using default: admin")
             "admin"
         else
-            userNameIn
+            options.SonarUserName
 
     let userPass = 
-        if userPassIn = "" then
+        if options.SonarUserPassword = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
             "admin"
         else
-            userPassIn
+            options.SonarUserPassword
 
     let branchtopass = 
-        if branch = "" then
+        if options.Branch = "" then
             ""
         else
-            "/d:sonar.branch=" + branch
+            "/d:sonar.branch=" + options.Branch
     
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" cmd hostUrl userName arguments branchtopass))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" options.MSBuildRunnerPath hostUrl userName arguments branchtopass))
 
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, homePath)
-    returncode
+    (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
 
-let EndPhase(cmd : string, usernamein : string, passwordin : string, homePath : string, hostUrlIn : string) =
+let EndPhase(options : OptionsData) =
 
     let hostUrl =
-        if hostUrlIn = "" then
+        if options.SonarHost = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
             "http://localhost:9000"
         else
-            hostUrlIn
+            options.SonarHost
 
     let username = 
-        if usernamein = "" then
+        if options.SonarUserName = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "login not specified. using default: admin")
             "admin"
         else
-            usernamein
+            options.SonarUserName
 
     let password = 
-        if passwordin = "" then
+        if options.SonarUserPassword = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
             "admin"
         else
-            passwordin
+            options.SonarUserPassword
 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### End Stage  ############") 
@@ -209,8 +230,8 @@ let EndPhase(cmd : string, usernamein : string, passwordin : string, homePath : 
             raise(new Exception("Failed to execute server analysis"))
     
 
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" cmd username))
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(cmd, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, homePath)
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" options.MSBuildRunnerPath username))
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
     
     if returncode = 0 then
         if urlForChecking <> "" then
