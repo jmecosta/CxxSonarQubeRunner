@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>CppCheckTask</id>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
         <authors>Tekla</authors>
         <owners>Tekla</owners>
         <licenseUrl>http://www.tekla.com/end-user-license-agreement</licenseUrl>
@@ -17,7 +17,7 @@
     <files>
         <file src="..\BuildDrop\CppCheckTask.dll" target="build" />
         <file src="CppCheckTask.targets" target="build" />
-        <file src="..\BuildDrop\FSharp*.*" target="build" />
+        <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
         <file src="..\BuildDrop\MsbuildTasksCommandExecutor.dll" target="build" />
         <file src="..\BuildDrop\MsbuildTasksUtils.dll" target="build" />
     </files>

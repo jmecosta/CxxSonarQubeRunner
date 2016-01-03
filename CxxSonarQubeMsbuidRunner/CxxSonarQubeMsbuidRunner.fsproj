@@ -25,7 +25,8 @@
     <OutputPath>$(OutPutPathTasks)</OutputPath>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\CxxSonarQubeMsbuidRunner.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>
     </StartArguments>
