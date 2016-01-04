@@ -479,5 +479,5 @@ type OptionsData(args : string []) =
         if File.Exists(this.SolutionTargetFile) then
             File.Delete(this.SolutionTargetFile)
 
-        if Directory.Exists(this.SonarQubeTempPath) then
-            Directory.Delete(this.SonarQubeTempPath, true)
+        if Directory.Exists(Path.Combine(this.SonarQubeTempPath, "bin")) then
+            Directory.Delete(Path.Combine(this.SonarQubeTempPath, "bin"), true)
