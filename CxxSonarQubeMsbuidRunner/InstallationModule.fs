@@ -54,8 +54,8 @@ let InstallPackage(file:string) =
             printf  "%s\r\n" e.Data
 
     let executor = new CommandExecutor(null, int64(1500000))
-    printf  "[Install] : %s /s\r\n" file
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(Path.Combine(executingPath, "Elevate.exe"),"-wait4exit -noui " + file + " /s", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory)
+    printf  "[Install] : %s %s %s /s\r\n" ("\"" + Path.Combine(executingPath, "Elevate.exe") + "\"") ("-wait4exit -noui") file
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand("\"" + Path.Combine(executingPath, "Elevate.exe") + "\"","-wait4exit -noui " + file + " /s", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory)
     returncode
 
 let InstallChocoPackage(package : string) = 
@@ -64,8 +64,8 @@ let InstallChocoPackage(package : string) =
             printf  "%s\r\n" e.Data
     
     let executor = new CommandExecutor(null, int64(1500000))
-    printf  "[Install] : %s install '%s' -y\r\n" ChocoExe package
-    (executor :> ICommandExecutor).ExecuteCommand(Path.Combine(executingPath, "Elevate.exe"),"-wait4exit -noui " + ChocoExe + " install " + package + " -y", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory)
+    printf  "[Install] : %s %s %s install '%s' -y\r\n" ("\"" + Path.Combine(executingPath, "Elevate.exe") + "\"") ("-wait4exit -noui") ChocoExe package
+    (executor :> ICommandExecutor).ExecuteCommand("\"" + Path.Combine(executingPath, "Elevate.exe") + "\"","-wait4exit -noui " + ChocoExe + " install " + package + " -y", Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, Environment.CurrentDirectory)
     
 let InstallChocolatey() =
     let ProcessOutputDataReceived(e : DataReceivedEventArgs) = 
@@ -99,14 +99,37 @@ let DownloadAndInstallMSIDist(url : string, installationPath : string) =
         File.Delete(tmpPath)
 
 let InstallMsbuildRunner(version : string) =
-    try
-        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner.%s.zip""" version version
-        Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
-    with
-    | _ ->   
-        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
-        Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
-              
+    let exePath = Path.Combine(InstallationPathHome, version, "MSBuild.SonarQube.Runner.exe")
+
+    if not(File.Exists(exePath)) then
+        if Directory.Exists(Path.Combine(InstallationPathHome, version)) then
+            Directory.Delete(Path.Combine(InstallationPathHome, version))
+
+        printf "Download and install msbuild runner from github, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
+        try
+            try
+                let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
+                printf "Download %s\r\n" downloadUrl
+                let exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+                if not(File.Exists(exe)) then
+                    raise (new Exception("Unable to download and unzip file from github : " + downloadUrl))
+                exe
+            with
+            | _ ->   
+                let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner.%s.zip""" version version
+                printf "Download %s\r\n" downloadUrl
+                let exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+                if not(File.Exists(exe)) then
+                    raise (new Exception("Unable to download and unzip file from github : " + downloadUrl))
+                exe
+        with
+        | ex ->
+            let data = sprintf "Unable to install msbuild runner from github : " + ex.Message + " please provide external location\r\n"
+            printf "%s" data
+            raise (ex)         
+    else
+        exePath
+
 let InstallPython() =
     let mutable pythonPath = Path.Combine(GetPythonPath(), "python.exe")
     if not(File.Exists(pythonPath)) then

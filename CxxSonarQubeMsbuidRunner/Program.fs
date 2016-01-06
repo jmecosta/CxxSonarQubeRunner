@@ -15,8 +15,6 @@ open Options
 
 [<EntryPoint>]
 let main argv = 
-
-    printfn "%A" argv
     let arguments = parseArgs(argv)
     let mutable ret = 0
 

@@ -60,11 +60,23 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
     map
 
 let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
-    if vccompiler.Equals("vs11") then
-        if useMSBuild64 then
-            @"C:\Program Files (x86)\MSBuild\11.0\Bin\amd64\MSBuild.exe"
-        else
-            @"C:\Program Files (x86)\MSBuild\11.0\Bin\MSBuild.exe"
+    if vccompiler.Equals("vs12") then
+
+        HelpersMethods.cprintf(ConsoleColor.DarkRed, "")
+        HelpersMethods.cprintf(ConsoleColor.DarkRed, "######## Analysis will not be possible unless vs 2013 community or above is installed ###########")
+        HelpersMethods.cprintf(ConsoleColor.DarkRed, "")
+
+        let compilermsbuild = 
+            if useMSBuild64 then
+                @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+            else
+                @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+        if not(File.Exists(compilermsbuild)) then
+            HelpersMethods.cprintf(ConsoleColor.DarkRed, "######## Analysis will failed, msbuild version not found  : " + compilermsbuild + " ##########")
+            HelpersMethods.cprintf(ConsoleColor.DarkRed, "")
+
+        compilermsbuild
+
     elif vccompiler.Equals("vs13") then
         if useMSBuild64 then
             @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
@@ -76,14 +88,18 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
         else
             @"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
     else
-        @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
+        if useMSBuild64 then
+            @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
+        else
+            @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"
+
 
 let RunBuild(options : OptionsData) =
     let arguments = options.PropsForMsbuild + " " + options.Target
 
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
-    let msbuildexec = GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64"))
+    let msbuildexec = "\"" + GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64")) + "\""
     let environment = EnvForBuild(options.VsVersion, (options.UseAmd64 = "amd64"))
 
     let ProcessOutputDataReceivedMSbuild(e : DataReceivedEventArgs) = 
@@ -99,11 +115,11 @@ let RunBuild(options : OptionsData) =
                 else
                     printf  "%s\r\n" e.Data
 
-    let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=%s" options.SonarQubeTempPath 
+    let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=\"%s\"" options.SonarQubeTempPath 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s /m %s \r\n" msbuildexec (options.Solution + " /v:diag " + sonarQubeTempPathProp + " " + arguments)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -111,7 +127,7 @@ let RunBuild(options : OptionsData) =
     for pro in currentprocess do
         printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
 
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, options.Solution + " /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, environment, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, options.HomePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, "\"" + options.Solution + "\" /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments, environment, ProcessOutputDataReceivedMSbuild, ProcessOutputDataReceivedMSbuild, options.HomePath)
 
     let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -139,7 +155,7 @@ let RunBuild(options : OptionsData) =
     returncode
 
 let BeginPhase(options : OptionsData) =
-    let arguments = options.ProjectKey + " " + options.ProjectName + " " + options.ProjectVersion + " " + options.PropsForBeginStage + " " + "/s:" + options.ConfigFile
+    let arguments = options.ProjectKey + " " + options.ProjectName + " " + options.ProjectVersion + " " + options.PropsForBeginStage + " " + "/s:\"" + options.ConfigFile + "\""
     let executor = new CommandExecutor(null, int64(1500000))
     let hostUrl =
         if options.SonarHost = "" then
