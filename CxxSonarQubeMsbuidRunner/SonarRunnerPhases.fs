@@ -25,11 +25,33 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
         else
             ""
     let buildEnvironmentBatFile =
-        if vsVersion = "vs10" then "C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
-        elif vsVersion = "vs12" then "C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\vcvarsall.bat"
-        elif vsVersion = "vs13" then "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
-        elif vsVersion = "vs15" then "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
-        else "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+        if vsVersion = "vs10" then 
+            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat") then
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
+            else
+                "C:\\Program Files\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
+
+        elif vsVersion = "vs12" then
+            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat") then
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+            else
+                "C:\\Program Files\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+
+        elif vsVersion = "vs13" then 
+            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat") then
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+            else
+                "C:\\Program Files\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+        elif vsVersion = "vs15" then
+            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+            else
+                "C:\\Program Files\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+        else
+            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+            else
+                "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
 
     let processOutputDataReceived(e : DataReceivedEventArgs) =
         if not(String.IsNullOrWhiteSpace(e.Data)) then
@@ -68,9 +90,16 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
 
         let compilermsbuild = 
             if useMSBuild64 then
-                @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
-            else
-                @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+                if File.Exists(@"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe") then
+                    @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+                else
+                    @"C:\Program Files\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+            else                
+                if File.Exists(@"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe") then
+                    @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+                else
+                    @"C:\Program Files\MSBuild\12.0\Bin\MSBuild.exe"
+
         if not(File.Exists(compilermsbuild)) then
             HelpersMethods.cprintf(ConsoleColor.DarkRed, "######## Analysis will failed, msbuild version not found  : " + compilermsbuild + " ##########")
             HelpersMethods.cprintf(ConsoleColor.DarkRed, "")
@@ -79,14 +108,28 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
 
     elif vccompiler.Equals("vs13") then
         if useMSBuild64 then
-            @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
-        else
-            @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+            if File.Exists(@"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe") then
+                @"C:\Program Files (x86)\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+            else
+                @"C:\Program Files\MSBuild\12.0\Bin\amd64\MSBuild.exe"
+        else                
+            if File.Exists(@"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe") then
+                @"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
+            else
+                @"C:\Program Files\MSBuild\12.0\Bin\MSBuild.exe"
+
+
     elif vccompiler.Equals("vs15") then 
         if useMSBuild64 then
-            @"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe"
-        else
-            @"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+            if File.Exists(@"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe") then
+                @"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe"
+            else
+                @"C:\Program Files\MSBuild\14.0\Bin\amd64\MSBuild.exe"
+        else                
+            if File.Exists(@"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe") then
+                @"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+            else
+                @"C:\Program Files\MSBuild\14.0\Bin\MSBuild.exe"
     else
         if useMSBuild64 then
             @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
