@@ -28,8 +28,9 @@ let main argv =
             options.ConfigureInstallationOfTools()
             options.CreatOptionsForAnalysis()
             options.Setup()
+            options.ProvisionProject()
 
-            try                
+            try                                
                 if SonarRunnerPhases.BeginPhase(options) <> 0 then
                     ret <- 1
                     printf "[CxxSonarQubeMsbuidRunner] Failed to execute Begin Phase, check log"
@@ -43,13 +44,14 @@ let main argv =
                     else
                         if SonarRunnerPhases.EndPhase(options) <> 0 then
                             ret <- 1
-                            printf "[CxxSonarQubeMsbuidRunner] Failed analyse project, check log"            
+                            printf "[CxxSonarQubeMsbuidRunner] Failed analyze project, check log"            
             with
             | ex ->
                 printf "Exception During Run: %s \r\n %s" ex.Message ex.StackTrace            
                 ret <- 1
 
             options.Clean()
+            options.DuplicateFalsePositives()
 
         with
         | ex ->
