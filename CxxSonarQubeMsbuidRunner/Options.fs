@@ -11,7 +11,9 @@ open System.Reflection
 open MsbuildTasksCommandExecutor
 open FSharp.Data
 open InstallationModule
-
+open VSSonarPlugins
+open VSSonarPlugins.Types
+open SonarRestService
 
 let (|Command|_|) (s:string) =
     let r = new Regex(@"^(?:-{1,2}|\/)(?<command>\w+)[=:]*(?<value>.*)$",RegexOptions.IgnoreCase)
@@ -165,6 +167,7 @@ let ShowHelp() =
         Console.WriteLine ("    /N|/n:<name : name>")
         Console.WriteLine ("    /K|/k:<key : key>")
         Console.WriteLine ("    /V|/v:<version : version>")
+        Console.WriteLine ("    /B|/b:<parent_branch  : in multi branch confiuration. Its parent branch>")
         Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1>")
@@ -188,6 +191,12 @@ type OptionsData(args : string []) =
             arguments.["r"] |> Seq.head
         else
             "1.1"
+
+    let parentBranch = 
+        if arguments.ContainsKey("b") then
+            arguments.["b"] |> Seq.head
+        else
+            ""
             
     let sqRunnerPathFromCommandLine = 
         if arguments.ContainsKey("q") then
@@ -455,6 +464,139 @@ type OptionsData(args : string []) =
                             args <- args + " /p:" + arg
 
             args.Trim()
+
+
+    member this.DuplicateFalsePositives() = 
+        if parentBranch <> "" && this.Branch <> "" then
+            let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
+                let pass =
+                    if this.SonarUserPassword = "" then
+                        "admin"
+                    else
+                        this.SonarUserPassword
+
+                let user =
+                    if this.SonarUserName = "" then
+                        "admin"
+                    else
+                        this.SonarUserName
+
+                let token = new VSSonarPlugins.Types.ConnectionConfiguration(address, user, pass, 4.5)
+                token.SonarVersion <- float (service.GetServerInfo(token))
+                token
+
+            let key = this.ProjectKey.Replace("/k:", "")
+            let rest = new SonarRestService(new JsonSonarConnector())        
+            let token = GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
+            let masterProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch).[0]
+            let branchProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
+
+            let filter = "?componentRoots=" + masterProject.Key + " &resolutions=FALSE-POSITIVE"
+            let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key)
+            let issuesByComp = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Issue>>()
+
+            for issue in falsePositivesInMaster do
+                if issuesByComp.ContainsKey(issue.Component) then
+                    let comp = issuesByComp.[issue.Component]
+                    comp.Add(issue)
+                else
+                    let newIssueList = System.Collections.Generic.List<Issue>()
+                    newIssueList.Add(issue)
+                    issuesByComp.Add(issue.Component, newIssueList)
+
+
+            for comp in issuesByComp do
+                let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(token, comp.Key.Replace(parentBranch, this.Branch))
+
+                for falsepositive in comp.Value do
+                    let isMatch = List.ofSeq issuesInComponentBranch |> Seq.tryFind (fun c -> c.Rule.Equals(falsepositive.Rule) && c.Line.Equals(falsepositive.Line) && not(c.Resolution.Equals(Resolution.FALSE_POSITIVE)))
+                    match isMatch with
+                    | Some c -> let issuelist = new System.Collections.Generic.List<Issue>()
+                                issuelist.Add(c)
+                                let errormsg = (rest :> ISonarRestService).MarkIssuesAsFalsePositive(token, issuelist, "")
+                                for msg in errormsg do
+                                    if msg.Value <> HttpStatusCode.OK then
+                                        printf "Failed mark issue as false positive %s %s\r\n" msg.Key (msg.Value.ToString())
+                                    else
+                                        printf "Issue %s marked as false positive\r\n" msg.Key
+                    | _ -> ()
+                
+            ()
+
+    member this.ProvisionProject() =
+        
+        if parentBranch <> "" && this.Branch <> "" then
+            let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
+                let pass =
+                    if this.SonarUserPassword = "" then
+                        "admin"
+                    else
+                        this.SonarUserPassword
+
+                let user =
+                    if this.SonarUserName = "" then
+                        "admin"
+                    else
+                        this.SonarUserName
+
+                let token = new VSSonarPlugins.Types.ConnectionConfiguration(address, user, pass, 4.5)
+                token.SonarVersion <- float (service.GetServerInfo(token))
+                token
+
+            let rest = new SonarRestService(new JsonSonarConnector())        
+            let token = GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
+
+            let key = this.ProjectKey.Replace("/k:", "")
+
+            let projectParent = 
+                try (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch) with | _ -> raise(new Exception("Cannot provision with current settings, unable to find main branch : " + parentBranch))
+                            
+            let branchProject = 
+                try (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
+                with
+                | _ ->
+                    // provision project
+                    let returndata = (rest :> ISonarRestService).ProvisionProject(token, key, this.ProjectName.Replace("/n:", ""), this.Branch)
+                    if returndata.Contains("Could not create Project, key already exists:") || returndata = "" then
+                        ()                   
+                    else                    
+                        raise(new Exception("Cannot provision current branch : " + returndata))
+                    new Resource(Key = key + ":" + this.Branch, BranchName = this.Branch)
+            
+            // duplicate main branch props to branch 
+            let propertiesofMainBranch = (rest :> ISonarRestService).GetProperties(token, projectParent.[0])
+            for prop in propertiesofMainBranch do
+                let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, prop.Value, branchProject)
+                if errormsg <> "" then
+                    printf "Failed to apply prop %s : %s\r\n" prop.Key errormsg
+
+            // clean any prop that is not in main
+            let propertiesofBranch = (rest :> ISonarRestService).GetProperties(token, branchProject)            
+            for prop in propertiesofBranch do
+                if propertiesofMainBranch.ContainsKey(prop.Key) && not(propertiesofMainBranch.[prop.Key].Equals(prop.Value)) then
+                    let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, propertiesofMainBranch.[prop.Key], branchProject)
+                    if errormsg <> "" then
+                        printf "Failed to apply updated value from main branch : prop %s : %s\r\n" prop.Key errormsg                        
+
+                if not(propertiesofMainBranch.ContainsKey(prop.Key)) then
+                    let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, "", branchProject)
+                    if errormsg <> "" then
+                        printf "Failed to clear prop %s : %s\r\n" prop.Key errormsg
+
+            // ensure same quality profiles are in used by both branches
+            let profiles = (rest :> ISonarRestService).GetQualityProfilesForProject(token, projectParent.[0])
+            let profilesBranch = (rest :> ISonarRestService).GetQualityProfilesForProject(token, branchProject)
+            let profilesByApi = (rest :> ISonarRestService).GetProfilesUsingRulesApp(token)
+
+
+            for profile in profiles do
+                let branchProfile = List.ofSeq profilesBranch |> Seq.find (fun c -> c.Language.Equals(profile.Language))
+
+                if branchProfile.Name <> profile.Name then
+                    let compProfile = List.ofSeq profilesByApi |> Seq.find (fun c -> c.Name.Equals(profile.Name) && c.Language.Equals(profile.Language))                
+                    let errormsg = (rest :> ISonarRestService).AssignProfileToProject(token, compProfile.Key, branchProject.Key)
+                    if errormsg <> "" then
+                        printf "Failed to apply profile %s : %s\r\n" profile.Name errormsg
 
 
     member this.Setup() =

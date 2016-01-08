@@ -103,7 +103,7 @@ let InstallMsbuildRunner(version : string) =
 
     if not(File.Exists(exePath)) then
         if Directory.Exists(Path.Combine(InstallationPathHome, version)) then
-            Directory.Delete(Path.Combine(InstallationPathHome, version))
+            Directory.Delete(Path.Combine(InstallationPathHome, version), true)
 
         printf "Download and install msbuild runner from github, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
         try
