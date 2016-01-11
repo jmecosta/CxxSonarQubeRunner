@@ -496,10 +496,10 @@ type OptionsData(args : string []) =
             let masterProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch).[0]
             let branchProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
 
-            let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE"
+            let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE,WONTFIX"
             let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key)
 
-            printf "[CxxSonarQubeMsbuidRunner] : Filter: %s  -> False Positives : %i \r\n" filter falsePositivesInMaster.Count
+            printf "[CxxSonarQubeMsbuidRunner] : Filter: %s  -> False Positives and Wont Fix : %i \r\n" filter falsePositivesInMaster.Count
 
             let issuesByComp = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Issue>>()
 
@@ -518,17 +518,22 @@ type OptionsData(args : string []) =
                 
                 printf "[CxxSonarQubeMsbuidRunner] : Try to apply false positives in : %s  -> Issues Found : %i \r\n" (comp.Key.Replace(parentBranch, this.Branch)) issuesInComponentBranch.Count
 
-                for falsepositive in comp.Value do
-                    let isMatch = List.ofSeq issuesInComponentBranch |> Seq.tryFind (fun c -> c.Rule.Equals(falsepositive.Rule) && c.Line.Equals(falsepositive.Line) && not(c.Resolution.Equals(Resolution.FALSE_POSITIVE)))
+                for issuetochange in comp.Value do
+                    let isMatch = List.ofSeq issuesInComponentBranch |> Seq.tryFind (fun c -> c.Rule.Equals(issuetochange.Rule) && c.Line.Equals(issuetochange.Line) && not(c.Resolution.Equals(Resolution.FALSE_POSITIVE)) && not(c.Resolution.Equals(Resolution.WONTFIX)))
                     match isMatch with
                     | Some c -> let issuelist = new System.Collections.Generic.List<Issue>()
                                 issuelist.Add(c)
-                                let errormsg = (rest :> ISonarRestService).MarkIssuesAsFalsePositive(token, issuelist, "")
+                                let errormsg = 
+                                    if issuetochange.Resolution.Equals(Resolution.WONTFIX) then
+                                        (rest :> ISonarRestService).MarkIssuesAsWontFix(token, issuelist, "")
+                                    else
+                                        (rest :> ISonarRestService).MarkIssuesAsFalsePositive(token, issuelist, "")
+
                                 for msg in errormsg do
                                     if msg.Value <> HttpStatusCode.OK then
-                                        printf "[CxxSonarQubeMsbuidRunner] Failed mark issue as false positive %s %s\r\n" msg.Key (msg.Value.ToString())
+                                        printf "[CxxSonarQubeMsbuidRunner] Failed mark issue as %s %s %s\r\n" (issuetochange.Resolution.ToString()) msg.Key (msg.Value.ToString())
                                     else
-                                        printf "[CxxSonarQubeMsbuidRunner] Issue %s marked as false positive\r\n" msg.Key
+                                        printf "[CxxSonarQubeMsbuidRunner] Issue %s marked as %s\r\n" msg.Key (issuetochange.Resolution.ToString())
                     | _ -> ()
                 
             ()

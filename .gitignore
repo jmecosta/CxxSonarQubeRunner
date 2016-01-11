@@ -110,3 +110,5 @@ UpgradeLog*.XML
 BuildDrop/
 ObjDrop/
 *.unittest.report.xml
+.sonarqube/*
+.cxxresults/*
