@@ -466,8 +466,13 @@ type OptionsData(args : string []) =
             args.Trim()
 
 
-    member this.DuplicateFalsePositives() = 
+    member this.DuplicateFalsePositives() =         
         if parentBranch <> "" && this.Branch <> "" then
+
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Duplicate False Positives ############") 
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+
             let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
                 let pass =
                     if this.SonarUserPassword = "" then
@@ -491,8 +496,11 @@ type OptionsData(args : string []) =
             let masterProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch).[0]
             let branchProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
 
-            let filter = "?componentRoots=" + masterProject.Key + " &resolutions=FALSE-POSITIVE"
+            let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE"
             let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key)
+
+            printf "[CxxSonarQubeMsbuidRunner] : Filter: %s  -> False Positives : %i \r\n" filter falsePositivesInMaster.Count
+
             let issuesByComp = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<Issue>>()
 
             for issue in falsePositivesInMaster do
@@ -507,6 +515,8 @@ type OptionsData(args : string []) =
 
             for comp in issuesByComp do
                 let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(token, comp.Key.Replace(parentBranch, this.Branch))
+                
+                printf "[CxxSonarQubeMsbuidRunner] : Try to apply false positives in : %s  -> Issues Found : %i \r\n" (comp.Key.Replace(parentBranch, this.Branch)) issuesInComponentBranch.Count
 
                 for falsepositive in comp.Value do
                     let isMatch = List.ofSeq issuesInComponentBranch |> Seq.tryFind (fun c -> c.Rule.Equals(falsepositive.Rule) && c.Line.Equals(falsepositive.Line) && not(c.Resolution.Equals(Resolution.FALSE_POSITIVE)))
@@ -516,9 +526,9 @@ type OptionsData(args : string []) =
                                 let errormsg = (rest :> ISonarRestService).MarkIssuesAsFalsePositive(token, issuelist, "")
                                 for msg in errormsg do
                                     if msg.Value <> HttpStatusCode.OK then
-                                        printf "Failed mark issue as false positive %s %s\r\n" msg.Key (msg.Value.ToString())
+                                        printf "[CxxSonarQubeMsbuidRunner] Failed mark issue as false positive %s %s\r\n" msg.Key (msg.Value.ToString())
                                     else
-                                        printf "Issue %s marked as false positive\r\n" msg.Key
+                                        printf "[CxxSonarQubeMsbuidRunner] Issue %s marked as false positive\r\n" msg.Key
                     | _ -> ()
                 
             ()
@@ -526,6 +536,11 @@ type OptionsData(args : string []) =
     member this.ProvisionProject() =
         
         if parentBranch <> "" && this.Branch <> "" then
+
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##########################################")
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Provision Project ############") 
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##########################################")
+
             let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
                 let pass =
                     if this.SonarUserPassword = "" then
@@ -561,33 +576,36 @@ type OptionsData(args : string []) =
                         ()                   
                     else                    
                         raise(new Exception("Cannot provision current branch : " + returndata))
+
+                    printf "[CxxSonarQubeMsbuidRunner] New project was provisioned correctly %s \r\n" key
                     new Resource(Key = key + ":" + this.Branch, BranchName = this.Branch)
             
-            // duplicate main branch props to branch 
+            // duplicate main branch props to branch             
             let propertiesofMainBranch = (rest :> ISonarRestService).GetProperties(token, projectParent.[0])
+            printf "[CxxSonarQubeMsbuidRunner] Duplicating %i properties from master\r\n" propertiesofMainBranch.Count
             for prop in propertiesofMainBranch do
                 let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, prop.Value, branchProject)
                 if errormsg <> "" then
-                    printf "Failed to apply prop %s : %s\r\n" prop.Key errormsg
+                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply prop %s : %s\r\n" prop.Key errormsg
 
+            
             // clean any prop that is not in main
             let propertiesofBranch = (rest :> ISonarRestService).GetProperties(token, branchProject)            
             for prop in propertiesofBranch do
                 if propertiesofMainBranch.ContainsKey(prop.Key) && not(propertiesofMainBranch.[prop.Key].Equals(prop.Value)) then
                     let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, propertiesofMainBranch.[prop.Key], branchProject)
                     if errormsg <> "" then
-                        printf "Failed to apply updated value from main branch : prop %s : %s\r\n" prop.Key errormsg                        
+                        printf "[CxxSonarQubeMsbuidRunner] Failed to apply updated value from main branch : prop %s : %s\r\n" prop.Key errormsg                        
 
                 if not(propertiesofMainBranch.ContainsKey(prop.Key)) then
                     let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, "", branchProject)
                     if errormsg <> "" then
-                        printf "Failed to clear prop %s : %s\r\n" prop.Key errormsg
+                        printf "[CxxSonarQubeMsbuidRunner] Failed to clear prop %s : %s\r\n" prop.Key errormsg
 
             // ensure same quality profiles are in used by both branches
             let profiles = (rest :> ISonarRestService).GetQualityProfilesForProject(token, projectParent.[0])
             let profilesBranch = (rest :> ISonarRestService).GetQualityProfilesForProject(token, branchProject)
             let profilesByApi = (rest :> ISonarRestService).GetProfilesUsingRulesApp(token)
-
 
             for profile in profiles do
                 let branchProfile = List.ofSeq profilesBranch |> Seq.find (fun c -> c.Language.Equals(profile.Language))
@@ -596,7 +614,11 @@ type OptionsData(args : string []) =
                     let compProfile = List.ofSeq profilesByApi |> Seq.find (fun c -> c.Name.Equals(profile.Name) && c.Language.Equals(profile.Language))                
                     let errormsg = (rest :> ISonarRestService).AssignProfileToProject(token, compProfile.Key, branchProject.Key)
                     if errormsg <> "" then
-                        printf "Failed to apply profile %s : %s\r\n" profile.Name errormsg
+                        printf "[CxxSonarQubeMsbuidRunner] Failed to apply profile %s : %s\r\n" profile.Name errormsg
+                    else
+                        printf "[CxxSonarQubeMsbuidRunner] Profile %s : applied correctly\r\n" profile.Name
+                else
+                    printf "[CxxSonarQubeMsbuidRunner] Profile %s : already correct\r\n" profile.Name
 
 
     member this.Setup() =

@@ -59,6 +59,8 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
         ()
 
 
+    printf "[CxxSonarQubeMsbuidRunner] Capture Environment For Build cmd.exe /c \"%s\" && set \r\n" (buildEnvironmentBatFile + " " + buildEnvironmentPlatform)
+    
     let startInfo = ProcessStartInfo(FileName = "cmd.exe",
                                         Arguments = "/c \"" + buildEnvironmentBatFile + "\" " + buildEnvironmentPlatform + " && set",
                                         WindowStyle = ProcessWindowStyle.Normal,
@@ -77,6 +79,7 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
         if line <> "" then
             let data = line.Split('=')
             if data.Length = 2 then
+                printf "[CxxSonarQubeMsbuidRunner] %s = %s \r\n" data.[0] data.[1]
                 map <- map.Add(data.[0], data.[1])
 
     map
@@ -149,7 +152,7 @@ let RunBuild(options : OptionsData) =
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -157,7 +160,7 @@ let RunBuild(options : OptionsData) =
     for pro in currentprocess do
         printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
 
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, "\"" + options.Solution + "\" /m /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog + " /noconsolelogger", environment, options.HomePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, "\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog + " /noconsolelogger", environment, options.HomePath)
 
     let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
