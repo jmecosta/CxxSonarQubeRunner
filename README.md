@@ -41,8 +41,10 @@ To use:
 To use:
 
 1. in command line set /d:sonar.branch=your_branch /b:main_branch
+
    . /d:sonar.branch is the regular prop for creating branch
    . /b: is the target branch or master branch
 
 This will create a new branch in sonar and copy all settings over to the feature bracnh from main. A small meta-runner exists here https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/releases for teamcity.
 
+If you want branches to be independent you can skip the /b parameter, after that it will not copy any settings to the new branch
