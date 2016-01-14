@@ -18,7 +18,6 @@
         <file src="..\BuildDrop\InspectorTask.dll" target="build" />
         <file src="IntelInspectorTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
-        <file src="..\BuildDrop\MsbuildTasksCommandExecutor.dll" target="build" />
-        <file src="..\BuildDrop\MsbuildTasksUtils.dll" target="build" />
+        <file src="..\BuildDrop\MsbuildUtilityHelpers.dll" target="build" />
     </files>
 </package>
