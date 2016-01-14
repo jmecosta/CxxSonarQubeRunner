@@ -4,7 +4,7 @@ open System.IO
 open System
 open System.Net
 open System.IO.Compression
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 open System.Diagnostics
 open Microsoft.Win32
 

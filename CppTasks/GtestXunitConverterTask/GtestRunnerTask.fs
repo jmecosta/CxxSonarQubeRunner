@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace MSBuild.Tekla.Tasks.GtestXunitConverter
+namespace GtestRunnerTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -17,8 +17,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MsbuildTasksUtils
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 
 type GtestXmlReport = XmlProvider<"""<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="43" failures="0" disabled="2" errors="0" timestamp="2013-06-29T09:23:30" time="0.348" name="AllTests">

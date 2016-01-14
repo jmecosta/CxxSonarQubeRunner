@@ -1,7 +1,7 @@
-﻿namespace MsbuildTaskUtils.Test
+﻿namespace MsbuildUtilityHelpers.Test
 
 open NUnit.Framework
-open MsbuildTasksUtils
+open MsbuildUtilityHelpers
 open System.IO
 
 type VSSolutionUtilsTest() = 

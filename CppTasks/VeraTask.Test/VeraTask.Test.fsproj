@@ -58,6 +58,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">
+      <Name>MsbuildUtilityHelpers</Name>
+      <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\VeraTask\VeraTask.fsproj">
       <Name>VeraTask</Name>
       <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
@@ -92,16 +97,6 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Reflection.Context" />
     <Reference Include="System.Xml.Linq" />
-    <ProjectReference Include="..\..\Common\CommandExecutor\CommandExecutor.fsproj">
-      <Name>CommandExecutor</Name>
-      <Project>{9b154406-0af6-45a9-bf32-9c5c23822b6b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildTaskUtils.fsproj">
-      <Name>MsbuildTaskUtils</Name>
-      <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets" Condition="Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -6,7 +6,7 @@ open System.Net
 open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Reflection
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 open FSharp.Data
 
 open Options

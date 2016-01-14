@@ -86,13 +86,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
-    <ProjectReference Include="..\..\Common\CommandExecutor\CommandExecutor.fsproj">
-      <Name>CommandExecutor</Name>
-      <Project>{9b154406-0af6-45a9-bf32-9c5c23822b6b}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildTaskUtils.fsproj">
-      <Name>MsbuildTaskUtils</Name>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">
+      <Name>MsbuildUtilityHelpers</Name>
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>

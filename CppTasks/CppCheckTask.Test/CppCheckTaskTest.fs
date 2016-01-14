@@ -9,8 +9,8 @@ open Microsoft.Build.Utilities
 open NUnit.Framework
 open Foq
 
-open MsbuildTasksCommandExecutor
-open MSBuild.Tekla.Tasks.CppCheck
+open MsbuildUtilityHelpers
+open CppCheckTask
 
 type CppCheckTaskTest() = 
     let tempFile = Path.Combine(Directory.GetParent(Path.GetTempFileName()).ToString(), "MSBuildTaskTests")

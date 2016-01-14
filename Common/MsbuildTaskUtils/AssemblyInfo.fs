@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public License along with this program; if not, write to the Free
 // Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 // --------------------------------------------------------------------------------------------------------------------
-namespace MsbuildTasksUtils
+namespace MsbuildUtilityHelpers
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -20,11 +20,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("MsbuildTasksUtils")>]
+[<assembly: AssemblyTitle("MsbuildUtilityHelpers")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("jmecsoftware.com")>]
-[<assembly: AssemblyProduct("MsbuildTasksUtils")>]
+[<assembly: AssemblyProduct("MsbuildUtilityHelpers")>]
 [<assembly: AssemblyCopyright("Copyright © 2016 jmecsoftware.com")>]
 [<assembly: AssemblyTrademark("")>]
 

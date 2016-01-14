@@ -1,4 +1,4 @@
-﻿namespace MsbuildTasksUtils
+﻿namespace MsbuildUtilityHelpers
 
 open Microsoft.Build.Construction
 open System.Resources

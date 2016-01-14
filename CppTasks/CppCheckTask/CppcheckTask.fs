@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace MSBuild.Tekla.Tasks.CppCheck
+namespace CppCheckTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -16,8 +16,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MsbuildTasksUtils
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 
 type CppCheckError = XmlProvider<"""<error file="E:\\TSSRC\\Common.cpp" line="4" id="missingInclude" severity="style" msg="Not Found" />""">
 

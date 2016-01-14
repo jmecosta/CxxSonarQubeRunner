@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace MSBuild.Tekla.Tasks.Rats
+namespace RatsTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -17,8 +17,7 @@ open Microsoft.Build.Framework
 
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MsbuildTasksUtils
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 
 type RatsError = XmlProvider<"""<?xml version="1.0"?><rats_output>
 <stats>

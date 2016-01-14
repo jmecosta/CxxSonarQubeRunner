@@ -6,9 +6,9 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open MSBuild.Tekla.Tasks.Vera
+open VeraTask
 open Foq
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 open System.IO
 
 type VeraTest() =

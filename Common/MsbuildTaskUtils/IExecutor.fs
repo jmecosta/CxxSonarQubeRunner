@@ -1,4 +1,4 @@
-﻿namespace MsbuildTasksCommandExecutor
+﻿namespace MsbuildUtilityHelpers
 
 open System
 open System.IO
@@ -119,8 +119,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
             this.output <- this.output @ [e.Data]
             System.Diagnostics.Debug.WriteLine(e.Data)
         ()
-
-
 
         member this.GetParentProcess(Id : int32) = 
             let mutable parentPid = 0

@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace MSBuild.Tekla.Tasks.CppLint
+namespace CppLintTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -16,8 +16,7 @@ open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
-open MsbuildTasksUtils
-open MsbuildTasksCommandExecutor
+open MsbuildUtilityHelpers
 
 type CppLintErrorX(filename:string, line:string, severity:string, message:string, id:string) =
     member val filename = filename

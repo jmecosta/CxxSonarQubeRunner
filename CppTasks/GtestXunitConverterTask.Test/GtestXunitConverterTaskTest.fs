@@ -6,7 +6,7 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open MSBuild.Tekla.Tasks.GtestXunitConverter
+open GtestRunnerTask
 open Foq
 
 type GtestXuniConverterPathTest() =

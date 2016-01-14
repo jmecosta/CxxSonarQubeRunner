@@ -1,4 +1,4 @@
-﻿namespace MsbuildTasksUtils
+﻿namespace MsbuildUtilityHelpers
 
 open FSharp.Data
 open System.Xml.Linq

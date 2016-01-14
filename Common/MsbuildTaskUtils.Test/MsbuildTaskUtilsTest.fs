@@ -1,9 +1,9 @@
-﻿namespace MsbuildTaskUtils.Test
+﻿namespace MsbuildUtilityHelpers.Test
 
 open NUnit.Framework
-open MsbuildTasksUtils
+open MsbuildUtilityHelpers
 
-type MsbuildTaskTest() = 
+type MsbuildUtilityHelpersTest() = 
 
     [<Test>]
     member test.``Ask Non Existent Program Should Return False`` () = 
