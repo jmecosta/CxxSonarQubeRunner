@@ -14,7 +14,7 @@
         <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
         <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-other</CppLintOutputPath>
         <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">true</CppLintTaskEnabled>
+        <EnableCppLintTask         Condition="'$(EnableCppLintTask)' == ''">true</EnableCppLintTask>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -24,7 +24,7 @@
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
         <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-vera++</VeraOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <VeraTaskEnabled        Condition="'$(VeraTaskEnabled)' == ''">true</VeraTaskEnabled>
+        <EnableVeraTask        Condition="'$(EnableVeraTask)' == ''">true</EnableVeraTask>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -34,7 +34,7 @@
         <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
         <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-rats</RatsOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <RatsTaskEnabled        Condition="'$(RatsTaskEnabled)' == ''">true</RatsTaskEnabled>
+        <EnableRatsTask        Condition="'$(EnableRatsTask)' == ''">true</EnableRatsTask>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -44,10 +44,10 @@
         <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
         <CppCheckOutputType         Condition="'$(CppCheckOutputType)' == ''">xml-version-1</CppCheckOutputType>
         <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-cppcheck</CppCheckOutputPath>
-        <CppCheckTaskEnabled        Condition="'$(CppCheckTaskEnabled)' == ''">true</CppCheckTaskEnabled>
+        <EnableCppCheckTask        Condition="'$(EnableCppCheckTask)' == ''">true</EnableCppCheckTask>
     </PropertyGroup>
     
-    <Target Name="Cpplint" Condition="'$(CppLintTaskEnabled)' == 'true'">
+    <Target Name="Cpplint" Condition="'$(EnableCppLintTask)' == 'true'">
         <Message Text="Cpplint = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <CpplintTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       PythonPath="$(PythonPath)"
@@ -60,7 +60,7 @@
                       PathReplacementStrings="$(PathReplacementStrings)"
                       />
     </Target>
-    <Target Name="Vera" Condition="'$(VeraTaskEnabled)' == 'true'">
+    <Target Name="Vera" Condition="'$(EnableVeraTask)' == 'true'">
         <Message Text="Vera = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <VeraTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       VeraPath="$(VeraPath)"
@@ -71,7 +71,7 @@
                       PathReplacementStrings="$(PathReplacementStrings)"
                       />
     </Target>
-    <Target Name="Rats" Condition="'$(RatsTaskEnabled)' == 'true'">
+    <Target Name="Rats" Condition="'$(EnableRatsTask)' == 'true'">
         <Message Text="Rats = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <RatsTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       RatsPath="$(RatsPath)"
@@ -82,7 +82,7 @@
                       PathReplacementStrings="$(PathReplacementStrings)"
                       />
     </Target>
-    <Target Name="CppCheck" Condition="'$(CppCheckTaskEnabled)' == 'true'">
+    <Target Name="CppCheck" Condition="'$(EnableCppCheckTask)' == 'true'">
         <Message Text="CppCheck = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <CppCheckTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       CppCheckPath="$(CppCheckPath)"
