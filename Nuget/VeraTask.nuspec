@@ -15,7 +15,7 @@
         <tags>.Net Tekla</tags>
     </metadata>
     <files>
-        <file src="..\BuildDrop\VeraTask.dll" target="build" />
+        <file src="..\BuildDrop\VeraMSBuildTask.dll" target="build" />
         <file src="VeraTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
         <file src="..\BuildDrop\MsbuildUtilityHelpers.dll" target="build" />
