@@ -77,6 +77,11 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CppTasks\VeraTask\VeraMSBuildTask.fsproj">
+      <Name>VeraMSBuildTask</Name>
+      <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="FSharp.Data">
       <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\FSharp.Data.dll</HintPath>
       <Private>True</Private>
@@ -113,34 +118,29 @@
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppTasks\CppCheckTask\CppCheckTask.fsproj">
-      <Name>CppCheckTask</Name>
+    <ProjectReference Include="..\CppTasks\CppCheckTask\CppCheckMSBuildTask.fsproj">
+      <Name>CppCheckMSBuildTask</Name>
       <Project>{03e5f1fe-0719-483b-b75c-a6acc8b5e39f}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppTasks\CppLintTask\CppLintTask.fsproj">
-      <Name>CppLintTask</Name>
+    <ProjectReference Include="..\CppTasks\CppLintTask\CppLintMSBuildTask.fsproj">
+      <Name>CppLintMSBuildTask</Name>
       <Project>{f1d22b38-182b-4003-8865-ede0e918fa01}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppTasks\GtestXunitConverterTask\GtestRunnerTask.fsproj">
-      <Name>GtestRunnerTask</Name>
+    <ProjectReference Include="..\CppTasks\GtestXunitConverterTask\GtestRunnerMSBuildTask.fsproj">
+      <Name>GtestRunnerMSBuildTask</Name>
       <Project>{72a6efc3-13ff-4653-918f-5d7d36b94426}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppTasks\InspectorTask\InspectorTask.fsproj">
-      <Name>InspectorTask</Name>
+    <ProjectReference Include="..\CppTasks\InspectorTask\InspectorMSBuildTask.fsproj">
+      <Name>InspectorMSBuildTask</Name>
       <Project>{e492e92a-9707-4283-95b6-0d0e871cc02c}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppTasks\RatsTask\RatsTask.fsproj">
-      <Name>RatsTask</Name>
+    <ProjectReference Include="..\CppTasks\RatsTask\RatsMSBuildTask.fsproj">
+      <Name>RatsMSBuildTask</Name>
       <Project>{d95f41d9-def8-4bd4-aceb-c1107b004da6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\CppTasks\VeraTask\VeraTask.fsproj">
-      <Name>VeraTask</Name>
-      <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">

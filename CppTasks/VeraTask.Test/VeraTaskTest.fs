@@ -6,7 +6,7 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open VeraTask
+open VeraMSBuildTask
 open Foq
 open MsbuildUtilityHelpers
 open System.IO
@@ -30,7 +30,7 @@ type VeraTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = VeraTask(mockExecutor)
+        let task = VeraMSBuildTask(mockExecutor)
         task.VeraOutputType <- "vs7"
         Assert.That((task.ExecuteVera "foo bar"), Is.True)
 
@@ -48,7 +48,7 @@ type VeraTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = VeraTask(mockExecutor)
+        let task = VeraMSBuildTask(mockExecutor)
         task.VeraOutputType <- "xml"
         task.VeraOutputPath <- executingPath
         task.SolutionPathToAnalyse <- "E:\\SRC\\Project\\test.sln"

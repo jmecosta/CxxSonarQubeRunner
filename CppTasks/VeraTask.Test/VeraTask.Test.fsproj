@@ -63,8 +63,8 @@
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\VeraTask\VeraTask.fsproj">
-      <Name>VeraTask</Name>
+    <ProjectReference Include="..\VeraTask\VeraMSBuildTask.fsproj">
+      <Name>VeraMSBuildTask</Name>
       <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
       <Private>True</Private>
     </ProjectReference>

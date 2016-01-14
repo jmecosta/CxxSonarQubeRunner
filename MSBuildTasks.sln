@@ -19,29 +19,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{40BC8178
 		Nuget\VeraTask.targets = Nuget\VeraTask.targets
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppCheckTask", "CppTasks\CppCheckTask\CppCheckTask.fsproj", "{03E5F1FE-0719-483B-B75C-A6ACC8B5E39F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppCheckMSBuildTask", "CppTasks\CppCheckTask\CppCheckMSBuildTask.fsproj", "{03E5F1FE-0719-483B-B75C-A6ACC8B5E39F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppCheckTask.Test", "CppTasks\CppCheckTask.Test\CppCheckTask.Test.fsproj", "{0BBFE770-E753-42EE-8FA1-821CEA913296}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppCheckMSBuildTask.Test", "CppTasks\CppCheckTask.Test\CppCheckMSBuildTask.Test.fsproj", "{0BBFE770-E753-42EE-8FA1-821CEA913296}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "InspectorTask", "CppTasks\InspectorTask\InspectorTask.fsproj", "{E492E92A-9707-4283-95B6-0D0E871CC02C}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "InspectorMSBuildTask", "CppTasks\InspectorTask\InspectorMSBuildTask.fsproj", "{E492E92A-9707-4283-95B6-0D0E871CC02C}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MsbuildUtilityHelpers", "Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj", "{8E7D4AC9-AB34-4F3A-BFC6-7BC7B9AAC9AE}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MsbuildUtilityHelpers.Test", "Common\MsbuildTaskUtils.Test\MsbuildUtilityHelpers.Test.fsproj", "{705621E7-A1AE-478C-B781-FA8C5F474B05}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RatsTask", "CppTasks\RatsTask\RatsTask.fsproj", "{D95F41D9-DEF8-4BD4-ACEB-C1107B004DA6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RatsMSBuildTask", "CppTasks\RatsTask\RatsMSBuildTask.fsproj", "{D95F41D9-DEF8-4BD4-ACEB-C1107B004DA6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RatsTask.Test", "CppTasks\RatsTask.Test\RatsTask.Test.fsproj", "{DE26488A-A102-42B5-8DF6-63AF374926C5}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VeraTask", "CppTasks\VeraTask\VeraTask.fsproj", "{C20A4652-4E06-413A-859C-D2BB975EC644}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VeraMSBuildTask", "CppTasks\VeraTask\VeraMSBuildTask.fsproj", "{C20A4652-4E06-413A-859C-D2BB975EC644}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VeraTask.Test", "CppTasks\VeraTask.Test\VeraTask.Test.fsproj", "{9C415DD8-24CF-413E-A78C-B39125E38B65}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppLintTask", "CppTasks\CppLintTask\CppLintTask.fsproj", "{F1D22B38-182B-4003-8865-EDE0E918FA01}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppLintMSBuildTask", "CppTasks\CppLintTask\CppLintMSBuildTask.fsproj", "{F1D22B38-182B-4003-8865-EDE0E918FA01}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppLintTask.Test", "CppTasks\CppLintTask.Test\CppLintTask.Test.fsproj", "{B7D2CBB7-9021-4A81-8478-B4CA00BF7B68}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CppLintMSBuildTask.Test", "CppTasks\CppLintTask.Test\CppLintMSBuildTask.Test.fsproj", "{B7D2CBB7-9021-4A81-8478-B4CA00BF7B68}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GtestRunnerTask", "CppTasks\GtestXunitConverterTask\GtestRunnerTask.fsproj", "{72A6EFC3-13FF-4653-918F-5D7D36B94426}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GtestRunnerMSBuildTask", "CppTasks\GtestXunitConverterTask\GtestRunnerMSBuildTask.fsproj", "{72A6EFC3-13FF-4653-918F-5D7D36B94426}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "GtestXunitConverterTask.Test", "CppTasks\GtestXunitConverterTask.Test\GtestXunitConverterTask.Test.fsproj", "{E4587340-6DFF-4419-8C0F-712CCD0C94A4}"
 EndProject

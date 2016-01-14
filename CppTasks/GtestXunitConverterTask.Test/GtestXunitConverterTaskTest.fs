@@ -6,7 +6,7 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open GtestRunnerTask
+open GtestRunnerMSBuildTask
 open Foq
 
 type GtestXuniConverterPathTest() =
@@ -15,7 +15,7 @@ type GtestXuniConverterPathTest() =
 
     [<Test>]
     member test.``Should Parse Correctly Xunit Report with *.xml`` () = 
-        let task = GtestRunnerTask(null)
+        let task = GtestRunnerMSBuildTask(null)
         task.SolutionPathToAnalyse <- Path.Combine(executingPath, "testdata", "solutionsfile.sln")
         task.TestSuffix <- "_test.cpp;_tests.cpp"
         task.GtestXMLReportFile <- Path.Combine(executingPath,  "testdata", "*.xml")

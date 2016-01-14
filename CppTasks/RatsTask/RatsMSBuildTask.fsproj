@@ -6,15 +6,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{b7d2cbb7-9021-4a81-8478-b4ca00bf7b68}</ProjectGuid>
+    <ProjectGuid>d95f41d9-def8-4bd4-aceb-c1107b004da6</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>CppLintTask.Test</RootNamespace>
-    <AssemblyName>CppLintTask.Test</AssemblyName>
+    <RootNamespace>RatsTask</RootNamespace>
+    <AssemblyName>RatsMSBuildTask</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <Name>CppLintTask.Test</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <Name>RatsMSBuildTask</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <NuGetPackageImportStamp>6ddbd5e1</NuGetPackageImportStamp>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -22,19 +21,27 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(TestOutputPath)</OutputPath>
+    <OutputPath>$(OutPutPathTasks)</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\CppLintTask.Test.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>../MSBuild/SonarTask.msbuild /t:CheckRatsAnalysisXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(TestOutputPath)</OutputPath>
+    <OutputPath>$(OutPutPathTasks)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\CppLintTask.Test.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>..\MSBuild\RatsTask.msbuild /t:CheckRatsCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -53,59 +60,39 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="CppLintTaskTest.fs" />
+    <Compile Include="RatsTask.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Foq">
-      <HintPath>..\..\Nuget\Foq.dll</HintPath>
+    <Reference Include="FSharp.Collections.ParallelSeq">
+      <HintPath>..\..\Nuget\FSharp.Collections.ParallelSeq.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Data">
+      <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Data">
-      <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.Data.TypeProviders" />
-    <Reference Include="Microsoft.Build" />
-    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.3.0.0-rc\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Reflection.Context" />
     <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">
       <Name>MsbuildUtilityHelpers</Name>
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\CppLintTask\CppLintTask.fsproj">
-      <Name>CppLintTask</Name>
-      <Project>{f1d22b38-182b-4003-8865-ede0e918fa01}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
-  <Import Project="..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets" Condition="Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

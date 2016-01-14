@@ -6,12 +6,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{72a6efc3-13ff-4653-918f-5d7d36b94426}</ProjectGuid>
+    <ProjectGuid>{f1d22b38-182b-4003-8865-ede0e918fa01}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>GtestXunitConverterTask</RootNamespace>
-    <AssemblyName>GtestRunnerTask</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>GtestRunnerTask</Name>
+    <RootNamespace>CppLintTask</RootNamespace>
+    <AssemblyName>CppLintMSBuildTask</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <Name>CppLintMSBuildTask</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
@@ -27,7 +27,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <StartAction>Program</StartAction>
-    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>../MSBuild/CppLintTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -39,6 +40,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <StartAction>Program</StartAction>
+    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
+    <StartArguments>..\MSBuild\CppLintTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -57,12 +60,19 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="GtestRunnerTask.fs" />
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="CppLintTask.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Collections.ParallelSeq">
+      <HintPath>..\..\Nuget\FSharp.Collections.ParallelSeq.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>True</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
       <Private>True</Private>
@@ -75,12 +85,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <SpecificVersion>True</SpecificVersion>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">

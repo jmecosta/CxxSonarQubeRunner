@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace GtestRunnerTask
+namespace GtestRunnerMSBuildTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -87,11 +87,11 @@ Incorrect coordsys after SetUIInputItem]]></failure>
   </testsuite>
   </testsuites>""">
 
-type GtestRunnerTask(logger : TaskLoggingHelper) as this =
+type GtestRunnerMSBuildTask(logger : TaskLoggingHelper) as this =
     inherit Task()
     let logger : TaskLoggingHelper = if logger = null then new TaskLoggingHelper(this) else logger
     let executor : CommandExecutor = new CommandExecutor(logger, int64(3500000))
-    new() = GtestRunnerTask(null)
+    new() = GtestRunnerMSBuildTask(null)
     member val CurrentSeed : string = "" with get, set
     member val PreviousMessage : string = "" with get, set
     member val Actual : string = "" with get, set    

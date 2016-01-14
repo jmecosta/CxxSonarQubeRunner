@@ -6,7 +6,7 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open RatsTask
+open RatsMSBuildTask
 open Foq
 open MsbuildUtilityHelpers
 
@@ -30,7 +30,7 @@ type RatsTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = RatsTask(mockExecutor)
+        let task = RatsMSBuildTask(mockExecutor)
         task.RatsOutputType <- "vs7"
 
         Assert.That((task.ExecuteRats "foo bar"), Is.True)
@@ -44,7 +44,7 @@ type RatsTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = RatsTask(mockExecutor)
+        let task = RatsMSBuildTask(mockExecutor)
         task.RatsOutputType <- "xml"
         task.RatsOutputPath <- executingPath
 

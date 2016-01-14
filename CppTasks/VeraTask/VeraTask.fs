@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace VeraTask
+namespace VeraMSBuildTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -26,13 +26,13 @@ type VeraErrorX(filename:string, line:string, severity:string, message:string, s
     member val message = message
     member val source = source
 
-type VeraTask(executorIn : ICommandExecutor) as this =
+type VeraMSBuildTask(executorIn : ICommandExecutor) as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _VeraExec = "Vera.exe"
     let syncLock = new System.Object()
 
-    new() = VeraTask(null)
+    new() = VeraMSBuildTask(null)
 
     member val totalViolations : int = 0 with get, set
     member val buildok : bool = true with get, set

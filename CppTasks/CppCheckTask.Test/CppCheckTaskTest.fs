@@ -1,4 +1,4 @@
-﻿module CppCheckTaskTest
+﻿module CppCheckMSBuildTaskTest
 
 open System.IO
 open Microsoft.Build
@@ -10,9 +10,9 @@ open NUnit.Framework
 open Foq
 
 open MsbuildUtilityHelpers
-open CppCheckTask
+open CppCheckMSBuildTask
 
-type CppCheckTaskTest() = 
+type CppCheckMSBuildTaskTest() = 
     let tempFile = Path.Combine(Directory.GetParent(Path.GetTempFileName()).ToString(), "MSBuildTaskTests")
     let mockLogger = Mock<TaskLoggingHelper>().Create()
 
@@ -23,7 +23,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Run return 0 when run ok with vs with no lines`` () = 
-        let task = CppCheckTask()
+        let task = CppCheckMSBuildTask()
         task.CppCheckOutputPath <- tempFile
         task.CppCheckOutputType <- "vs7"
         let mockExecutor =
@@ -37,7 +37,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Run return 0 when run ok with vs`` () = 
-        let task = CppCheckTask()
+        let task = CppCheckMSBuildTask()
         task.CppCheckOutputPath <- tempFile
         task.CppCheckOutputType <- "vs7"
         let mockExecutor =
@@ -51,7 +51,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Runs Ok with Xml data version 1`` () = 
-        let task = CppCheckTask()
+        let task = CppCheckMSBuildTask()
         task.CppCheckOutputType <- "xml-version-1"
         task.CppCheckOutputPath <- tempFile
         task.SolutionPathToAnalyse <- Directory.GetParent(tempFile).ToString()
@@ -66,7 +66,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Runs Ok with Xml data version 2`` () = 
-        let task = CppCheckTask()
+        let task = CppCheckMSBuildTask()
         task.CppCheckOutputType <- "xml-version-2"
         task.CppCheckOutputPath <- tempFile
         task.SolutionPathToAnalyse <- Directory.GetParent(tempFile).ToString()
@@ -81,7 +81,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Run CppCheckCommand No violations Reported`` () = 
-        let task = CppCheckTask()
+        let task = CppCheckMSBuildTask()
         task.CppCheckDefines <- "CppCheck"
         task.CppCheckOutputPath <- tempFile
 
@@ -96,7 +96,7 @@ type CppCheckTaskTest() =
 
     [<Test>]
     member test.``Non Existent CppCheck Should Report Error to log`` () = 
-        let Task = new CppCheckTask()
+        let Task = new CppCheckMSBuildTask()
         Task.CppCheckPath <- "Non_Exixtent_CppCheckPath.exe"
         Assert.Throws<System.InvalidOperationException>
                 (fun () ->Task.verifyCppCheckExecProperties(mockLogger).Force() |> ignore)

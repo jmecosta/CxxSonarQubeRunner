@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace RatsTask
+namespace RatsMSBuildTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -64,13 +64,13 @@ entropy should be used.
 </timing>
 </rats_output>""">
 
-type RatsTask(executorIn : ICommandExecutor) as this =
+type RatsMSBuildTask(executorIn : ICommandExecutor) as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let _ratsExec = "rats.exe"
     let syncLock = new System.Object()
 
-    new() = RatsTask(null)
+    new() = RatsMSBuildTask(null)
 
     member val buildok : bool = true with get, set
     member val counter : int = 0 with get, set

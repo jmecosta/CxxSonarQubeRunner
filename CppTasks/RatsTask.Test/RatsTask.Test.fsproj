@@ -93,8 +93,8 @@
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\RatsTask\RatsTask.fsproj">
-      <Name>RatsTask</Name>
+    <ProjectReference Include="..\RatsTask\RatsMSBuildTask.fsproj">
+      <Name>RatsMSBuildTask</Name>
       <Project>{d95f41d9-def8-4bd4-aceb-c1107b004da6}</Project>
       <Private>True</Private>
     </ProjectReference>

@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace CppCheckTask
+namespace CppCheckMSBuildTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -20,7 +20,7 @@ open MsbuildUtilityHelpers
 
 type CppCheckError = XmlProvider<"""<error file="E:\\TSSRC\\Common.cpp" line="4" id="missingInclude" severity="style" msg="Not Found" />""">
 
-type CppCheckTask() as this =
+type CppCheckMSBuildTask() as this =
     inherit Task()
     let logger : TaskLoggingHelper = new TaskLoggingHelper(this)
     let executor : CommandExecutor = new CommandExecutor(logger, int64(1500000))

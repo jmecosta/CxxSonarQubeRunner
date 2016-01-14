@@ -6,14 +6,15 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>d95f41d9-def8-4bd4-aceb-c1107b004da6</ProjectGuid>
+    <ProjectGuid>0bbfe770-e753-42ee-8fa1-821cea913296</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>RatsTask</RootNamespace>
-    <AssemblyName>RatsTask</AssemblyName>
+    <RootNamespace>CppCheckTask.Test</RootNamespace>
+    <AssemblyName>CppCheckTask.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <Name>RatsTask</Name>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <Name>CppCheckMSBuildTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <NuGetPackageImportStamp>b4a682d0</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -21,27 +22,20 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(OutPutPathTasks)</OutputPath>
+    <OutputPath>$(TestOutputPath)</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
-    <StartArguments>../MSBuild/SonarTask.msbuild /t:CheckRatsAnalysisXML</StartArguments>
+    <DocumentationFile>bin\Debug\CppCheckTask.Test.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(OutPutPathTasks)</OutputPath>
+    <OutputPath>$(TestOutputPath)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
-    <StartArguments>..\MSBuild\RatsTask.msbuild /t:CheckRatsCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -60,27 +54,31 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="RatsTask.fs" />
+    <Compile Include="CppCheckTaskTest.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Collections.ParallelSeq">
-      <HintPath>..\..\Nuget\FSharp.Collections.ParallelSeq.dll</HintPath>
+    <Reference Include="Foq">
+      <HintPath>..\..\Nuget\Foq.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="mscorlib" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.3.0.0-rc\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.Build.Tasks.v4.0" />
-    <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -92,7 +90,19 @@
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\CppCheckTask\CppCheckMSBuildTask.fsproj">
+      <Name>CppCheckMSBuildTask</Name>
+      <Project>{03e5f1fe-0719-483b-b75c-a6acc8b5e39f}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
+  <Import Project="..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets" Condition="Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

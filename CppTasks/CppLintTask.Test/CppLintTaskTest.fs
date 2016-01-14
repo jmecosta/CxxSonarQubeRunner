@@ -1,4 +1,4 @@
-﻿namespace CppLintTask.Test
+﻿namespace CppLintMSBuildTask.Test
 
 open System.IO
 open NUnit.Framework
@@ -6,7 +6,7 @@ open Microsoft.Build
 open Microsoft.Build.Framework
 open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open CppLintTask
+open CppLintMSBuildTask
 open Foq
 open MsbuildUtilityHelpers
 
@@ -29,7 +29,7 @@ type CppLintTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = CppLintTask(mockExecutor)
+        let task = CppLintMSBuildTask(mockExecutor)
         task.CppLintOutputType <- "vs7"
 
         Assert.That((task.ExecuteCppLint "foo bar"), Is.True)
@@ -46,7 +46,7 @@ type CppLintTest() =
                 .Setup(fun x -> <@ x.GetErrorCode @>).Returns(ReturnCode.Ok)
                 .Create()
 
-        let task = CppLintTask(mockExecutor)
+        let task = CppLintMSBuildTask(mockExecutor)
 
         task.CppLintOutputPath <- executingPath
         task.CppLintOutputType <- "xml"

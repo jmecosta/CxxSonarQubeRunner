@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="AnalyseWithCpplint" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask TaskName="CpplintTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintTask.dll"/>
+    <UsingTask TaskName="CpplintMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintMSBuildTask.dll"/>
 
     <PropertyGroup>
         <PythonPath                   Condition="'$(PythonPath)' == ''">C:\Python27\python.exe</PythonPath>
@@ -10,12 +10,12 @@
         <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
         <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</CppLintOutputPath>
         <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">false</CppLintTaskEnabled>
+        <CpplintMSBuildTaskEnabled         Condition="'$(CpplintMSBuildTaskEnabled)' == ''">false</CpplintMSBuildTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithCpplint" AfterTargets="AfterBuild" Condition="'$(CppLintTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithCpplint" AfterTargets="AfterBuild" Condition="'$(CpplintMSBuildTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
-        <CpplintTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+        <CpplintMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       ProjectNameToAnalyse="$(MSBuildProjectName)"
                       PythonPath="$(PythonPath)"
                       CppLintPath="$(CppLintPath)"

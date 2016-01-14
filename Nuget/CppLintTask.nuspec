@@ -16,7 +16,7 @@
     </metadata>
     <files>
         <file src="CppLint\*.*" target="build\cpplint" />
-        <file src="..\BuildDrop\CppLintTask.dll" target="build" />
+        <file src="..\BuildDrop\CppLintMSBuildTask.dll" target="build" />
         <file src="CppLintTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
         <file src="..\BuildDrop\MsbuildUtilityHelpers.dll" target="build" />

@@ -8,9 +8,9 @@
     <ProjectGuid>{e492e92a-9707-4283-95b6-0d0e871cc02c}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>InspectorTask</RootNamespace>
-    <AssemblyName>InspectorTask</AssemblyName>
+    <AssemblyName>InspectorMSBuildTask</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>InspectorTask</Name>
+    <Name>InspectorMSBuildTask</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

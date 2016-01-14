@@ -1,6 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.net
 
-namespace InspectorTask
+namespace InspectorMSBuildTask
 #if INTERACTIVE
 #r "Microsoft.Build.Framework.dll";;
 #r "Microsoft.Build.Utilities.v4.0.dll";;
@@ -36,7 +36,7 @@ type GenericTaskExecuter() =
         proc.WaitForExit()
         proc
 
-type IntelInspectorTask() as this =
+type InspectorMSBuildTask() as this =
     inherit Task()
     (* Hard-coded settings *)
     let _inspectorExecutable = "inspxe-cl.exe"

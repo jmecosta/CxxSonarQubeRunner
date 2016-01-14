@@ -1,48 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="..\..\configuration.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{03e5f1fe-0719-483b-b75c-a6acc8b5e39f}</ProjectGuid>
+    <ProjectGuid>{b7d2cbb7-9021-4a81-8478-b4ca00bf7b68}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>CppCheckTask</RootNamespace>
-    <AssemblyName>CppCheckTask</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>CppCheckTask</Name>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+    <RootNamespace>CppLintTask.Test</RootNamespace>
+    <AssemblyName>CppLintTask.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <Name>CppLintMSBuildTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <NuGetPackageImportStamp>6ddbd5e1</NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>$(OutPutPathTasks)</OutputPath>
+    <OutputPath>$(TestOutputPath)</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe</StartProgram>
-    <StartArguments>../MSBuild/SonarTask.msbuild /t:CppCheckAnalysisXML</StartArguments>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
+    <DocumentationFile>bin\Debug\CppLintTask.Test.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>$(OutPutPathTasks)</OutputPath>
+    <OutputPath>$(TestOutputPath)</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
+    <DocumentationFile>bin\Release\CppLintTask.Test.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -57,14 +52,21 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="CppcheckTask.fs" />
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="CppLintTaskTest.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CppLintTask\CppLintMSBuildTask.fsproj">
+      <Name>CppLintMSBuildTask</Name>
+      <Project>{f1d22b38-182b-4003-8865-ede0e918fa01}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+    <Reference Include="Foq">
+      <HintPath>..\..\Nuget\Foq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
@@ -73,23 +75,37 @@
       <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.Data.TypeProviders" />
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.3.0.0-rc\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Reflection.Context" />
     <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">
       <Name>MsbuildUtilityHelpers</Name>
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets" Condition="Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

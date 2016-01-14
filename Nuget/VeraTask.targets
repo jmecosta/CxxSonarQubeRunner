@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="AnalyseWithVera" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask TaskName="VeraTask" AssemblyFile="$(MSBuildThisFileDirectory)VeraTask.dll"/>
+    <UsingTask TaskName="VeraMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)VeraMSBuildTask.dll"/>
 
     <PropertyGroup>
         <VeraPath               Condition="'$(VeraPath)' == ''">C:\Program Files (x86)\vera++\bin\vera++.exe</VeraPath>
@@ -9,12 +9,12 @@
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
         <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-vera++</VeraOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <VeraTaskEnabled        Condition="'$(VeraTaskEnabled)' == ''">false</VeraTaskEnabled>
+        <VeraMSBuildTaskEnabled        Condition="'$(VeraMSBuildTaskEnabled)' == ''">false</VeraMSBuildTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithVera" AfterTargets="AfterBuild" Condition="'$(VeraTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithVera" AfterTargets="AfterBuild" Condition="'$(VeraMSBuildTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
-        <VeraTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+        <VeraMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       ProjectNameToAnalyse="$(MSBuildProjectName)"
                       VeraPath="$(VeraPath)"
                       VeraOptions="$(VeraOptions)"
