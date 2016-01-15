@@ -55,7 +55,7 @@ let main argv =
 
         with
         | ex ->
-            printf "Exception During Run: %s" ex.Message
+            printf "Exception During Run: %s %s\r\n" ex.Message ex.StackTrace
             ret <- 1
         
     ret

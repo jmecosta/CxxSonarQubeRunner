@@ -8,11 +8,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{f1d22b38-182b-4003-8865-ede0e918fa01}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>CppLintTask</RootNamespace>
+    <RootNamespace>CppLintMSBuildTask</RootNamespace>
     <AssemblyName>CppLintMSBuildTask</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>CppLintMSBuildTask</Name>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -28,7 +28,7 @@
     </DocumentationFile>
     <StartAction>Program</StartAction>
     <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
-    <StartArguments>../MSBuild/CppLintTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
+    <StartArguments>../MSBuild/CppLintMSBuildTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,7 +41,7 @@
     </DocumentationFile>
     <StartAction>Program</StartAction>
     <StartProgram>C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe</StartProgram>
-    <StartArguments>..\MSBuild\CppLintTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
+    <StartArguments>..\MSBuild\CppLintMSBuildTask.msbuild /t:CheckCppLintCommonXML</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -60,7 +60,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="CppLintTask.fs" />
+    <Compile Include="CppLintMSBuildTask.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />

@@ -12,7 +12,7 @@
     <AssemblyName>CxxSonarQubeMsbuidRunner</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>CxxSonarQubeMsbuidRunner</Name>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -82,17 +82,18 @@
       <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Data">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\FSharp.Data.dll</HintPath>
+    <Reference Include="FSharp.Data, Version=2.2.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\Nuget\FSharp.Data.dll</HintPath>
+      <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\FSharp.Data.DesignTime.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\FSharp.Data.DesignTime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\MsbuildAutomationHelper.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\MsbuildAutomationHelper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -100,11 +101,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\RestSharp.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SonarRestService">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\SonarRestService.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\SonarRestService.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -144,11 +145,11 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\VSSonarPlugins.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\VSSonarPlugins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VSSonarQubeCmdExecutor">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.5.0.4\lib\VSSonarQubeCmdExecutor.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\VSSonarQubeCmdExecutor.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
