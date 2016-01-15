@@ -9,10 +9,10 @@
         <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
         <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-rats</RatsOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <RatsMSBuildTaskEnabled        Condition="'$(RatsMSBuildTaskEnabled)' == ''">false</RatsMSBuildTaskEnabled>
+        <RatsTaskEnabled        Condition="'$(RatsTaskEnabled)' == ''">false</RatsTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithRats" AfterTargets="AfterBuild" Condition="'$(RatsMSBuildTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithRats" AfterTargets="AfterBuild" Condition="'$(RatsTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
         <RatsMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       ProjectNameToAnalyse="$(MSBuildProjectName)"

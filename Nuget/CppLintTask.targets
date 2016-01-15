@@ -10,10 +10,10 @@
         <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
         <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</CppLintOutputPath>
         <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <CpplintMSBuildTaskEnabled         Condition="'$(CpplintMSBuildTaskEnabled)' == ''">false</CpplintMSBuildTaskEnabled>
+        <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">false</CppLintTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithCpplint" AfterTargets="AfterBuild" Condition="'$(CpplintMSBuildTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithCpplint" AfterTargets="AfterBuild" Condition="'$(CppLintTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
         <CpplintMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       ProjectNameToAnalyse="$(MSBuildProjectName)"

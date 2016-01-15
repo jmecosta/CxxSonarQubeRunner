@@ -9,10 +9,10 @@
     <StackDepth                 Condition="'$(StackDepth)' == ''">1</StackDepth>
     <AnalysisType               Condition="'$(AnalysisType)' == ''">mi1</AnalysisType>
     <ResultFile                 Condition="'$(ResultFile)' == ''">$(SolutionDir)\sonarcpp\externalrules-result\intel-result-$(MSBuildProjectName).xml</ResultFile>       
-    <IntelInspectorMSBuildTaskEnabled  Condition="'$(IntelInspectorMSBuildTaskEnabled)' == ''">false</IntelInspectorMSBuildTaskEnabled>  
+    <IntelInspectorTaskEnabled  Condition="'$(IntelInspectorTaskEnabled)' == ''">false</IntelInspectorTaskEnabled>  
   </PropertyGroup>
   
-  <Target Name="InspectBinary" AfterTargets="AfterBuild" Condition="'$(IntelInspectorMSBuildTaskEnabled)' == 'true'">
+  <Target Name="InspectBinary" AfterTargets="AfterBuild" Condition="'$(IntelInspectorTaskEnabled)' == 'true'">
       <IntelInspectorMSBuildTask StackDepth="$(StackDepth)"
                           AnalysisType="$(UserAnalysisType)"
                           ExecutableToRun="$(OutDir)$(RootNamespace).exe"

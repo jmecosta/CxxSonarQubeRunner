@@ -12,10 +12,10 @@
         <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
         <CppCheckOutputType         Condition="'$(CppCheckOutputType)' == ''">xml-version-1</CppCheckOutputType>
         <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-cppcheck</CppCheckOutputPath>
-        <CppCheckMSBuildTaskEnabled        Condition="'$(CppCheckMSBuildTaskEnabled)' == ''">false</CppCheckMSBuildTaskEnabled>
+        <CppCheckTaskEnabled        Condition="'$(CppCheckTaskEnabled)' == ''">false</CppCheckTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithCppCheck" AfterTargets="AfterBuild" Condition="'$(CppCheckMSBuildTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithCppCheck" AfterTargets="AfterBuild" Condition="'$(CppCheckTaskEnabled)' == 'true'">
         <Message Text="ProjectPathToAnalyse = $(ProjectDir)"/>
 		<Message Text="SolutionPathToAnalyse = $(SolutionDir)\$(SolutionName).sln"/>
         <CppCheckMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"

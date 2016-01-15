@@ -14,11 +14,11 @@
         <SeedStart                     Condition="'$(SeedStart)' == ''">1</SeedStart>
         <SeedEnd                       Condition="'$(SeedEnd)' == ''">2</SeedEnd>
         <PathReplacementStrings        Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <GtestRunnerMSBuildTaskEnabled        Condition="'$(GtestRunnerMSBuildTaskEnabled)' == ''">true</GtestRunnerMSBuildTaskEnabled>
+        <GtestRunnerTaskEnabled        Condition="'$(GtestRunnerTaskEnabled)' == ''">true</GtestRunnerTaskEnabled>
         <BrakeBuild                    Condition="'$(BrakeBuild)' == ''">true</BrakeBuild>
     </PropertyGroup>
 
-    <Target Name="GTestRunnerTarget" AfterTargets="AfterBuild" Condition="'$(GtestRunnerMSBuildTaskEnabled)' == 'true'">
+    <Target Name="GTestRunnerTarget" AfterTargets="AfterBuild" Condition="'$(GtestRunnerTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
         <GtestRunnerMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                           ProjectNameToAnalyse="$(MSBuildProjectName)"
