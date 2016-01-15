@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-    <UsingTask TaskName="CpplintMSBuildtTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintMSBuildtTask.dll"/>
+    <UsingTask TaskName="CpplintMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)CpplintMSBuildTask.dll"/>
     <UsingTask TaskName="VeraMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)VeraMSBuildTask.dll"/>
     <UsingTask TaskName="RatsMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)RatsMSBuildTask.dll"/>
     <UsingTask TaskName="CppCheckMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)CppCheckMSBuildTask.dll"/>
@@ -14,7 +14,7 @@
         <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
         <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-other</CppLintOutputPath>
         <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
-        <EnableCpplintMSBuildtTask         Condition="'$(EnableCpplintMSBuildtTask)' == ''">true</EnableCpplintMSBuildtTask>
+        <EnableCpplintMSBuildTask         Condition="'$(EnableCpplintMSBuildTask)' == ''">true</EnableCpplintMSBuildTask>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -47,9 +47,9 @@
         <EnableCppCheckMSBuildTask        Condition="'$(EnableCppCheckMSBuildTask)' == ''">true</EnableCppCheckMSBuildTask>
     </PropertyGroup>
     
-    <Target Name="Cpplint" Condition="'$(EnableCpplintMSBuildtTask)' == 'true'">
+    <Target Name="Cpplint" Condition="'$(EnableCpplintMSBuildTask)' == 'true'">
         <Message Text="Cpplint = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
-        <CpplintMSBuildtTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
+        <CpplintMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       PythonPath="$(PythonPath)"
                       CppLintPath="$(CppLintPath)"
                       CppLintOptions="$(CppLintOptions)"
