@@ -27,7 +27,7 @@ build_script:
 
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\CppLintMSBuildTask.nuspec
+  - cmd: nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\GtestRunnerTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
