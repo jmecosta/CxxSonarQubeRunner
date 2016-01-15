@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <metadata>
-        <id>CppLintMSBuildTask</id>
+        <id>CppLintTask</id>
         <version>1.5.0</version>
         <authors>Tekla</authors>
         <owners>Tekla</owners>
@@ -17,7 +17,7 @@
     <files>
         <file src="CppLint\*.*" target="build\cpplint" />
         <file src="..\BuildDrop\CppLintMSBuildTask.dll" target="build" />
-        <file src="CppLintMSBuildTask.targets" target="build" />
+        <file src="CppLintTask.targets" target="build" />
         <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
         <file src="..\BuildDrop\MsbuildUtilityHelpers.dll" target="build" />
     </files>
