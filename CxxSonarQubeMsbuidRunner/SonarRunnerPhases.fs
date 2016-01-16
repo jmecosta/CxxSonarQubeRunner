@@ -11,7 +11,95 @@ open FSharp.Data
 open Options
 
 type StatusAnalysis = JsonProvider<"""
-{"task":{"id":"AVEC7PZCplUol9a0gqLe","type":"REPORT","componentId":"AVECef1fplUol9a0gqAc","componentKey":"tekla.structures.core:Common","componentName":"Common","componentQualifier":"TRK","status":"SUCCESS","submittedAt":"2015-11-14T00:17:42+0200","startedAt":"2015-11-14T00:17:44+0200","executedAt":"2015-11-14T00:17:48+0200","executionTimeMs":4291,"logs":true}}
+{"task":{"id":"AVJJb5v27B9KTw6sNKZv","type":"REPORT","componentId":"AVJJamkH7B9KTw6sNKYe","componentKey":"Tekla.Tools.RoslynRunner","componentName":"RoslynRunner","componentQualifier":"TRK","analysisId":"720","status":"SUCCESS","submittedAt":"2016-01-16T09:56:37+0200","submitterLogin":"admin","startedAt":"2016-01-16T09:56:37+0200","executedAt":"2016-01-16T09:56:38+0200","executionTimeMs":862,"logs":true}}
+""">
+
+type GateAnalysis = JsonProvider<"""
+{
+  "projectStatus": {
+    "status": "ERROR",
+    "conditions": [
+      {
+        "status": "ERROR",
+        "metricKey": "new_coverage",
+        "comparator": "LT",
+        "periodIndex": 1,
+        "errorThreshold": "85",
+        "actualValue": "82.50562381034781"
+      },
+      {
+        "status": "ERROR",
+        "metricKey": "new_blocker_violations",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "0",
+        "actualValue": "14"
+      },
+      {
+        "status": "ERROR",
+        "metricKey": "new_critical_violations",
+        "comparator": "GT",
+        "periodIndex": 1,
+        "errorThreshold": "0",
+        "actualValue": "1"
+      },
+      {
+        "status": "OK",
+        "metricKey": "new_sqale_debt_ratio",
+        "comparator": "GT",
+        "periodIndex": 2,
+        "errorThreshold": "5",
+        "actualValue": "0.6562109862671661"
+      },
+      {
+        "status": "OK",
+        "metricKey": "reopened_issues",
+        "comparator": "GT",
+        "periodIndex": 3,
+        "warningThreshold": "0",
+        "actualValue": "0"
+      },
+      {
+        "status": "WARN",
+        "metricKey": "open_issues",
+        "comparator": "GT",
+        "periodIndex": 3,
+        "warningThreshold": "0",
+        "actualValue": "17"
+      },
+      {
+        "status": "OK",
+        "metricKey": "skipped_tests",
+        "comparator": "GT",
+        "periodIndex": 5,
+        "warningThreshold": "0",
+        "actualValue": "0"
+      }
+    ],
+    "periods": [
+      {
+        "index": 1,
+        "mode": "last_period",
+        "date": "2000-04-27T00:45:23+0200"
+      },
+      {
+        "index": 2,
+        "mode": "last_version",
+        "date": "2000-04-27T00:45:23+0200",
+        "parameter": "2015-12-07"
+      },
+      {
+        "index": 3,
+        "mode": "last_analysis"
+      },
+      {
+        "index": 5,
+        "mode": "last_30_days",
+        "parameter": "2015-11-07"
+      }
+    ]
+  }
+}
 """>
 
 let ProcessOutputDataReceived(e : DataReceivedEventArgs) = 
@@ -264,7 +352,6 @@ let EndPhase(options : OptionsData) =
                 urlForChecking <- e.Data.Split([|"INFO  - More about the report processing at"|], StringSplitOptions.RemoveEmptyEntries).[1].Trim()
 
     let rec loopTimerCheck() =
-        let mutable status = 0
         let content = HelpersMethods.GetRequest(username, password, urlForChecking)
         let response = StatusAnalysis.Parse(content)
         idAnalysis <- response.Task.Id
@@ -273,8 +360,57 @@ let EndPhase(options : OptionsData) =
             Thread.Sleep(1000)
             loopTimerCheck()
         elif response.Task.Status.Equals("SUCCESS") then
-            printf "STATUS: %s \r\n" response.Task.Status
-            status <- 0
+            printf "CE STATUS: %s \r\n" response.Task.Status
+            
+            let mutable gateurl = ""
+            let content = 
+                try
+                    printf "CHECK GATE ON 5.3: %s \r\n" response.Task.Status
+                    let mutable gateurl = options.SonarHost + "/api/qualitygates/project_status?analysisId=" + (response.Task.AnalysisId.ToString())
+                    HelpersMethods.GetRequest(username, password, gateurl)
+                
+                with
+                | ex -> printf "GATE CHECK ONLY ON 5.3 or ABOVE: %s \r\n" ex.Message
+                        ""
+
+            if content <> "" then
+                let response = GateAnalysis.Parse(content)
+
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Gate Check  ###########") 
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
+                
+                printf "\r\n"
+
+                if response.ProjectStatus.Status = "ERROR" then
+                    HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "STATUS: %s \r\n" response.ProjectStatus.Status))
+                elif response.ProjectStatus.Status = "WARN" then
+                    HelpersMethods.cprintf(ConsoleColor.Yellow, (sprintf "STATUS: %s \r\n" response.ProjectStatus.Status))
+                elif response.ProjectStatus.Status = "OK" then
+                    HelpersMethods.cprintf(ConsoleColor.Green, (sprintf "STATUS: %s \r\n" response.ProjectStatus.Status))
+                else
+                    ()
+
+                if response.ProjectStatus.Status = "NONE" then
+                    printf "GATE NOT DEFINED FOR PROJECT\r\n"
+                else
+
+                    for condition in response.ProjectStatus.Conditions do
+                        let perioddata =
+                            try
+                                sprintf "=> During Period %s" (condition.PeriodIndex.ToString())
+                            with
+                            | _ -> ""
+
+                        printf "\r\n"
+                        printf "%s %s %s   %s \r\n" condition.MetricKey condition.Comparator (condition.ErrorThreshold.ToString()) perioddata
+                        printf "    Status : %s\r\n" condition.Status
+                        printf "    Actual Value : %s\r\n" (condition.ActualValue.ToString())
+
+                printf "\r\n"
+                if response.ProjectStatus.Status = "ERROR" then
+                    raise(new Exception("Project did not pass the defined quality gate."))
+       
         else
             let content = HelpersMethods.GetRequest(username, password, urlForChecking.Replace("task?id=" + idAnalysis, "logs?taskId=" + idAnalysis))
             HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "%s" content))
@@ -290,7 +426,7 @@ let EndPhase(options : OptionsData) =
             loopTimerCheck()
             0
         else
-            printf  "[EndPhase] : Cannot Check Analysis Resutls in Server, available only for 5.2 or above\r"
+            printf  "[EndPhase] : Cannot Check Analysis results in Server, available only for 5.2 or above\r"
             0
     else
         HelpersMethods.cprintf(ConsoleColor.Red, "[EndPhase] : Failed. Check Log")

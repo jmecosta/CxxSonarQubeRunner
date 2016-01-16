@@ -28,7 +28,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>/k:Tekla.Tools.RoslynRunner /n:RoslynRunner  /v:work /m=D:\Development\SonarQube\dotnet\sonar-roslyn-plugin\RoslynRunner\RoslynRunner.sln /d:sonar.branch=provision /b:master</StartArguments>
+    <StartArguments>/k:Tekla.Tools.RoslynRunner /n:RoslynRunner  /v:work /m=D:\Development\SonarQube\dotnet\sonar-roslyn-plugin\RoslynRunner\RoslynRunner.sln</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -82,14 +82,11 @@
       <Project>{c20a4652-4e06-413a-859c-d2bb975ec644}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="FSharp.Data, Version=2.2.5.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FSharp.Data">
       <HintPath>..\Nuget\FSharp.Data.dll</HintPath>
-      <SpecificVersion>True</SpecificVersion>
-      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.5.0.4\lib\FSharp.Data.DesignTime.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\Nuget\FSharp.Data.DesignTime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
