@@ -6,7 +6,6 @@ open System.Net
 open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Reflection
-open MsbuildUtilityHelpers
 open FSharp.Data
 
 open Options
@@ -29,7 +28,7 @@ let main argv =
             options.CreatOptionsForAnalysis()
             options.Setup()
             options.ProvisionProject()
-
+           
             try                                
                 if SonarRunnerPhases.BeginPhase(options) <> 0 then
                     ret <- 1
@@ -42,6 +41,8 @@ let main argv =
                         ret <- 1
                         printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt"
                     else
+                        // import shared projects if any
+                        SharedProjectImporter.ImportSharedProjects(options.Solution, options.ProjectKey.Replace("/k:", ""))
                         if SonarRunnerPhases.EndPhase(options) <> 0 then
                             ret <- 1
                             printf "[CxxSonarQubeMsbuidRunner] Failed analyze project, check log"            
