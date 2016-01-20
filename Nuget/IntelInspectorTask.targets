@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="InspectBinary" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="IntelInspectorMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)InspectorMSBuildTask.dll" />
+  <UsingTask TaskName="InspectorMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)InspectorMSBuildTask.dll" />
   
   <PropertyGroup>
     <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2015_DIR=C:\Program Files (x86)\Intel\Inspector XE 2015</ExecutableEnvironment>
@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <Target Name="InspectBinary" AfterTargets="AfterBuild" Condition="'$(IntelInspectorTaskEnabled)' == 'true'">
-      <IntelInspectorMSBuildTask StackDepth="$(StackDepth)"
+      <InspectorMSBuildTask StackDepth="$(StackDepth)"
                           AnalysisType="$(UserAnalysisType)"
                           ExecutableToRun="$(OutDir)$(RootNamespace).exe"
                           ExecutableEnvironment="$(ExecutableEnvironment)"
