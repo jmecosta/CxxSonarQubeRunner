@@ -260,7 +260,11 @@ type CppLintMSBuildTask(executorIn : ICommandExecutor) as this =
                 ()
 
             let iterateOverProjectFiles(projectFile : ProjectFiles) =
-                projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
+
+                if x.ProjectNameToAnalyse = "" ||
+                    projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
+
+                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
 
             (Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse))) |>  Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
 

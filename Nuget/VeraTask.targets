@@ -12,7 +12,7 @@
         <VeraMSBuildTaskEnabled        Condition="'$(VeraMSBuildTaskEnabled)' == ''">false</VeraMSBuildTaskEnabled>
     </PropertyGroup>
 
-    <Target Name="AnalyseWithVera" AfterTargets="AfterBuild" Condition="'$(VeraMSBuildTaskEnabled)' == 'true'">
+    <Target Name="AnalyseWithVera" AfterTargets="AfterBuild" Condition="'$(VeraTaskEnabled)' == 'true'">
         <Message Text="ProjectNameToAnalyse = $(ProjectName)"/>
         <VeraMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       ProjectNameToAnalyse="$(MSBuildProjectName)"
