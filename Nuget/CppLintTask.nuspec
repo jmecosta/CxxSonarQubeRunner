@@ -2,17 +2,17 @@
 <package>
     <metadata>
         <id>CppLintTask</id>
-        <version>1.5.2</version>
-        <authors>Tekla</authors>
-        <owners>Tekla</owners>
-        <licenseUrl>http://www.tekla.com/end-user-license-agreement</licenseUrl>
-        <projectUrl>http://tekla.com</projectUrl>
-        <iconUrl>http://tekla.cachefly.net/cdn/farfuture/AdKO-3KN3Ky6TjBryc_NBj5xAj-QEgBZO8kecdpkuJA/mtime:1398248216/sites/all/themes/custom/tekla_omega/logo.png</iconUrl>
+        <version>1.5.3</version>
+        <authors>jmecsoftware.com</authors>
+        <owners>jmecsoftware.com</owners>
+        <licenseUrl>https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/blob/master/License.txt</licenseUrl>
+        <projectUrl>https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks</projectUrl>
+        <iconUrl>https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/blob/master/Nuget/logo.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Analysis: CppLintMSBuildTask Task</description>
+        <description>Analysis: CppLint Task</description>
         <releaseNotes>Initial Package.</releaseNotes>
-        <copyright>Tekla Copyright 2015</copyright>
-        <tags>.Net Tekla</tags>
+        <copyright>jmecsoftware.com</copyright>
+        <tags>C++ SonarQube</tags>
     </metadata>
     <files>
         <file src="CppLint\*.*" target="build\cpplint" />
