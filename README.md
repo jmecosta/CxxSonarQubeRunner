@@ -1,6 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/pc2gnjt8tji49y3v/branch/master?svg=true)](https://ci.appveyor.com/project/jorgecosta/sonar-cxx-msbuild-tasks/branch/master)
 
-# SonarQube C++ Community plugin msbuild tasks 
+# Sonar C++ Community plugin msbuild tasks 
 
 Easy execution of static analysis tools that run outside cxx plugin.
 
