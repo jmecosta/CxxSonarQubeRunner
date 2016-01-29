@@ -647,5 +647,8 @@ type OptionsData(args : string []) =
         if File.Exists(this.SolutionTargetFile) then
             File.Delete(this.SolutionTargetFile)
 
-        if Directory.Exists(Path.Combine(this.SonarQubeTempPath, "bin")) then
-            Directory.Delete(Path.Combine(this.SonarQubeTempPath, "bin"), true)
+        try
+            if Directory.Exists(Path.Combine(this.SonarQubeTempPath, "bin")) then
+                Directory.Delete(Path.Combine(this.SonarQubeTempPath, "bin"), true)
+        with
+        | _ -> printf "Failed to clean target files, compilation might not be possible. Kill any msbuild processes before compilation"

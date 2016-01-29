@@ -264,10 +264,13 @@ let RunBuild(options : OptionsData) =
             processdata.Kill()
             processdata.WaitForExit(2000) |> ignore
 
-    let afterkillproc = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
-    printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found after cleaning up: \r\n"
-    for pro in afterkillproc do
-        printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
+    try
+        let afterkillproc = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
+        printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found after cleaning up: \r\n"
+        for pro in afterkillproc do
+            printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
+    with
+    | ex -> printf "[CxxSonarQubeMsbuidRunner] unable to kill msbuild, compilation might not be possible later"
 
     if returncode <> 0 then
         let lines = File.ReadAllLines(options.BuildLog)
