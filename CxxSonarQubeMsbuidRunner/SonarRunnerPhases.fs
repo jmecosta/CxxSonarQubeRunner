@@ -167,7 +167,6 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
         if line <> "" then
             let data = line.Split('=')
             if data.Length = 2 then
-                printf "[CxxSonarQubeMsbuidRunner] %s = %s \r\n" data.[0] data.[1]
                 map <- map.Add(data.[0], data.[1])
 
     map
