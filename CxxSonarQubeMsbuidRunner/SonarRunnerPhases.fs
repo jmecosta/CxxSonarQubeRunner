@@ -260,9 +260,12 @@ let RunBuild(options : OptionsData) =
         match wasrunning with
         | Some c -> ()
         | _ -> 
-            printf "Will Kill : %s" (sprintf "%s : %s\r\n" (processdata.Id.ToString()) processdata.ProcessName)
-            processdata.Kill()
-            processdata.WaitForExit(2000) |> ignore
+            try
+                printf "Will Kill : %s" (sprintf "%s : %s\r\n" (processdata.Id.ToString()) processdata.ProcessName)
+                processdata.Kill()
+                processdata.WaitForExit(2000) |> ignore
+            with
+            | ex -> printf "[CxxSonarQubeMsbuidRunner] unable to kill msbuild, compilation might not be possible later"
 
     try
         let afterkillproc = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
