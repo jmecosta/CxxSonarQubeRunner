@@ -27,7 +27,7 @@ Easy execution of static analysis tools that run outside cxx plugin.
 ## CxxSonarQubeMsbuidRunner
 This is a wrapper around SonarQube Msbuild Runner, the input is the same as in the original. with a few more options to support the wrapper.
 
-Download Latest From: https://ci.appveyor.com/api/buildjobs/avy5n4j6j386ftls/artifacts/CxxSonarQubeMsbuidRunner.zip
+Download Latest CxxSonarQubeMsbuidRunner.zip From: https://ci.appveyor.com/project/jorgecosta/sonar-cxx-msbuild-tasks/build/artifacts
 
 To use:
 
