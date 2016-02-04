@@ -175,6 +175,7 @@ let ShowHelp() =
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
         Console.WriteLine ("    /A|/a:<amd64, disabled>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
+        Console.WriteLine ("    /C|/c:<Permission template to apply when using feature branches>")
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
@@ -200,6 +201,12 @@ type OptionsData(args : string []) =
     let sqRunnerPathFromCommandLine = 
         if arguments.ContainsKey("q") then
             arguments.["q"] |> Seq.head
+        else
+            ""
+
+    let permissiontemplatename = 
+        if arguments.ContainsKey("c") then
+            arguments.["c"] |> Seq.head
         else
             ""
 
@@ -624,6 +631,15 @@ type OptionsData(args : string []) =
                 else
                     printf "[CxxSonarQubeMsbuidRunner] Profile %s : already correct\r\n" profile.Name
 
+            if permissiontemplatename <> "" then
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(token, projectParent.[0].Key, permissiontemplatename)
+                if errormsg <> "" then
+                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply permission template %s : %s\r\n" permissiontemplatename errormsg
+                else
+                    printf "[CxxSonarQubeMsbuidRunner] permission template %s : applied correctly\r\n" permissiontemplatename
 
     member this.Setup() =
         // read sonar project files
