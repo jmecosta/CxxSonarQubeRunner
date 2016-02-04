@@ -475,10 +475,6 @@ type OptionsData(args : string []) =
     member this.DuplicateFalsePositives() =         
         if parentBranch <> "" && this.Branch <> "" then
 
-            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
-            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Duplicate False Positives ############") 
-            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
-
             let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
                 let pass =
                     if this.SonarUserPassword = "" then
@@ -501,6 +497,20 @@ type OptionsData(args : string []) =
             let token = GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
             let masterProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch).[0]
             let branchProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
+
+            if permissiontemplatename <> "" then
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(token, branchProject.Key, permissiontemplatename)
+                if errormsg <> "" then
+                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply permission template %s : %s\r\n" permissiontemplatename errormsg
+                else
+                    printf "[CxxSonarQubeMsbuidRunner] permission template %s : applied correctly to %s \r\n" permissiontemplatename  branchProject.Key
+
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Duplicate False Positives ############") 
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
 
             let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE,WONTFIX"
             let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key)
@@ -541,7 +551,9 @@ type OptionsData(args : string []) =
                                     else
                                         printf "[CxxSonarQubeMsbuidRunner] Issue %s marked as %s\r\n" msg.Key (issuetochange.Resolution.ToString())
                     | _ -> ()
-                
+              
+
+                                    
             ()
 
     member this.ProvisionProject() =
@@ -630,16 +642,6 @@ type OptionsData(args : string []) =
                         printf "[CxxSonarQubeMsbuidRunner] Profile %s : applied correctly\r\n" profile.Name
                 else
                     printf "[CxxSonarQubeMsbuidRunner] Profile %s : already correct\r\n" profile.Name
-
-            if permissiontemplatename <> "" then
-                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
-                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
-                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
-                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(token, projectParent.[0].Key, permissiontemplatename)
-                if errormsg <> "" then
-                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply permission template %s : %s\r\n" permissiontemplatename errormsg
-                else
-                    printf "[CxxSonarQubeMsbuidRunner] permission template %s : applied correctly\r\n" permissiontemplatename
 
     member this.Setup() =
         // read sonar project files
