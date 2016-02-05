@@ -3,12 +3,13 @@
   <UsingTask TaskName="InspectorMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)InspectorMSBuildTask.dll" />
   
   <PropertyGroup>
-    <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2015_DIR=C:\Program Files (x86)\Intel\Inspector XE 2015</ExecutableEnvironment>
-    <PathToIntelInspector       Condition="'$(PathToIntelInspector)' == ''">C:\Program Files (x86)\Intel\Inspector XE 2015</PathToIntelInspector>
+    <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2016_DIR=C:\Program Files (x86)\IntelSWTools\Inspector XE 2016</ExecutableEnvironment>
+    <PathToIntelInspector       Condition="'$(PathToIntelInspector)' == ''">C:\Program Files (x86)\IntelSWTools\Inspector XE 2016</PathToIntelInspector>
     <ResourceLeaks              Condition="'$(ResourceLeaks)' == ''">true</ResourceLeaks>
     <StackDepth                 Condition="'$(StackDepth)' == ''">1</StackDepth>
     <AnalysisType               Condition="'$(AnalysisType)' == ''">mi1</AnalysisType>
-    <ResultFile                 Condition="'$(ResultFile)' == ''">$(SolutionDir)\sonarcpp\externalrules-result\intel-result-$(MSBuildProjectName).xml</ResultFile>       
+    <IntelResultDir             Condition="'$(IntelResultDir)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</IntelResultDir>
+    <ResultFile                 Condition="'$(ResultFile)' == ''">$(IntelResultDir)\intel-result-$(MSBuildProjectName).xml</ResultFile>
     <IntelInspectorTaskEnabled  Condition="'$(IntelInspectorTaskEnabled)' == ''">false</IntelInspectorTaskEnabled>  
   </PropertyGroup>
   

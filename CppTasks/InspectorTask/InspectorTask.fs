@@ -14,6 +14,7 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open System.Threading
+open MsbuildUtilityHelpers
 
 type GenericTaskExecuter() =
     let shellExecute program args env =
@@ -35,6 +36,7 @@ type GenericTaskExecuter() =
         printProcessOutputs proc.StandardOutput
         proc.WaitForExit()
         proc
+
 
 type InspectorMSBuildTask() as this =
     inherit Task()
@@ -85,7 +87,7 @@ type InspectorMSBuildTask() as this =
     member val ExecutableToRun = "" with get, set
 
     [<Required>]
-    member val PathToIntelInspector = @"C:\Program Files (x86)\Intel\Inspector XE 2015" with get, set
+    member val PathToIntelInspector = @"C:\Program Files (x86)\IntelSWTools\Inspector XE 2016" with get, set
         
     /// Specifies the executable command line parameters
     member val ExecutableParameters : string = null with get, set
@@ -160,6 +162,7 @@ type InspectorMSBuildTask() as this =
 
     member x.memoryCheck cmdLine env temp =
         let te = GenericTaskExecuter()
+        _log.LogMessage(sprintf "Analysis Command: %s %s" x.getInspectorFullPath cmdLine)
         this.proc <- te.ExecuteProgram(_log.LogMessage, x.getInspectorFullPath, cmdLine, env, this.stopWatch)
         if not(this.proc.ExitCode = 0) then
             if x.PrintReport then x.doPrintReportAboutProblems te env temp
@@ -168,14 +171,15 @@ type InspectorMSBuildTask() as this =
 
 
     member x.exportCsv tempDir =
-        let temporaryFileName = Path.GetTempFileName()
-        use writer = System.IO.File.AppendText(temporaryFileName)
         let cmd = (sprintf "-report problems -format=csv -result-dir=%s" tempDir)
-        this.proc <- GenericTaskExecuter().ExecuteProgram(writer.WriteLine, x.getInspectorFullPath, cmd, List.empty, this.stopWatch)
-        this.proc.WaitForExit()
-        writer.Close()
-        if not(this.proc.ExitCode = 0) then
-            _log.LogMessage(sprintf "Process exitec with code %d: %s" this.proc.ExitCode (x.formatOutputCode this.proc.ExitCode))
+        _log.LogMessage(sprintf "Export Command: %s %s => %s" x.getInspectorFullPath cmd x.ResultFile)
+
+        let executor = new CommandExecutor(_log, int64(1500000))
+
+        let returncode = (executor :> ICommandExecutor).ExecuteCommand(x.getInspectorFullPath, cmd, Map.empty, Environment.CurrentDirectory)
+        let stdout = (executor :> ICommandExecutor).GetStdOut
+        stdout |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else _log.LogMessage(i)
+        if returncode <> 0 then _log.LogMessage(sprintf "Process exitec with code %d: %s" this.proc.ExitCode (x.formatOutputCode this.proc.ExitCode))
 
         // covert csv to xml file supported by sonar
         let ErrorCategories = ["cross-thread stack access";
@@ -227,13 +231,12 @@ type InspectorMSBuildTask() as this =
         try System.IO.File.Delete(x.ResultFile) with _ -> ()
         let parentName = Directory.GetParent(x.ResultFile).ToString()
         if not(Directory.Exists(parentName)) then Directory.CreateDirectory(parentName) |> ignore
+        if not(Directory.Exists(parentName)) then _log.LogError(sprintf "Unable to create Reports, Folder does not exist %s" parentName)
 
         addLine("""<?xml version="1.0" encoding="UTF-8"?>""")
         addLine("""<results>""")
 
-        let fileLines = File.ReadAllLines(temporaryFileName)
-
-        for line in fileLines do
+        for line in stdout do
             let elems = line.Split(',')
             if elems.Length > 5 then
                 let mutable source = elems.[0].Replace("\"","")
@@ -270,8 +273,7 @@ type InspectorMSBuildTask() as this =
                     let errormsg = sprintf """<error file="%s" line="%s" id="intelXe.%s" severity="%s" msg="%s"/>""" source line severity severity ("Rule Not Found In Sonar Profile: " + msg)
                     addLine(errormsg)
 
-        addLine("""</results>""")
-        try System.IO.File.Delete(temporaryFileName) with _ -> ()         
+        addLine("""</results>""")      
         ()
 
     member this.TimerControl(timeout : int64) =
