@@ -176,6 +176,7 @@ let ShowHelp() =
         Console.WriteLine ("    /A|/a:<amd64, disabled>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
         Console.WriteLine ("    /C|/c:<Permission template to apply when using feature branches>")
+        Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
@@ -209,6 +210,16 @@ type OptionsData(args : string []) =
             arguments.["c"] |> Seq.head
         else
             ""
+
+    let parallelBuilds = 
+        if arguments.ContainsKey("j") then
+            let data = arguments.["j"] |> Seq.head
+            if data = "0" then
+                "/m"
+            else
+                "/m:" + data
+        else
+            "/m:1"
 
     let userCxxSettings =
         if File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "cxx-user-options.xml")) then
@@ -287,6 +298,7 @@ type OptionsData(args : string []) =
     member val VsVersion : string = "" with get, set
     member val UseAmd64 : string = "" with get, set
     member val Target : string = "" with get, set
+    member val ParallelMsbuildOption = "/m:1" with get, set
 
     member val CppCheckPath : string = "" with get, set
     member val RatsPath : string = "" with get, set
@@ -295,6 +307,7 @@ type OptionsData(args : string []) =
     member val CppLintPath : string = "" with get, set
     member val MSBuildRunnerPath : string = "" with get, set
     member val BuildLog : string = "" with get, set
+    
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
@@ -318,6 +331,7 @@ type OptionsData(args : string []) =
 
         
         // setup properties paths
+        this.ParallelMsbuildOption <- parallelBuilds
         this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)                                        
         this.HomePath <- Directory.GetParent(this.Solution).ToString()
         this.ConfigFile <- Path.GetTempFileName()

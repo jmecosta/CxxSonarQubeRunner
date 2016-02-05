@@ -239,7 +239,7 @@ let RunBuild(options : OptionsData) =
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=" + options.BuildLog + " " + options.ParallelMsbuildOption)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
