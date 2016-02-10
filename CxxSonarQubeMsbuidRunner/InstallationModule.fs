@@ -142,8 +142,9 @@ let InstallPython() =
 
 let InstallCppLint() =
     let cpplintMod = Path.Combine(InstallationPathHome, "cpplint_mod.py")
-    let wc = new WebClient()
-    wc.DownloadFile("""https://raw.githubusercontent.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/master/Nuget/CppLint/cpplint_mod.py""", cpplintMod)
+    if not(File.Exists(cpplintMod)) then
+        let wc = new WebClient()
+        wc.DownloadFile("""https://raw.githubusercontent.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/master/Nuget/CppLint/cpplint_mod.py""", cpplintMod)
     cpplintMod
 
 let InstallRats() =    
