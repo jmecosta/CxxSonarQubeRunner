@@ -26,7 +26,7 @@ let main argv =
             options.ConfigureMsbuildRunner()
             options.ConfigureInstallationOfTools()
             options.CreatOptionsForAnalysis()
-            options.Setup()
+            let solutionData = options.Setup()
             options.ProvisionProject()
            
             try                                
@@ -42,7 +42,7 @@ let main argv =
                         printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt"
                     else
                         // import shared projects if any
-                        SharedProjectImporter.ImportSharedProjects(options.Solution, options.ProjectKey.Replace("/k:", ""))
+                        SharedProjectImporter.ImportSharedProjects(options.Solution, options.ProjectKey.Replace("/k:", ""), solutionData)
                         if SonarRunnerPhases.EndPhase(options) <> 0 then
                             ret <- 1
                             printf "[CxxSonarQubeMsbuidRunner] Failed analyze project, check log"            

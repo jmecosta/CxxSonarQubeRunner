@@ -13,6 +13,7 @@ open InstallationModule
 open VSSonarPlugins
 open VSSonarPlugins.Types
 open SonarRestService
+open MSBuildHelper
 
 let (|Command|_|) (s:string) =
     let r = new Regex(@"^(?:-{1,2}|\/)(?<command>\w+)[=:]*(?<value>.*)$",RegexOptions.IgnoreCase)
@@ -667,7 +668,14 @@ type OptionsData(args : string []) =
         Directory.CreateDirectory(Path.Combine(this.HomePath, ".cxxresults")) |> ignore
         this.BuildLog <- Path.Combine(this.HomePath, ".cxxresults", "BuildLog.txt")
 
-        DeployCxxTargets(this)
+        let solutionData = CreateSolutionData(this.Solution)
+
+        let foundVcx = solutionData.Projects |> Seq.tryFind (fun c -> c.Value.Path.ToLower().EndsWith(".vcxproj"))
+        match foundVcx with
+        | Some m -> DeployCxxTargets(this)
+        | _ -> ()
+
+        solutionData
 
     member this.Clean() =
         if this.DepracatedSonarPropsContent <> Array.empty then

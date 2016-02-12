@@ -55,12 +55,11 @@ type SharedProj() =
     member val ImportItems : string list = List.Empty with get, set
     member val AnalysisFiles : string list = List.Empty with get, set
 
-let ImportSharedProjects(solution : string, projectKey : string) =
-    let solutions = CreateSolutionData(solution)
-    let workDir = Path.Combine(Directory.GetParent(solution).ToString(), ".sonarqube", "out")
+let ImportSharedProjects(solutionPath : string, projectKey : string, solution : ProjectTypes.Solution) =
+    let workDir = Path.Combine(Directory.GetParent(solutionPath).ToString(), ".sonarqube", "out")
     let mutable sharedProjects = Map.empty
 
-    for project in solutions.Projects do
+    for project in solution.Projects do
         printf "%s" project.Value.Path
         if project.Value.Path.EndsWith(".shproj") then
             // load project items
@@ -88,7 +87,7 @@ let ImportSharedProjects(solution : string, projectKey : string) =
         // find projects that have shared refs and add analysis file the shared folder
         let mutable configuration = ""
         let mutable platform = ""
-        for project in solutions.Projects do
+        for project in solution.Projects do
             if project.Value.Path.EndsWith(".csproj") then
                 let projectData = ProjType.Parse(File.ReadAllText(project.Value.Path))
                 for import in projectData.Imports do
