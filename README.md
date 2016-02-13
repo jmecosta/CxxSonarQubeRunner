@@ -1,5 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/pc2gnjt8tji49y3v/branch/master?svg=true)](https://ci.appveyor.com/project/jorgecosta/sonar-cxx-msbuild-tasks/branch/master)
 
+
 This repository contains a build wrapper for run SonarQube analysis in a more automated way than the current SonarQube MSBuild Runner. The following features are available.  
 
 1. Runs complete analysis in single command, runs begin, end and build solution.
@@ -10,7 +11,7 @@ This repository contains a build wrapper for run SonarQube analysis in a more au
 6. Supports Visual Studio Shared projects
 
 # Installation
-1. Download wrapper from https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/releases and unzip to some location in your hard drive.
+1. Download wrapper from https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/releases and unzip to some location in your hard drive. Last snapshot is available in AppVeyour in the artifacts section after followign the build icon above.
 2. If you use Teamcity, you can use this metarunner https://gist.github.com/jmecosta/32bfc907668256bd7763 that will automate the download of the wrapper.
 
 # Basic Usage
@@ -53,7 +54,8 @@ This wrapper uses several msbuild tasks that can be used outside the wrapper. Nu
 
 Gtest Task is a usefull task to gather test information before the analysis build. Same for intel inspector task. The configuration parameters for each task are available in each target file that is in the package or in GitHub repository. For example the following section in  https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/blob/master/Nuget/CppCheckTask.targets
 
-```    <PropertyGroup>        
+```
+<PropertyGroup>        
         <CppCheckPathX86            Condition="Exists('C:\Program Files (x86)\Cppcheck\cppcheck.exe')">C:\Program Files (x86)\Cppcheck\cppcheck.exe</CppCheckPathX86>
         <CppCheckPathX64            Condition="Exists('C:\Program Files\Cppcheck\cppcheck.exe')">C:\Program Files\Cppcheck\cppcheck.exe</CppCheckPathX64>        
         <CppCheckPath               Condition="'$(CppCheckPath)' == '' And '$(CppCheckPathX86)' != ''">$(CppCheckPathX86)</CppCheckPath>
@@ -67,4 +69,4 @@ Gtest Task is a usefull task to gather test information before the analysis buil
     </PropertyGroup>
 ```
 
-contains the proerties the task use, by default it will look for the analysers in their default locations. But those can be overriten in your project file.
+contains the properties the task uses, by default it will look for the analysers in their default locations. But those can be overriten in your project file if required.
