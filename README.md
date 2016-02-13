@@ -72,8 +72,8 @@ Gtest Task is a usefull task to gather test information before the analysis buil
 contains the properties the task uses, by default it will look for the analysers in their default locations. But those can be overriten in your project file if required.
 
 # Third party tools used by this wrapper.
-The wrapper by itself does do much besides using the SonarQube API to provision and copy settings during the build. The wrapper itself will donwload the needed tools from the internet to run the analysis. By order these are the tools we use.
-We use Chocolatey when possible to install third party applications, for this reason Chocolatey is the first tool installed when you run the wrapper.
+The wrapper by itself does not do much besides using the SonarQube API to provision and copy settings during the build. The wrapper itself will donwload the needed tools from the internet to run the analysis. 
+We use Chocolatey when possible to install third party applications, for this reason Chocolatey is the first tool installed when you run the wrapper. These are the tools we use.
 
 * Vera++, downloaded from Bitbucket https://bitbucket.org/verateam/vera/wiki/Home and installed before begin stage. Custom task requires you to install manaully the tool
 * Rats, downloaded from this repository for convinience. https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/blob/master/Nuget/rats.zip also include in nuget package. Original package developed. More info here https://code.google.com/archive/p/rough-auditing-tool-for-security/wikis
