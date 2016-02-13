@@ -1,5 +1,9 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/pc2gnjt8tji49y3v/branch/master?svg=true)](https://ci.appveyor.com/project/jorgecosta/sonar-cxx-msbuild-tasks/branch/master)
 
+This repository contains a build wrapper for run SonarQube analysis in a more automated way than the current SonarQube MSBuild Runner. The following features are available. The wrapper
+
+1. 
+
 # Sonar C++ Community plugin msbuild tasks 
 
 Easy execution of static analysis tools that run outside cxx plugin.
