@@ -178,6 +178,7 @@ let ShowHelp() =
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
         Console.WriteLine ("    /C|/c:<Permission template to apply when using feature branches>")
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
+        Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
@@ -188,6 +189,8 @@ let ShowHelp() =
 type OptionsData(args : string []) =
     let arguments = parseArgs(args)
     
+    let installMode = arguments.ContainsKey("i")
+
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
@@ -276,6 +279,7 @@ type OptionsData(args : string []) =
 
 
     member val SonarHost : string = "" with get, set
+    member val InstallMode : bool = installMode
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
     member val Branch : string = "" with get, set
