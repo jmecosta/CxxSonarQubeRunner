@@ -158,6 +158,7 @@ let ShowHelp() =
         Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000>")
         Console.WriteLine ("    /E|/e reuse reports mode, cxx  static tools will not run. Ensure reports are placed in default locations.")
         Console.WriteLine ("    /F|/f disable code analysis in solution.")
+        Console.WriteLine ("    /G|/g enable verbose mode.")
 
         Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
@@ -190,6 +191,8 @@ type OptionsData(args : string []) =
     let disableCodeAnalysis = arguments.ContainsKey("f")
 
     let reuseMode = arguments.ContainsKey("e")
+
+    let verboseModeTrue = arguments.ContainsKey("g")
 
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
@@ -314,6 +317,7 @@ type OptionsData(args : string []) =
     member val BuildLog : string = "" with get, set
     
     member val DisableCodeAnalysis = disableCodeAnalysis
+    member val IsVerboseOn = verboseModeTrue
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
