@@ -112,19 +112,8 @@ let GetArgumentClass(additionalArguments : string, content : string [], home : s
         arguments <- arguments.Add("sonar.cxx.compiler.reportPath", GetPathFromHome(".cxxresults/BuildLog.txt"))
     arguments
 
-let PatchMSbuildSonarRunnerTargetsFiles(targetFile : string) =
-    let content = File.ReadAllLines(targetFile)
-    use outFile = new StreamWriter(targetFile, false)
-    
-    for line in content do
-        if line.Contains("""<SQAnalysisFileItemTypes Condition=" $(SQAnalysisFileItemTypes) == '' ">""") then
-            outFile.WriteLine("""<SQAnalysisFileItemTypes Condition=" $(SQAnalysisFileItemTypes) == '' ">Compile;Content;EmbeddedResource;None;ClCompile;ClInclude;Page;TypeScriptCompile</SQAnalysisFileItemTypes>""")
-        else
-            outFile.WriteLine(line)
 
-        if line.Contains("""<SonarQubeAnalysisFiles Include="@(%(SonarQubeAnalysisFileItems.Identity))" />""") then
-            outFile.WriteLine("""<SonarQubeAnalysisFiles Include="$(MSBuildProjectFullPath)" />""")            
-
+           
 
 let WriteFile(file : string, content : Array) =
     use outFile = new StreamWriter(file)
@@ -163,23 +152,30 @@ let ShowHelp() =
         Console.WriteLine ("Runs MSbuild Runner with Cxx Support")
         Console.WriteLine ()
         Console.WriteLine ("Options:")
+        Console.WriteLine ("    /A|/a:<amd64, disabled>")
+        Console.WriteLine ("    /B|/b:<parent_branch  : in multi branch confiuration. Its parent branch>")
+        Console.WriteLine ("    /C|/c:<Permission template to apply when using feature branches>")
+        Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000>")
+        Console.WriteLine ("    /E|/e reuse reports mode, cxx  static tools will not run. Ensure reports are placed in default locations.")
+        Console.WriteLine ("    /F|/f disable code analysis in solution.")
+
+        Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
+        Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
+        Console.WriteLine ("    /K|/k:<key : key>")
+        
         Console.WriteLine ("    /M|/m:<solution file : mandatory>")
         Console.WriteLine ("    /N|/n:<name : name>")
-        Console.WriteLine ("    /K|/k:<key : key>")
-        Console.WriteLine ("    /V|/v:<version : version>")
-        Console.WriteLine ("    /B|/b:<parent_branch  : in multi branch confiuration. Its parent branch>")
-        Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
-        Console.WriteLine ("    /S|/s:<additional settings filekey>")
-        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1>")
-        Console.WriteLine ("    /Q|/q:<SQ msbuild runner path>")
-        Console.WriteLine ("    /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000>")
-        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
-        Console.WriteLine ("    /A|/a:<amd64, disabled>")
-        Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
-        Console.WriteLine ("    /C|/c:<Permission template to apply when using feature branches>")
-        Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
-        Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
 
+        Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
+        Console.WriteLine ("    /Q|/q:<SQ msbuild runner path>")
+        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1>")       
+        Console.WriteLine ("    /S|/s:<additional settings filekey>")
+        Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
+
+        Console.WriteLine ("    /V|/v:<version : version>")
+        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
+
+        
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
 
@@ -190,6 +186,10 @@ type OptionsData(args : string []) =
     let arguments = parseArgs(args)
     
     let installMode = arguments.ContainsKey("i")
+
+    let disableCodeAnalysis = arguments.ContainsKey("f")
+
+    let reuseMode = arguments.ContainsKey("e")
 
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
@@ -313,6 +313,7 @@ type OptionsData(args : string []) =
     member val MSBuildRunnerPath : string = "" with get, set
     member val BuildLog : string = "" with get, set
     
+    member val DisableCodeAnalysis = disableCodeAnalysis
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
@@ -674,10 +675,11 @@ type OptionsData(args : string []) =
 
         let solutionData = CreateSolutionData(this.Solution)
 
-        let foundVcx = solutionData.Projects |> Seq.tryFind (fun c -> c.Value.Path.ToLower().EndsWith(".vcxproj"))
-        match foundVcx with
-        | Some m -> DeployCxxTargets(this)
-        | _ -> ()
+        if not(reuseMode) then
+            let foundVcx = solutionData.Projects |> Seq.tryFind (fun c -> c.Value.Path.ToLower().EndsWith(".vcxproj"))
+            match foundVcx with
+            | Some m -> DeployCxxTargets(this)
+            | _ -> ()
 
         solutionData
 
@@ -696,3 +698,39 @@ type OptionsData(args : string []) =
                 Directory.Delete(Path.Combine(this.SonarQubeTempPath, "bin"), true)
         with
         | _ -> printf "Failed to clean target files, compilation might not be possible. Kill any msbuild processes before compilation"
+
+
+
+let PatchMSbuildSonarRunnerTargetsFiles(targetFile : string, options : OptionsData) =
+    let content = File.ReadAllLines(targetFile)
+    use outFile = new StreamWriter(targetFile, false)
+    
+    for line in content do
+        if line.Contains("""<SQAnalysisFileItemTypes Condition=" $(SQAnalysisFileItemTypes) == '' ">""") then
+            outFile.WriteLine("""<SQAnalysisFileItemTypes Condition=" $(SQAnalysisFileItemTypes) == '' ">Compile;Content;EmbeddedResource;None;ClCompile;ClInclude;Page;TypeScriptCompile</SQAnalysisFileItemTypes>""")
+
+        elif line.Contains("""<RunCodeAnalysisOnThisProject>$(SonarQubeRunMSCodeAnalysis)</RunCodeAnalysisOnThisProject>""") then
+            if options.DisableCodeAnalysis then
+                outFile.WriteLine("""<RunCodeAnalysisOnThisProject>false</RunCodeAnalysisOnThisProject>""")
+            else
+                outFile.WriteLine(line)
+
+        elif line.Contains("""<RunCodeAnalysisOnce>true</RunCodeAnalysisOnce>""") then
+            if options.DisableCodeAnalysis then
+                outFile.WriteLine("""<RunCodeAnalysisOnce>false</RunCodeAnalysisOnce>""")
+            else
+                outFile.WriteLine(line)
+
+        elif line.Contains("""<SonarQubeDisableRoslynCodeAnalysis Condition="$(SonarQubeExclude) == 'true' OR $(SonarQubeTestProject) == 'true' ">true</SonarQubeDisableRoslynCodeAnalysis>""") then
+            if options.DisableCodeAnalysis then
+                outFile.WriteLine("""<SonarQubeDisableRoslynCodeAnalysis>true</SonarQubeDisableRoslynCodeAnalysis>""")
+            else
+                outFile.WriteLine(line)
+
+        else
+            outFile.WriteLine(line)
+
+
+        if line.Contains("""<SonarQubeAnalysisFiles Include="@(%(SonarQubeAnalysisFileItems.Identity))" />""") then
+            outFile.WriteLine("""<SonarQubeAnalysisFiles Include="$(MSBuildProjectFullPath)" />""")            
+

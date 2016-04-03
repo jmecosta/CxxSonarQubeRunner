@@ -38,7 +38,7 @@ let main argv =
                         printf "[CxxSonarQubeMsbuidRunner] Failed to execute Begin Phase, check log"
                     else
                         let targetFile = Path.Combine(options.HomePath, ".sonarqube", "bin", "Targets", "SonarQube.Integration.targets")
-                        PatchMSbuildSonarRunnerTargetsFiles(targetFile)
+                        PatchMSbuildSonarRunnerTargetsFiles(targetFile, options)
                     
                         if SonarRunnerPhases.RunBuild(options) <> 0 then
                             ret <- 1
