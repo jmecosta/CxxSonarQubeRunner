@@ -55,8 +55,8 @@ type SharedProj() =
     member val ImportItems : string list = List.Empty with get, set
     member val AnalysisFiles : string list = List.Empty with get, set
 
-let ImportSharedProjects(solutionPath : string, projectKey : string, solution : ProjectTypes.Solution) =
-    let workDir = Path.Combine(Directory.GetParent(solutionPath).ToString(), ".sonarqube", "out")
+let ImportSharedProjects(sonarTempPath : string, projectKey : string, solution : ProjectTypes.Solution) =
+    let workDir = Path.Combine(sonarTempPath, ".sonarqube", "out")
     let mutable sharedProjects = Map.empty
 
     for project in solution.Projects do

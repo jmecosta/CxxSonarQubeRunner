@@ -343,7 +343,9 @@ type OptionsData(args : string []) =
         // setup properties paths
         this.ParallelMsbuildOption <- parallelBuilds
         this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)                                        
-        this.HomePath <- Directory.GetParent(this.Solution).ToString()
+        this.HomePath <- 
+                Directory.GetParent(this.Solution).ToString()
+
         this.ConfigFile <- Path.GetTempFileName()
         this.SolutionTargetFile <- Path.Combine(this.HomePath, "after." + this.SolutionName + ".sln.targets")   
         this.DeprecatedPropertiesFile <- Path.Combine(this.HomePath, "sonar-project.properties")
@@ -351,7 +353,14 @@ type OptionsData(args : string []) =
         if File.Exists(this.DeprecatedPropertiesFile) then
             this.DepracatedSonarPropsContent <- File.ReadAllLines(this.DeprecatedPropertiesFile)
 
-        this.SonarQubeTempPath <- Path.Combine(this.HomePath, ".sonarqube")
+        if Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY") <> null then
+            this.SonarQubeTempPath <- Path.Combine(Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY"), ".sonarqube")
+                
+        else
+            this.SonarQubeTempPath <- Path.Combine(this.HomePath, ".sonarqube")
+
+
+        
         
     // get first from command line, second from user settings file and finally from web
     member this.ConfigureMsbuildRunner() =  

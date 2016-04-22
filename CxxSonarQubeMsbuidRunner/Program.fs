@@ -37,7 +37,7 @@ let main argv =
                         ret <- 1
                         printf "[CxxSonarQubeMsbuidRunner] Failed to execute Begin Phase, check log"
                     else
-                        let targetFile = Path.Combine(options.HomePath, ".sonarqube", "bin", "Targets", "SonarQube.Integration.targets")
+                        let targetFile = Path.Combine(options.SonarQubeTempPath, "bin", "Targets", "SonarQube.Integration.targets")
                         PatchMSbuildSonarRunnerTargetsFiles(targetFile, options)
                     
                         if SonarRunnerPhases.RunBuild(options) <> 0 then
@@ -45,7 +45,7 @@ let main argv =
                             printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt"
                         else
                             // import shared projects if any
-                            SharedProjectImporter.ImportSharedProjects(options.Solution, options.ProjectKey.Replace("/k:", ""), solutionData)
+                            SharedProjectImporter.ImportSharedProjects(options.SonarQubeTempPath, options.ProjectKey.Replace("/k:", ""), solutionData)
                             if SonarRunnerPhases.EndPhase(options) <> 0 then
                                 ret <- 1
                                 printf "[CxxSonarQubeMsbuidRunner] Failed analyze project, check log"            
