@@ -313,10 +313,10 @@ let BeginPhase(options : OptionsData) =
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
 
     if options.IsVerboseOn then
-        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" options.MSBuildRunnerPath hostUrl userName arguments branchtopass))
+        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s %s %s\r\n" options.MSBuildRunnerPath hostUrl arguments branchtopass))
         (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
     else
-        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" options.MSBuildRunnerPath hostUrl userName arguments branchtopass))
+        HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.host.url=%s %s %s\r\n" options.MSBuildRunnerPath hostUrl arguments branchtopass))
         (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
     
 let EndPhase(options : OptionsData) =
@@ -420,7 +420,7 @@ let EndPhase(options : OptionsData) =
         else
             " /d:sonar.password=" + options.SonarUserPassword
 
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" options.MSBuildRunnerPath username))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end" options.MSBuildRunnerPath))
     let returncode = (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "end /d:sonar.login=" + username + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
     
     if returncode = 0 then
