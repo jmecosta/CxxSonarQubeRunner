@@ -298,10 +298,9 @@ let BeginPhase(options : OptionsData) =
 
     let userPass = 
         if options.SonarUserPassword = "" then
-            HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
-            "admin"
+            ""
         else
-            options.SonarUserPassword
+            " /d:sonar.password=" + options.SonarUserPassword
 
     let branchtopass = 
         if options.Branch = "" then
@@ -315,10 +314,10 @@ let BeginPhase(options : OptionsData) =
 
     if options.IsVerboseOn then
         HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" options.MSBuildRunnerPath hostUrl userName arguments branchtopass))
-        (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+        (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
     else
         HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.host.url=%s /d:sonar.login=%s /d:sonar.password=xxxxx %s %s\r\n" options.MSBuildRunnerPath hostUrl userName arguments branchtopass))
-        (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + " /d:sonar.password=" + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+        (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
     
 let EndPhase(options : OptionsData) =
 
@@ -336,13 +335,6 @@ let EndPhase(options : OptionsData) =
         else
             options.SonarUserName
 
-    let password = 
-        if options.SonarUserPassword = "" then
-            HelpersMethods.cprintf(ConsoleColor.Yellow, "password not specified. using default: admin")
-            "admin"
-        else
-            options.SonarUserPassword
-
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### End Stage  ############") 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
@@ -358,7 +350,7 @@ let EndPhase(options : OptionsData) =
                 urlForChecking <- e.Data.Split([|"INFO  - More about the report processing at"|], StringSplitOptions.RemoveEmptyEntries).[1].Trim()
 
     let rec loopTimerCheck() =
-        let content = HelpersMethods.GetRequest(username, password, urlForChecking)
+        let content = HelpersMethods.GetRequest(username, options.SonarUserPassword, urlForChecking)
         let response = StatusAnalysis.Parse(content)
         idAnalysis <- response.Task.Id
         if response.Task.Status.Equals("IN_PROGRESS") || response.Task.Status.Equals("PENDING") then 
@@ -373,7 +365,7 @@ let EndPhase(options : OptionsData) =
                 try
                     printf "CHECK GATE ON 5.3: %s \r\n" response.Task.Status
                     let mutable gateurl = options.SonarHost + "/api/qualitygates/project_status?analysisId=" + (response.Task.AnalysisId.ToString())
-                    HelpersMethods.GetRequest(username, password, gateurl)
+                    HelpersMethods.GetRequest(username, options.SonarUserPassword, gateurl)
                 
                 with
                 | ex -> printf "GATE CHECK ONLY ON 5.3 or ABOVE: %s \r\n" ex.Message
@@ -418,13 +410,18 @@ let EndPhase(options : OptionsData) =
                     raise(new Exception("Project did not pass the defined quality gate."))
        
         else
-            let content = HelpersMethods.GetRequest(username, password, urlForChecking.Replace("task?id=" + idAnalysis, "logs?taskId=" + idAnalysis))
+            let content = HelpersMethods.GetRequest(username, options.SonarUserPassword, urlForChecking.Replace("task?id=" + idAnalysis, "logs?taskId=" + idAnalysis))
             HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "%s" content))
             raise(new Exception("Failed to execute server analysis"))
     
+    let password = 
+        if options.SonarUserPassword = "" then
+            ""
+        else
+            " /d:sonar.password=" + options.SonarUserPassword
 
     HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end /d:sonar.login=%s /d:sonar.password=xxxxx" options.MSBuildRunnerPath username))
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "end /d:sonar.login=" + username + " /d:sonar.password=" + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "end /d:sonar.login=" + username + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
     
     if returncode = 0 then
         if urlForChecking <> "" then
