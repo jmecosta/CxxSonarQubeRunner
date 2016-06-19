@@ -346,8 +346,8 @@ let EndPhase(options : OptionsData) =
         if not(String.IsNullOrWhiteSpace(e.Data))  then
             printf  "%s\r\n" e.Data
 
-            if e.Data.Contains("INFO  - More about the report processing at") then
-                urlForChecking <- e.Data.Split([|"INFO  - More about the report processing at"|], StringSplitOptions.RemoveEmptyEntries).[1].Trim()
+            if e.Data.Contains("More about the report processing at") then
+                urlForChecking <- e.Data.Split([|"More about the report processing at"|], StringSplitOptions.RemoveEmptyEntries).[1].Trim()
 
     let rec loopTimerCheck() =
         let content = HelpersMethods.GetRequest(username, options.SonarUserPassword, urlForChecking)
