@@ -22,7 +22,7 @@
         <VeraOptions            Condition="'$(VeraOptions)' == ''">-nodup -showrules</VeraOptions>
         <VeraIgnores            Condition="'$(VeraIgnores)' == ''"></VeraIgnores>
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
-        <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-vera++</VeraOutputPath>
+        <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-vera</VeraOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
         <EnableVeraMSBuildTask        Condition="'$(EnableVeraMSBuildTask)' == ''">true</EnableVeraMSBuildTask>
     </PropertyGroup>
