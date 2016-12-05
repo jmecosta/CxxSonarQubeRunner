@@ -87,7 +87,7 @@ type InspectorMSBuildTask() as this =
     member val ExecutableToRun = "" with get, set
 
     [<Required>]
-    member val PathToIntelInspector = @"C:\Program Files (x86)\IntelSWTools\Inspector XE 2016" with get, set
+    member val PathToIntelInspector = @"C:\Program Files (x86)\IntelSWTools\Inspector 2017" with get, set
         
     /// Specifies the executable command line parameters
     member val ExecutableParameters : string = null with get, set
@@ -151,7 +151,7 @@ type InspectorMSBuildTask() as this =
         else if code = 4 then "Application returned a non-zero exit code"
         else if code = 8 then "At least one new problem detected"
         else if code = 12 then "Application returned a non-zero exit code and at least one new problem detected"
-        else failwith "Unexpected error code"
+        else "Unexpected error code"
 
     member x.doPrintReportAboutProblems (te:GenericTaskExecuter) env temp =
         te.ExecuteProgram(_log.LogWarning,

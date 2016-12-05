@@ -3,8 +3,8 @@
   <UsingTask TaskName="InspectorMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)InspectorMSBuildTask.dll" />
   
   <PropertyGroup>
-    <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2016_DIR=C:\Program Files (x86)\IntelSWTools\Inspector XE 2016</ExecutableEnvironment>
-    <PathToIntelInspector       Condition="'$(PathToIntelInspector)' == ''">C:\Program Files (x86)\IntelSWTools\Inspector XE 2016</PathToIntelInspector>
+    <ExecutableEnvironment      Condition="'$(ExecutableEnvironment)' == ''">INSPECTOR_2017_DIR=C:\Program Files (x86)\IntelSWTools\Inspector 2017</ExecutableEnvironment>
+    <PathToIntelInspector       Condition="'$(PathToIntelInspector)' == ''">C:\Program Files (x86)\IntelSWTools\Inspector 2017</PathToIntelInspector>
     <ResourceLeaks              Condition="'$(ResourceLeaks)' == ''">true</ResourceLeaks>
     <StackDepth                 Condition="'$(StackDepth)' == ''">1</StackDepth>
     <AnalysisType               Condition="'$(AnalysisType)' == ''">mi1</AnalysisType>
