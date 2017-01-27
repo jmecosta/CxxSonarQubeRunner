@@ -228,7 +228,7 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
 
 
 let RunBuild(options : OptionsData) =
-    let arguments = options.PropsForMsbuild + " " + options.Target
+    let arguments = options.PropsForMsbuild + " " + options.Target + " /p:VeraTaskEnabled=true /p:RatsTaskEnabled=true /p:CppLintTaskEnabled=true /p:CppCheckTaskEnabled=true "
 
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""

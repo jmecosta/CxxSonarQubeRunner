@@ -8,7 +8,7 @@
     <ResourceLeaks              Condition="'$(ResourceLeaks)' == ''">true</ResourceLeaks>
     <StackDepth                 Condition="'$(StackDepth)' == ''">1</StackDepth>
     <AnalysisType               Condition="'$(AnalysisType)' == ''">mi1</AnalysisType>
-    <IntelResultDir             Condition="'$(IntelResultDir)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</IntelResultDir>
+    <IntelResultDir             Condition="'$(IntelResultDir)' == ''">$(SolutionDir)\.cxxresults\reports-other</IntelResultDir>
     <ResultFile                 Condition="'$(ResultFile)' == ''">$(IntelResultDir)\intel-result-$(MSBuildProjectName).xml</ResultFile>
     <IntelInspectorTaskEnabled  Condition="'$(IntelInspectorTaskEnabled)' == ''">false</IntelInspectorTaskEnabled>  
   </PropertyGroup>

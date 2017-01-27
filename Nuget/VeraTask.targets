@@ -7,7 +7,7 @@
         <VeraOptions            Condition="'$(VeraOptions)' == ''">-nodup -showrules</VeraOptions>
         <VeraIgnores            Condition="'$(VeraIgnores)' == ''"></VeraIgnores>
         <VeraOutputType         Condition="'$(VeraOutputType)' == ''">xml</VeraOutputType>
-        <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-vera++</VeraOutputPath>
+        <VeraOutputPath         Condition="'$(VeraOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-vera</VeraOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
         <VeraMSBuildTaskEnabled        Condition="'$(VeraMSBuildTaskEnabled)' == ''">false</VeraMSBuildTaskEnabled>
     </PropertyGroup>

@@ -14,7 +14,8 @@
     <Name>CppCheckMSBuildTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <NuGetPackageImportStamp>b4a682d0</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -94,13 +95,6 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets" Condition="Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\NunitRunnerTask.2.0.9\build\NunitRunnerTask.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

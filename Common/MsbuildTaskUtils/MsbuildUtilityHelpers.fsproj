@@ -66,8 +66,9 @@
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.Data">
+    <Reference Include="FSharp.Data, Version=2.2.5.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\refs\FSharp.Data.dll</HintPath>
+      <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Engine" />

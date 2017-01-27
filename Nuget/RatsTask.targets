@@ -7,7 +7,7 @@
         <RatsOptions            Condition="'$(RatsOptions)' == ''"></RatsOptions>
         <RatsIgnores            Condition="'$(RatsIgnores)' == ''"></RatsIgnores>
         <RatsOutputType         Condition="'$(RatsOutputType)' == ''">xml</RatsOutputType>
-        <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-rats</RatsOutputPath>
+        <RatsOutputPath         Condition="'$(RatsOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-rats</RatsOutputPath>
         <PathReplacementStrings Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
         <RatsTaskEnabled        Condition="'$(RatsTaskEnabled)' == ''">false</RatsTaskEnabled>
     </PropertyGroup>

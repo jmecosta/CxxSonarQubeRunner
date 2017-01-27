@@ -8,7 +8,7 @@
         <CppLintOptions                Condition="'$(CppLintOptions)' == ''"></CppLintOptions>
         <CppLintEnvironment                Condition="'$(CppLintEnvironment)' == ''"></CppLintEnvironment>
         <CppLintOutputType             Condition="'$(CppLintOutputType)' == ''">xml</CppLintOutputType>
-        <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\sonarcpp\externalrules-result</CppLintOutputPath>
+        <CppLintOutputPath             Condition="'$(CppLintOutputPath)' == ''">$(SolutionDir)\.cxxresults\externalrules-result</CppLintOutputPath>
         <PathReplacementStrings     Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
         <CppLintTaskEnabled         Condition="'$(CppLintTaskEnabled)' == ''">false</CppLintTaskEnabled>
     </PropertyGroup>

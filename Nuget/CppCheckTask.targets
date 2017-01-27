@@ -11,7 +11,7 @@
 		<CppCheckDefines            Condition="'$(CppCheckDefines)' == ''">__cplusplus</CppCheckDefines>
         <CppCheckIgnores            Condition="'$(CppCheckIgnores)' == ''"></CppCheckIgnores>
         <CppCheckOutputType         Condition="'$(CppCheckOutputType)' == ''">xml-version-1</CppCheckOutputType>
-        <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-cppcheck</CppCheckOutputPath>
+        <CppCheckOutputPath         Condition="'$(CppCheckOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-cppcheck</CppCheckOutputPath>
         <CppCheckTaskEnabled        Condition="'$(CppCheckTaskEnabled)' == ''">false</CppCheckTaskEnabled>
     </PropertyGroup>
 
