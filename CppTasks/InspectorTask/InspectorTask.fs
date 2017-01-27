@@ -22,7 +22,10 @@ type GenericTaskExecuter() =
                                        Arguments = args,
                                        UseShellExecute = false,
                                        RedirectStandardOutput = true)
-        env |> List.map startInfo.EnvironmentVariables.Add |> ignore
+        try
+            env |> List.map startInfo.EnvironmentVariables.Add |> ignore
+        with
+        | _ -> ()
         Process.Start(startInfo)
 
     member this.ExecuteProgram(logger, program, args, env, timouthandler : Stopwatch) =

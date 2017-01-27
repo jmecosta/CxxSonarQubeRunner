@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>GtestXunitConverterTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <NuGetPackageImportStamp>0beb4f5b</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -82,16 +82,14 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="Foq">
-      <HintPath>..\..\Nuget\Foq.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\refs\Foq.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\refs\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data.TypeProviders" />
     <Reference Include="Microsoft.Build" />

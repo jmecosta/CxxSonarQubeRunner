@@ -121,6 +121,11 @@ let WriteFile(file : string, content : Array) =
         outFile.WriteLine(elem)
 
 let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
+    printf "Apply the following changes to sonar configuration Files\r\n";
+    argsPars |> Map.iter (fun c d -> 
+        let line = sprintf """"%s : %s \r\n""" c d
+        printf "%s" line
+        )
     use outFile = new StreamWriter(file)
     outFile.WriteLine("""<?xml version="1.0" encoding="utf-8" ?>""")
     outFile.WriteLine("""<SonarQubeAnalysisProperties  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">""")

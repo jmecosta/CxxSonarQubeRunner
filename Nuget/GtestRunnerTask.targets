@@ -5,7 +5,7 @@
     <PropertyGroup>
         <TestSuffix                    Condition="'$(TestSuffix)' == ''">_tests.cpp;_test.cpp</TestSuffix>
         <GtestXMLReportFile            Condition="'$(GtestXMLReportFile)' == ''">$(SolutionDir)\gtest-reports\$(ProjectName).xml</GtestXMLReportFile>
-        <GtestXunitConverterOutputPath Condition="'$(GtestXunitConverterOutputPath)' == ''">$(SolutionDir)\sonarcpp\reports-xunit</GtestXunitConverterOutputPath>
+        <GtestXunitConverterOutputPath Condition="'$(GtestXunitConverterOutputPath)' == ''">$(SolutionDir)\.cxxresults\reports-xunit</GtestXunitConverterOutputPath>
         <SkipSearchForFileLocation     Condition="'$(SkipSearchForFileLocation)' == ''">true</SkipSearchForFileLocation>
         <RunTests                      Condition="'$(RunTests)' == ''">true</RunTests>
         <GtestExeFile                  Condition="'$(GtestExeFile)' == ''">$(OutDir)$(TargetName)$(TargetExt)</GtestExeFile>

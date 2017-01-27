@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>RatsTask.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <NuGetPackageImportStamp>48cb9ae4</NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -62,12 +62,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Foq">
-      <HintPath>..\..\Nuget\Foq.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\refs\Foq.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\..\Nuget\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\refs\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
