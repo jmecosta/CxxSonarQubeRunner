@@ -5,6 +5,7 @@ open System.IO
 open System.IO.Compression
 open System.Text
 open System.Net
+open System.Linq
 open System.Text.RegularExpressions
 open System.Diagnostics
 open System.Reflection
@@ -641,27 +642,29 @@ type OptionsData(args : string []) =
                     printf "[CxxSonarQubeMsbuidRunner] New project was provisioned correctly %s \r\n" key
                     new Resource(Key = key + ":" + this.Branch, BranchName = this.Branch)
             
-            // duplicate main branch props to branch             
-            let propertiesofMainBranch = (rest :> ISonarRestService).GetProperties(token, projectParent.[0])
+            // duplicate main branch props to branch
+            let propertiesofMainBranch = (rest :> ISonarRestService).GetSettings(token, projectParent.[0]).ToList()
             printf "[CxxSonarQubeMsbuidRunner] Duplicating %i properties from master\r\n" propertiesofMainBranch.Count
             for prop in propertiesofMainBranch do
-                let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, prop.Value, branchProject)
+                let errormsg = (rest :> ISonarRestService).SetSetting(token, prop, branchProject)
                 if errormsg <> "" then
-                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply prop %s : %s\r\n" prop.Key errormsg
+                    printf "[CxxSonarQubeMsbuidRunner] %s : %s \r\n" prop.key errormsg
 
             
             // clean any prop that is not in main
-            let propertiesofBranch = (rest :> ISonarRestService).GetProperties(token, branchProject)            
-            for prop in propertiesofBranch do
-                if propertiesofMainBranch.ContainsKey(prop.Key) && not(propertiesofMainBranch.[prop.Key].Equals(prop.Value)) then
-                    let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, propertiesofMainBranch.[prop.Key], branchProject)
-                    if errormsg <> "" then
-                        printf "[CxxSonarQubeMsbuidRunner] Failed to apply updated value from main branch : prop %s : %s\r\n" prop.Key errormsg                        
+            //let propertiesofBranch = (rest :> ISonarRestService).GetSettings(token, branchProject).ToList()
+            //for prop in propertiesofBranch do
+            //    if propertiesofMainBranch.ContainsKey(prop.Key) && not(propertiesofMainBranch.[prop.Key].Equals(prop.Value)) then
+            //        let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, propertiesofMainBranch.[prop.Key], branchProject)
+            //        if errormsg <> "" then
+            //            printf "[CxxSonarQubeMsbuidRunner] Failed to apply updated value from main branch : prop %s : %s\r\n" prop.Key errormsg
+            //        else
+            //            printf "[CxxSonarQubeMsbuidRunner] Applied updated value from main branch : prop %s : %s\r\n" prop.Key prop.Value
 
-                if not(propertiesofMainBranch.ContainsKey(prop.Key)) then
-                    let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, "", branchProject)
-                    if errormsg <> "" then
-                        printf "[CxxSonarQubeMsbuidRunner] Failed to clear prop %s : %s\r\n" prop.Key errormsg
+            //    if not(propertiesofMainBranch.ContainsKey(prop.Key)) then
+            //        let errormsg = (rest :> ISonarRestService).UpdateProperty(token, prop.Key, "", branchProject)
+            //        if errormsg <> "" then
+            //            printf "[CxxSonarQubeMsbuidRunner] Failed to clear prop %s : %s\r\n" prop.Key errormsg
 
             // ensure same quality profiles are in used by both branches
             let profiles = (rest :> ISonarRestService).GetQualityProfilesForProject(token, projectParent.[0])

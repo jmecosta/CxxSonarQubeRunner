@@ -56,7 +56,7 @@
   <ItemGroup>
     <Compile Include="CppLintTaskTest.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CppLintTask\CppLintMSBuildTask.fsproj">
@@ -82,7 +82,7 @@
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.3.0.0-rc\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="CppCheckTaskTest.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Foq">
@@ -70,20 +70,18 @@
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.3.0.0-rc\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>True</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildUtilityHelpers.fsproj">
       <Name>MsbuildUtilityHelpers</Name>
       <Project>{8e7d4ac9-ab34-4f3a-bfc6-7bc7b9aac9ae}</Project>
