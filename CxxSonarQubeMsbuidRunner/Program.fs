@@ -54,13 +54,13 @@ let main argv =
                     printf "Exception During Run: %s \r\n %s" ex.Message ex.StackTrace            
                     ret <- 1
 
-            
                 options.Clean()
                 options.DuplicateFalsePositives()
-
         with
         | ex ->
             printf "Exception During Run: %s %s\r\n" ex.Message ex.StackTrace
             ret <- 1
+        
+
         
     ret

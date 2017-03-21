@@ -147,7 +147,7 @@ let InstallCppLint() =
         wc.DownloadFile("""https://raw.githubusercontent.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/master/Nuget/CppLint/cpplint_mod.py""", cpplintMod)
     cpplintMod
 
-let InstallRats() =    
+let InstallRats() = 
     Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/rats.zip""", "RATS"), "rats.exe")
 
 let InstallVera() =

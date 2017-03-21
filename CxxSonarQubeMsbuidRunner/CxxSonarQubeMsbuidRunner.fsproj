@@ -41,7 +41,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>/k:Tekla.Tools.RoslynRunner /n:RoslynRunner  /v:work /m=D:\Development\SonarQube\dotnet\sonar-roslyn-plugin\RoslynRunner\RoslynRunner.sln</StartArguments>
+    <StartArguments>/i</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -84,16 +84,16 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\FSharp.Data.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\FSharp.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\FSharp.Data.DesignTime.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\FSharp.Data.DesignTime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\MsbuildAutomationHelper.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\MsbuildAutomationHelper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
@@ -101,11 +101,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\RestSharp.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SonarRestService">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\SonarRestService.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\SonarRestService.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -145,11 +145,11 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\VSSonarPlugins.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\VSSonarPlugins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VSSonarQubeCmdExecutor">
-      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.0\lib\VSSonarQubeCmdExecutor.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin3Api.6.1.1\lib\VSSonarQubeCmdExecutor.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

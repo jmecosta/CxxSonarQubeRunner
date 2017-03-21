@@ -204,7 +204,7 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "1.1"
+            "2.2"
 
     let parentBranch = 
         if arguments.ContainsKey("b") then
