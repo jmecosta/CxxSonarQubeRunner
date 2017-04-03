@@ -42,6 +42,36 @@ The wrapper will install the needed tools to run analysis, however in cases were
 </CxxUserProperties>
 ```
 
+## Command line options
+
+        Usage: CxxSonarQubeMsbuidRunner [OPTIONS]
+        Runs MSbuild Runner with Cxx Support
+        
+        Options:
+            /A|/a:<amd64, disabled>
+            /B|/b:<parent_branch  : in multi branch confiuration. Its parent branch>
+            /C|/c:<Permission template to apply when using feature branches>
+            /D|/d:<property to pass : /d:sonar.host.url=http://localhost:9000>
+            /E|/e reuse reports mode, cxx  static tools will not run. Ensure reports are placed in default locations.
+            /F|/f disable code analysis in solution.
+            /G|/g enable verbose mode.
+        
+            /I|/i wrapper will install tools only. No analysis is performed
+            /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>
+            /K|/k:<key : key>
+        
+            /M|/m:<solution file : mandatory>
+            /N|/n:<name : name>
+        
+            /P|/p:<additional settings for msbuild - /p:Configuration=Release>
+            /Q|/q:<SQ msbuild runner path>
+            /R|/r:<msbuild sonarqube runner -> 1.1>       
+            /S|/s:<additional settings filekey>
+            /T|/t:<msbuild target, default is /t:Rebuild>
+        
+            /V|/v:<version : version>
+            /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>
+
 ## Custom msbuild tasks
 This wrapper uses several msbuild tasks that can be used outside the wrapper. Nuget packages are available in Nuget.org and can be installed by follwing the next instructions
 
