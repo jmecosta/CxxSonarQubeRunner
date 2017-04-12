@@ -416,6 +416,7 @@ let EndPhase(options : OptionsData) =
                     HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "STATUS: %s Project did not pass the defined quality gate.\r\n" response.ProjectStatus.Status))
                     if options.FailOnFailedGate then
                         printf "##teamcity[buildProblem description='Gate Failing']]\r\n"
+                        raise(new Exception("Project did not pass the defined quality gate."))
         else
             let content = HelpersMethods.GetRequest(username, options.SonarUserPassword, urlForChecking.Replace("task?id=" + idAnalysis, "logs?taskId=" + idAnalysis))
             HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "%s" content))
