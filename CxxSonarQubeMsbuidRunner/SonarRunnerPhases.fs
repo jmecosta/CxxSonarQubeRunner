@@ -11,7 +11,7 @@ open FSharp.Data
 open Options
 
 type StatusAnalysis = JsonProvider<"""
-{"task":{"id":"AVJJb5v27B9KTw6sNKZv","type":"REPORT","componentId":"AVJJamkH7B9KTw6sNKYe","componentKey":"Tekla.Tools.RoslynRunner","componentName":"RoslynRunner","componentQualifier":"TRK","analysisId":"720","status":"SUCCESS","submittedAt":"2016-01-16T09:56:37+0200","submitterLogin":"admin","startedAt":"2016-01-16T09:56:37+0200","executedAt":"2016-01-16T09:56:38+0200","executionTimeMs":862,"logs":true}}
+{"task":{"organization":"default-organization","id":"AVtd7ZDTxV0p7xjZ0mSW","type":"REPORT","componentId":"52b3c171-c7b9-4e20-8374-545898863b0f","componentKey":"Tekla.Structures.DotApps:DotNetInterface","componentName":"DotNetInterface","componentQualifier":"TRK","analysisId":"AVtd7ZjSfRkk4M2OYRqg","status":"SUCCESS","submittedAt":"2017-04-11T19:51:42+0300","submitterLogin":"user","startedAt":"2017-04-11T19:51:43+0300","executedAt":"2017-04-11T19:56:16+0300","executionTimeMs":272925,"logs":false,"hasScannerContext":true}}
 """>
 
 type GateAnalysis = JsonProvider<"""
@@ -342,9 +342,12 @@ let EndPhase(options : OptionsData) =
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable idAnalysis = ""
     let mutable urlForChecking = ""
-    let ProcessEndPhaseData(e : DataReceivedEventArgs) = 
+    
+    let ProcessEndPhaseData(e : DataReceivedEventArgs) =         
         if not(String.IsNullOrWhiteSpace(e.Data))  then
             printf  "%s\r\n" e.Data
+            if e.Data.Contains("EXECUTION FAILURE") then 
+                printf "##teamcity[buildProblem description='Analysis Failed: Check Build Log']]\r\n"
 
             if e.Data.Contains("More about the report processing at") then
                 urlForChecking <- e.Data.Split([|"More about the report processing at"|], StringSplitOptions.RemoveEmptyEntries).[1].Trim()
@@ -364,7 +367,7 @@ let EndPhase(options : OptionsData) =
             let content = 
                 try
                     printf "CHECK GATE ON 5.3: %s \r\n" response.Task.Status
-                    let mutable gateurl = options.SonarHost + "/api/qualitygates/project_status?analysisId=" + (response.Task.AnalysisId.ToString())
+                    let mutable gateurl = options.SonarHost + "/api/qualitygates/project_status?analysisId=" + response.Task.AnalysisId
                     HelpersMethods.GetRequest(username, options.SonarUserPassword, gateurl)
                 
                 with
@@ -382,6 +385,9 @@ let EndPhase(options : OptionsData) =
 
                 if response.ProjectStatus.Status = "ERROR" then
                     HelpersMethods.cprintf(ConsoleColor.Red, (sprintf "STATUS: %s \r\n" response.ProjectStatus.Status))
+                    if options.FailOnFailedGate then
+                        printf "##teamcity[buildProblem description='Gate Failing']]\r\n"
+
                 elif response.ProjectStatus.Status = "WARN" then
                     HelpersMethods.cprintf(ConsoleColor.Yellow, (sprintf "STATUS: %s \r\n" response.ProjectStatus.Status))
                 elif response.ProjectStatus.Status = "OK" then
@@ -433,5 +439,5 @@ let EndPhase(options : OptionsData) =
             0
     else
         HelpersMethods.cprintf(ConsoleColor.Red, "[EndPhase] : Failed. Check Log")
-        returncode        
-        
+        printf "##teamcity[buildProblem description='sonar-scanner return non 0 error code']]\r\n"
+        1

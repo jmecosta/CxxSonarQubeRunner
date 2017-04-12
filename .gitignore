@@ -112,3 +112,4 @@ ObjDrop/
 *.unittest.report.xml
 .sonarqube/*
 .cxxresults/*
+.vs/**

@@ -182,7 +182,8 @@ let ShowHelp() =
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
 
-        
+        Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
+
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
 
@@ -195,6 +196,8 @@ type OptionsData(args : string []) =
     let installMode = arguments.ContainsKey("i")
 
     let disableCodeAnalysis = arguments.ContainsKey("f")
+
+    let failedOnFailedGate = arguments.ContainsKey("z")
 
     let reuseMode = arguments.ContainsKey("e")
 
@@ -292,6 +295,7 @@ type OptionsData(args : string []) =
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
     member val Branch : string = "" with get, set
+    
 
     member val ProjectKey : string = "" with get, set
     member val ProjectName : string = "" with get, set
@@ -324,6 +328,7 @@ type OptionsData(args : string []) =
     
     member val DisableCodeAnalysis = disableCodeAnalysis
     member val IsVerboseOn = verboseModeTrue
+    member val FailOnFailedGate = failedOnFailedGate
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
