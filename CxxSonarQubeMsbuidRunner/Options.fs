@@ -167,7 +167,7 @@ let ShowHelp() =
         Console.WriteLine ("    /G|/g enable verbose mode.")
 
         Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
-        Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>")
+        Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /j:1 is default. 0 uses all processors>")
         Console.WriteLine ("    /K|/k:<key : key>")
         
         Console.WriteLine ("    /M|/m:<solution file : mandatory>")
@@ -180,7 +180,7 @@ let ShowHelp() =
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
 
         Console.WriteLine ("    /V|/v:<version : version>")
-        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>")
+        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
 
         Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
 

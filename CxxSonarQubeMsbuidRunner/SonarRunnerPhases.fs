@@ -106,6 +106,8 @@ let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
     if not(String.IsNullOrWhiteSpace(e.Data))  then
         printf  "%s\r\n" e.Data
 
+let flavours = [ "Enterprise"; "Community"; "Professional" ]
+
 let EnvForBuild(vsVersion : string, useAmd64 : bool) = 
     let buildEnvironmentPlatform =
         if useAmd64 then
@@ -134,7 +136,16 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
             if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
                 "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
             else
-                "C:\\Program Files\\Microsoft Visual Studio 12.0\\VC\\vcvarsall.bat"
+                "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+        elif vsVersion = "vs17" then
+            let mutable ret = ""
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+                    elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+            ret
         else
             if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
                 "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
@@ -208,7 +219,6 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
             else
                 @"C:\Program Files\MSBuild\12.0\Bin\MSBuild.exe"
 
-
     elif vccompiler.Equals("vs15") then 
         if useMSBuild64 then
             if File.Exists(@"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe") then
@@ -220,6 +230,24 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
                 @"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
             else
                 @"C:\Program Files\MSBuild\14.0\Bin\MSBuild.exe"
+
+    elif vccompiler.Equals("vs17") then 
+        let mutable ret = ""
+        if useMSBuild64 then
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe"
+                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe"
+        else                
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+        ret
     else
         if useMSBuild64 then
             @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
