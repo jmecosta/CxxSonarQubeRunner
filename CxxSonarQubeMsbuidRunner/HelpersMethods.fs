@@ -16,13 +16,22 @@ let cprintf(c : ConsoleColor, stringdata:string) =
         System.Console.ForegroundColor <- old
         
 let GetRequest(username: string, password:string, url : string) =
+    // required to call https://sonarqube.com 
+    // not convinced on the scalability of this approach should Tls12 become vulnerable
+    ServicePointManager.SecurityProtocol <- SecurityProtocolType.Tls12
+
     printf "[SERVER CALL] %s\r\n" url
     let req = HttpWebRequest.Create(url) :?> HttpWebRequest 
     req.Method <- "GET"
     req.ContentType <- "text/json"
 
-    if username <> "" && password <> "" then
-        let auth = "Basic " + (username + ":" + password |> Encoding.UTF8.GetBytes |> Convert.ToBase64String)
+    if username <> "" then
+        let pwd = 
+            if String.IsNullOrWhiteSpace(password) then
+                String.Empty
+            else
+                password
+        let auth = "Basic " + (username + ":" + pwd |> Encoding.UTF8.GetBytes |> Convert.ToBase64String)
         req.Headers.Add("Authorization", auth)
 
     // read data
