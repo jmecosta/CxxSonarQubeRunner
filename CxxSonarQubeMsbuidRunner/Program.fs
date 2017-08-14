@@ -24,6 +24,9 @@ let main argv =
             let options = new OptionsData(argv)
             options.ConfigureInstallationOfTools()
 
+            if options.InstallMode then
+                options.ConfigureMsbuildRunner()
+
             if not(options.InstallMode) then
                 options.ValidateSolutionOptions()
                 options.ConfigureMsbuildRunner()

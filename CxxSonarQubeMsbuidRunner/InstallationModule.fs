@@ -80,13 +80,16 @@ let InstallChocolatey() =
 let DownloadAndInstallZipDist(url : string, swName : string) = 
     let installPath = Path.Combine(InstallationPathHome, swName)
 
-    if not(Directory.Exists(installPath)) then
-        Directory.CreateDirectory(installPath) |> ignore
+    try
+        if not(Directory.Exists(installPath)) then
+            Directory.CreateDirectory(installPath) |> ignore
         let tmpPath  = Path.GetTempFileName()
         let wc = new WebClient()
-        wc.DownloadFile(url, tmpPath)        
+        wc.DownloadFile(url, tmpPath)
         UnzipFileToFolder(tmpPath, installPath) 
         File.Delete(tmpPath)
+    with
+    | ex -> ()
 
     installPath
 
@@ -100,35 +103,34 @@ let DownloadAndInstallMSIDist(url : string, installationPath : string) =
 
 let InstallMsbuildRunner(version : string) =
     let exePath = Path.Combine(InstallationPathHome, version, "MSBuild.SonarQube.Runner.exe")
+    let exePathNew = Path.Combine(InstallationPathHome, version, "SonarQube.Scanner.MSBuild.exe")
 
-    if not(File.Exists(exePath)) then
+    if File.Exists(exePathNew) then
+        exePathNew
+    elif File.Exists(exePath) then
+        exePath
+    else
         if Directory.Exists(Path.Combine(InstallationPathHome, version)) then
             Directory.Delete(Path.Combine(InstallationPathHome, version), true)
 
         printf "Download and install msbuild runner from github, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
-        try
-            try
-                let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
-                printf "Download %s\r\n" downloadUrl
-                let exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
-                if not(File.Exists(exe)) then
-                    raise (new Exception("Unable to download and unzip file from github : " + downloadUrl))
-                exe
-            with
-            | _ ->   
-                let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner.%s.zip""" version version
-                printf "Download %s\r\n" downloadUrl
-                let exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
-                if not(File.Exists(exe)) then
-                    raise (new Exception("Unable to download and unzip file from github : " + downloadUrl))
-                exe
-        with
-        | ex ->
-            let data = sprintf "Unable to install msbuild runner from github : " + ex.Message + " please provide external location\r\n"
-            printf "%s" data
-            raise (ex)         
-    else
-        exePath
+
+        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
+        printf "Download %s\r\n" downloadUrl
+        let mutable exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+        if not(File.Exists(exe)) then
+            let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/sonar-scanner-msbuild-%s.zip""" version version
+            printf "Download %s\r\n" downloadUrl
+            exe <- Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+
+        if not(File.Exists(exe)) then
+            let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner.%s.zip""" version version
+            printf "Download %s\r\n" downloadUrl
+            exe <- Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+
+        if not(File.Exists(exe)) then
+            raise (new Exception("Unable to download and unzip file from github : " + downloadUrl))
+        exe
 
 let InstallPython() =
     let mutable pythonPath = Path.Combine(GetPythonPath(), "python.exe")
