@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>InspectorTask</RootNamespace>
     <AssemblyName>InspectorMSBuildTask</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>InspectorMSBuildTask</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

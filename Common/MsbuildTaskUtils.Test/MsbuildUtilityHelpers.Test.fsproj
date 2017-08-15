@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>MsbuildTaskUtils.Test</RootNamespace>
     <AssemblyName>MsbuildUtilityHelpers.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>MsbuildUtilityHelpers.Test</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>

@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CppCheckTask</RootNamespace>
     <AssemblyName>CppCheckMSBuildTask</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Name>CppCheckMSBuildTask</Name>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
