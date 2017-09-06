@@ -61,9 +61,5 @@ let main argv =
                 options.DuplicateFalsePositives()
         with
         | ex ->
-            printf "Exception During Run: %s %s\r\n" ex.Message
             ret <- 1
-        
-
-        
     ret

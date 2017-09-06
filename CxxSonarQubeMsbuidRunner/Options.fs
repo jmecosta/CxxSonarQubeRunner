@@ -332,12 +332,16 @@ type OptionsData(args : string []) =
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
+            let errorMsg = sprintf "/m must be specifed. See /h for complete help"
+            printf "%s\r\n\r\n" errorMsg
             ShowHelp()
-            raise(new Exception("/m must be specifed. See /h for complete help"))
+            raise(new Exception())
 
         if not(arguments.ContainsKey("m")) then
+            let errorMsg = sprintf "/m must be specifed. See /h for complete help"
+            printf "%s\r\n\r\n" errorMsg
             ShowHelp()
-            raise(new Exception("/m must be specifed. See /h for complete help"))
+            raise(new Exception())
 
         this.Solution <- 
             let data = arguments.["m"] |> Seq.head
@@ -347,13 +351,15 @@ type OptionsData(args : string []) =
                 Path.Combine(Environment.CurrentDirectory, data)
 
         if not(File.Exists(this.Solution)) then
+            let errorMsg = sprintf "/m used does not point to existent solution: %s" this.Solution
+            printf "%s\r\n\r\n" errorMsg
             ShowHelp()
-            raise(new Exception("/m used does not point to existent solution: " + this.Solution))
+            raise(new Exception())
 
         
         // setup properties paths
         this.ParallelMsbuildOption <- parallelBuilds
-        this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)                                        
+        this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)
         this.HomePath <- 
                 Directory.GetParent(this.Solution).ToString()
 
@@ -609,11 +615,8 @@ type OptionsData(args : string []) =
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##########################################")
 
             let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
-                let pass =
-                    if this.SonarUserPassword = "" then
-                        "admin"
-                    else
-                        this.SonarUserPassword
+                let pass = this.SonarUserPassword
+
 
                 let user =
                     if this.SonarUserName = "" then
@@ -625,7 +628,7 @@ type OptionsData(args : string []) =
                 token.SonarVersion <- float (service.GetServerInfo(token))
                 token
 
-            let rest = new SonarRestService(new JsonSonarConnector())        
+            let rest = new SonarRestService(new JsonSonarConnector())
             let token = GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
 
             let key = this.ProjectKey.Replace("/k:", "")
@@ -647,6 +650,19 @@ type OptionsData(args : string []) =
                     printf "[CxxSonarQubeMsbuidRunner] New project was provisioned correctly %s \r\n" key
                     new Resource(Key = key + ":" + this.Branch, BranchName = this.Branch)
             
+            if permissiontemplatename <> "" then
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
+                HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
+                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(token, branchProject.Key, permissiontemplatename)
+                if errormsg <> "" then
+                    printf "[CxxSonarQubeMsbuidRunner] Failed to apply permission template %s : %s\r\n" permissiontemplatename errormsg
+                else
+                    printf "[CxxSonarQubeMsbuidRunner] permission template %s : applied correctly to %s \r\n" permissiontemplatename  branchProject.Key
+
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "#######################################################")
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Duplicate Settings from Master ############") 
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "#######################################################")
             // duplicate main branch props to branch
             let propertiesofMainBranch = (rest :> ISonarRestService).GetSettings(token, projectParent.[0]).ToList()
             printf "[CxxSonarQubeMsbuidRunner] Duplicating %i properties from master\r\n" propertiesofMainBranch.Count
@@ -654,6 +670,8 @@ type OptionsData(args : string []) =
                 let errormsg = (rest :> ISonarRestService).SetSetting(token, prop, branchProject)
                 if errormsg <> "" then
                     printf "[CxxSonarQubeMsbuidRunner] %s : %s \r\n" prop.key errormsg
+                else
+                    printf "[CxxSonarQubeMsbuidRunner] %s : set with Value: %s \r\n" prop.key prop.Value
 
             
             // clean any prop that is not in main
@@ -672,6 +690,9 @@ type OptionsData(args : string []) =
             //            printf "[CxxSonarQubeMsbuidRunner] Failed to clear prop %s : %s\r\n" prop.Key errormsg
 
             // ensure same quality profiles are in used by both branches
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "#######################################################")
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Applying Quality Profiles #################") 
+            HelpersMethods.cprintf(ConsoleColor.DarkCyan, "#######################################################")
             let profiles = (rest :> ISonarRestService).GetQualityProfilesForProject(token, projectParent.[0])
             let profilesBranch = (rest :> ISonarRestService).GetQualityProfilesForProject(token, branchProject)
             let profilesByApi = (rest :> ISonarRestService).GetProfilesUsingRulesApp(token)
