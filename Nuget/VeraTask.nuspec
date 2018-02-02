@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>VeraTask</id>
-        <version>1.5.8</version>
+        <version>1.5.9</version>
         <authors>jmecsoftware.com</authors>
         <owners>jmecsoftware.com</owners>
         <licenseUrl>https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/blob/master/License.txt</licenseUrl>

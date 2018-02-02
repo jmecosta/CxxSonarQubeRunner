@@ -207,7 +207,7 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "2.2"
+            "4.0.2.892"
 
     let parentBranch = 
         if arguments.ContainsKey("b") then
@@ -695,14 +695,12 @@ type OptionsData(args : string []) =
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "#######################################################")
             let profiles = (rest :> ISonarRestService).GetQualityProfilesForProject(token, projectParent.[0])
             let profilesBranch = (rest :> ISonarRestService).GetQualityProfilesForProject(token, branchProject)
-            let profilesByApi = (rest :> ISonarRestService).GetProfilesUsingRulesApp(token)
 
             for profile in profiles do
                 let branchProfile = List.ofSeq profilesBranch |> Seq.find (fun c -> c.Language.Equals(profile.Language))
 
                 if branchProfile.Name <> profile.Name then
-                    let compProfile = List.ofSeq profilesByApi |> Seq.find (fun c -> c.Name.Equals(profile.Name) && c.Language.Equals(profile.Language))                
-                    let errormsg = (rest :> ISonarRestService).AssignProfileToProject(token, compProfile.Key, branchProject.Key)
+                    let errormsg = (rest :> ISonarRestService).AssignProfileToProject(token, profile.Key, branchProject.Key)
                     if errormsg <> "" then
                         printf "[CxxSonarQubeMsbuidRunner] Failed to apply profile %s : %s\r\n" profile.Name errormsg
                     else

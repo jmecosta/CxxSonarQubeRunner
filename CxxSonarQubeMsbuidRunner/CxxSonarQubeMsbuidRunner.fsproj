@@ -28,7 +28,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>/i /r 3.0.2.656</StartArguments>
+    <StartArguments>/x:vs15 /m:D:\Trimble\trimble-connect-desktop\Source\TrimbleConnect.sln /d:sonar.branch=feature_TCD-1394-grid-indicator-in-model-tree /b:master /c:DevInteral /k:Trimble.Connect.Desktop /n:Trimble.Connect.Desktop /v:work /r:4.0.2.892 /d:sonar.host.url=http://sonar /d:sonar.cs.opencover.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\*.coverage.xml /d:sonar.cs.nunit.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\*.unittest.report.xml /d:sonar.fs.opencover.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\dummy1.xml /d:sonar.fs.nunit.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\dummy1.xml /d:sonar.login=tekla.buildmaster /p:SonarQubeTempPath=D:\Trimble\trimble-connect-desktop\Source\.sonarqube /p:NunitRunnerTaskEnabled=true /p:ProduceCoverage=true</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,7 +41,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>/i</StartArguments>
+    <StartArguments>/x:vs15 /m:C:\prod\structures\DOT_APPS\TeklaExtensionPackage\Catalogs.sln /d:sonar.branch=feature_TTSD-6419_Take_dbv_context_into_use_in_sketch_db /b:master /c:geometricglobal /k:tekla.structures.core:Catalogs /n:Catalogs /v:work /r:3.0.2.656 /d:sonar.host.url=http://sonar /d:sonar.login=48d9a0810ba41392afd6c71c7eaccc0978c4b995 /p:SonarQubeTempPath=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.sonarqube /p:NunitRunnerTaskEnabled=true /p:ProduceCoverage=true /p:IntelInspectorTaskEnabled=true /p:IntelResultDir=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.cxxresults\reports-other /p:GtestXunitConverterOutputPath=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.cxxresults\reports-xunit /p:Platform=x64 /d:sonar.cxx.xunit.reportPath=.cxxresults/reports-xunit/*.xml /d:sonar.branch=master /j=1 /f t:"clean;build" /p:PythonPath=C:\tools\python2\python.exe /p:VeraPath=C:\ProgramData\MSBuidSonarQube\VERA\bin\vera++.exe /d:sonar.branch=feature_TTSD-6419_Take_dbv_context_into_use_in_sketch_db /j=2 /f</StartArguments>
+    <StartWorkingDirectory>C:\prod\structures\DOT_APPS\TeklaExtensionPackage\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -84,29 +85,24 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\FSharp.Data.DesignTime.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.DesignTime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\MsbuildAutomationHelper.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\MsbuildAutomationHelper.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\RestSharp.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="SonarRestService">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\SonarRestService.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\SonarRestService.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -145,12 +141,10 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\VSSonarPlugins.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarPlugins.dll</HintPath>
     </Reference>
     <Reference Include="VSSonarQubeCmdExecutor">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\VSSonarQubeCmdExecutor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarQubeCmdExecutor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

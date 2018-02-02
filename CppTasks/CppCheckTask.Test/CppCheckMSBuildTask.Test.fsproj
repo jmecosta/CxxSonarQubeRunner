@@ -64,19 +64,16 @@
       <HintPath>..\..\refs\Foq.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\FSharp.Data.DesignTime.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.DesignTime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\MsbuildAutomationHelper.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\MsbuildAutomationHelper.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -88,12 +85,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\RestSharp.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="SonarRestService">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\SonarRestService.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\SonarRestService.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -110,12 +105,10 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\VSSonarPlugins.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarPlugins.dll</HintPath>
     </Reference>
     <Reference Include="VSSonarQubeCmdExecutor">
-      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.0\lib\VSSonarQubeCmdExecutor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarQubeCmdExecutor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
