@@ -182,6 +182,7 @@ let ShowHelp() =
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
 
+        Console.WriteLine ("    /W|/w:<skip copy false positives and apply permission template, when not defined it will copy>")
         Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
@@ -292,6 +293,7 @@ type OptionsData(args : string []) =
 
     member val SonarHost : string = "" with get, set
     member val InstallMode : bool = installMode
+    member val ApplyFalseAndPermissionTemplate : bool = true with get, set
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
     member val Branch : string = "" with get, set
@@ -468,6 +470,8 @@ type OptionsData(args : string []) =
                     this.Branch <- prop.Value           
         with
         | _ -> ()
+
+        this.ApplyFalseAndPermissionTemplate <- not(arguments.ContainsKey("w"))
 
         // options that are passed with /s
         this.PropsInSettingsFile <- 
