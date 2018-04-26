@@ -175,7 +175,7 @@ let ShowHelp() =
 
         Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
         Console.WriteLine ("    /Q|/q:<SQ msbuild runner path>")
-        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1>")       
+        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1 or path to runner>")       
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
 
@@ -389,7 +389,11 @@ type OptionsData(args : string []) =
             try
                 this.MSBuildRunnerPath <- userCxxSettings.MsbuildRunnerPath
             with
-            | _ -> this.MSBuildRunnerPath <- InstallMsbuildRunner(msbuildRunnerVersion)
+            | _ -> this.MSBuildRunnerPath <- 
+                    if File.Exists(msbuildRunnerVersion) then
+                        msbuildRunnerVersion
+                    else
+                        InstallMsbuildRunner(msbuildRunnerVersion)
 
     member this.ConfigureInstallationOfTools() =
         

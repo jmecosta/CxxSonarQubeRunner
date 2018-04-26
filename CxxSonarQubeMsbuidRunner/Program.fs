@@ -59,7 +59,11 @@ let main argv =
 
                 if options.ApplyFalseAndPermissionTemplate then
                     options.Clean()
-                    options.DuplicateFalsePositives()
+                    try
+                        options.DuplicateFalsePositives()
+                    with
+                    | ex ->
+                        printf "Exception During Run: %s \r\n %s" ex.Message ex.StackTrace
         with
         | ex ->
             printf "Exception During Run: %s \r\n %s" ex.Message ex.StackTrace

@@ -106,7 +106,7 @@ let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
     if not(String.IsNullOrWhiteSpace(e.Data))  then
         printf  "%s\r\n" e.Data
 
-let flavours = [ "Enterprise"; "Community"; "Professional" ]
+let flavours = [ "Enterprise"; "Community"; "Professional"; "BuildTools" ]
 
 let EnvForBuild(vsVersion : string, useAmd64 : bool) = 
     let buildEnvironmentPlatform =
