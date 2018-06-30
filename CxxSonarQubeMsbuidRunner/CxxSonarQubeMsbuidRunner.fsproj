@@ -28,7 +28,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>/x:vs15 /m:D:\Trimble\trimble-connect-desktop\Source\TrimbleConnect.sln /d:sonar.branch=feature_TCD-1394-grid-indicator-in-model-tree /b:master /c:DevInteral /k:Trimble.Connect.Desktop /n:Trimble.Connect.Desktop /v:work /r:4.0.2.892 /d:sonar.host.url=http://sonar /d:sonar.cs.opencover.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\*.coverage.xml /d:sonar.cs.nunit.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\*.unittest.report.xml /d:sonar.fs.opencover.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\dummy1.xml /d:sonar.fs.nunit.reportsPaths=D:\Trimble\trimble-connect-desktop\Source\dummy1.xml /d:sonar.login=tekla.buildmaster /p:SonarQubeTempPath=D:\Trimble\trimble-connect-desktop\Source\.sonarqube /p:NunitRunnerTaskEnabled=true /p:ProduceCoverage=true</StartArguments>
+    <StartArguments>/x:vs17 /m:D:\TSD\tsd\Vision.sln /v:work /d:sonar.host.url=http://sonar /u</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -85,24 +85,24 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\FSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data.DesignTime">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\FSharp.Data.DesignTime.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\FSharp.Data.DesignTime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="MsbuildAutomationHelper">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\MsbuildAutomationHelper.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\MsbuildAutomationHelper.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\RestSharp.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="SonarRestService">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\SonarRestService.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\SonarRestService.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -141,10 +141,10 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="VSSonarPlugins">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarPlugins.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\VSSonarPlugins.dll</HintPath>
     </Reference>
     <Reference Include="VSSonarQubeCmdExecutor">
-      <HintPath>..\packages\VSSonarExtensionPlugin4Api.6.3.7\lib\VSSonarQubeCmdExecutor.dll</HintPath>
+      <HintPath>..\packages\VSSonarExtensionPlugin43Api.7.1.0\lib\VSSonarQubeCmdExecutor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

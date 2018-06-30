@@ -9,7 +9,7 @@ open System.Diagnostics
 open Microsoft.Win32
 
 let ChocoExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "chocolatey", "choco.exe")
-let InstallationPathHome = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "MSBuidSonarQube")
+let InstallationPathHome = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "MSBuidSonarQube")
 let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
 
 let GetPythonPath() = 
@@ -84,12 +84,13 @@ let DownloadAndInstallZipDist(url : string, swName : string) =
         if not(Directory.Exists(installPath)) then
             Directory.CreateDirectory(installPath) |> ignore
         let tmpPath  = Path.GetTempFileName()
+        ServicePointManager.SecurityProtocol <- SecurityProtocolType.Tls12
         let wc = new WebClient()
         wc.DownloadFile(url, tmpPath)
         UnzipFileToFolder(tmpPath, installPath) 
         File.Delete(tmpPath)
     with
-    | ex -> ()
+    | ex -> HelpersMethods.cprintf(ConsoleColor.Cyan, "Failed to download url: " + ex.Message)
 
     installPath
 
@@ -104,8 +105,11 @@ let DownloadAndInstallMSIDist(url : string, installationPath : string) =
 let InstallMsbuildRunner(version : string) =
     let exePath = Path.Combine(InstallationPathHome, version, "MSBuild.SonarQube.Runner.exe")
     let exePathNew = Path.Combine(InstallationPathHome, version, "SonarQube.Scanner.MSBuild.exe")
+    let exePathNewNew = Path.Combine(InstallationPathHome, version, "SonarScanner.MSBuild.exe")
 
-    if File.Exists(exePathNew) then
+    if File.Exists(exePathNewNew) then
+        exePathNewNew
+    elif File.Exists(exePathNew) then
         exePathNew
     elif File.Exists(exePath) then
         exePath
@@ -115,9 +119,15 @@ let InstallMsbuildRunner(version : string) =
 
         printf "Download and install msbuild runner from github, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
 
-        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
+        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/%s/sonar-scanner-msbuild-%s-net46.zip""" version version
         printf "Download %s\r\n" downloadUrl
-        let mutable exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+        let mutable exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "SonarScanner.MSBuild.exe")
+
+        if not(File.Exists(exe)) then
+            let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
+            printf "Download %s\r\n" downloadUrl
+            exe <- Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "MSBuild.SonarQube.Runner.exe")
+
         if not(File.Exists(exe)) then
             let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/sonar-scanner-msbuild-%s.zip""" version version
             printf "Download %s\r\n" downloadUrl
@@ -137,30 +147,54 @@ let InstallPython() =
     if not(File.Exists(pythonPath)) then
         if InstallChocoPackage("python2") <> 0 then
             printf "[Install] Failed to install python, likely it will fail. please install manually python to 'c:/tools/python2' \r\n"
+            pythonPath
         else
-            pythonPath <- "c:\\tools\python2\\python.exe"
-
-    pythonPath
+            printf "[Install] Python available in %s\r\n" pythonPath
+            "c:\\tools\python2\\python.exe"
+    else
+        printf "[Install] python installed already in %s\r\n" pythonPath
+        pythonPath
 
 let InstallCppLint() =
     let cpplintMod = Path.Combine(InstallationPathHome, "cpplint_mod.py")
     if not(File.Exists(cpplintMod)) then
+        printf "[Install] Download patched version of cpplint\r\n"
         let wc = new WebClient()
         wc.DownloadFile("""https://raw.githubusercontent.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/master/Nuget/CppLint/cpplint_mod.py""", cpplintMod)
+    else
+        printf "[Install] cpplint installed already in %s\r\n" cpplintMod
     cpplintMod
 
 let InstallRats() = 
-    Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/rats.zip""", "RATS"), "rats.exe")
+    let ratsPath = Path.Combine(InstallationPathHome, "RATS", "rats.exe")
+    if not(File.Exists(ratsPath)) then
+        printf "[Install] Download version of rats\r\n"
+        Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/rats.zip""", "RATS"), "rats.exe")
+    else
+        printf "[Install] rats installed already in %s\r\n" ratsPath
+        ratsPath
 
 let InstallVera() =
-    Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/vera.zip""", "VERA"), "bin", "vera++.exe")
+    let veraPath = Path.Combine(InstallationPathHome, "VERA", "bin", "vera++.exe")
+    if not(File.Exists(veraPath)) then
+        printf "[Install] Download version of vera\r\n"
+        Path.Combine(DownloadAndInstallZipDist("""https://github.com/SonarOpenCommunity/sonar-cxx-msbuild-tasks/raw/master/Nuget/vera.zip""", "VERA"), "bin", "vera++.exe")
+    else
+        printf "[Install] vera installed already in %s\r\n" veraPath
+        veraPath
 
 let InstallCppCheck() =
-    if not(File.Exists(GetCppCheckPath())) then
-        if InstallChocoPackage("cppcheck") <> 0 then           
+    let cppCheckPath = GetCppCheckPath()
+    if not(File.Exists(cppCheckPath)) then
+        if InstallChocoPackage("cppcheck") <> 0 then
             printf "[Install] Failed to install cppcheck, likely it will fail. please install manually python to 'C:/Program Files (x86)/Cppcheck'\r\n"
-        
-    GetCppCheckPath()
+            cppCheckPath
+        else
+            printf "[Install] cppcheck installed correctly in %s\r\n" (GetCppCheckPath())
+            GetCppCheckPath()
+    else
+        printf "[Install] cppcheck installed already in %s\r\n" cppCheckPath
+        cppCheckPath
 
 
 

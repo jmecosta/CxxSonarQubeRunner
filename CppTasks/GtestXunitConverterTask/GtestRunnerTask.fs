@@ -337,7 +337,7 @@ type GtestRunnerMSBuildTask(logger : TaskLoggingHelper) as this =
             if this.BrakeBuild then
                 logger.LogError(sprintf "%s Exit with Return Code = %d" x.GtestExeFile returncode)
             else
-                logger.LogWarning(sprintf "%s Exit with Return Code = %d => Turn to Waring BrakeBuild=false" x.GtestExeFile returncode)
+                logger.LogWarning(sprintf "%s Exit with Return Code = %d => Turn to Warning BrakeBuild=false" x.GtestExeFile returncode)
 
         returncode = 0          
         

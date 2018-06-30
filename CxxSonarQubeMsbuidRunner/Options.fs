@@ -15,6 +15,16 @@ open VSSonarPlugins
 open VSSonarPlugins.Types
 open SonarRestService
 open MSBuildHelper
+open System.Threading
+
+type NotificationManager() =
+    interface ILogManager with
+        member this.ReportMessage(message:string) = HelpersMethods.cprintf(ConsoleColor.Cyan, message)
+        member this.ReportMessage(message:Message) = HelpersMethods.cprintf(ConsoleColor.Cyan, message.Data)
+        member this.ReportException(ex:Exception) = HelpersMethods.cprintf(ConsoleColor.Red, ex.Message)
+                                                    HelpersMethods.cprintf(ConsoleColor.Red, ex.StackTrace)
+        member this.WriteMessageToLog(message:string) = ()
+        member this.WriteExceptionToLog(ex:Exception) = ()
 
 let (|Command|_|) (s:string) =
     let r = new Regex(@"^(?:-{1,2}|\/)(?<command>\w+)[=:]*(?<value>.*)$",RegexOptions.IgnoreCase)
@@ -134,6 +144,16 @@ let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string
     sonarProps |> Map.iter (fun c d -> if not(argsPars.ContainsKey(c)) then outFile.WriteLine((sprintf """<Property Name="%s">%s</Property>""" c d)))
     outFile.WriteLine("""</SonarQubeAnalysisProperties>""")
 
+let WriteUserSettingsFromSonarPropertiesFileCli(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
+    printf "Apply the following changes to sonar configuration Files\r\n";
+    argsPars |> Map.iter (fun c d -> 
+        let line = sprintf """"%s : %s \r\n""" c d
+        printf "%s" line
+        )
+    use outFile = new StreamWriter(file)
+    argsPars |> Map.iter (fun c d -> outFile.WriteLine((sprintf """%s=%s""" c d)))
+    sonarProps |> Map.iter (fun c d -> if not(argsPars.ContainsKey(c)) then outFile.WriteLine((sprintf """%s=%s""" c d)))
+
 type UserSettingsFileType = XmlProvider<"""
 <SonarQubeAnalysisProperties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
   <Property Name="sonar.host.url">http://filehost</Property>
@@ -149,6 +169,7 @@ type CxxSettingsType = XmlProvider<"""
   <Python>c:\path</Python>
   <Cpplint>c:\path</Cpplint>
   <MsbuildRunnerPath>c:\path</MsbuildRunnerPath>
+  <SonarCliRunnerPath>c:\path</SonarCliRunnerPath>
 </CxxUserProperties>
 """>
 
@@ -179,6 +200,8 @@ let ShowHelp() =
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
 
+        Console.WriteLine ("    /U|/u:use sonar scanner cli")
+
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
 
@@ -193,7 +216,10 @@ let ShowHelp() =
 
 type OptionsData(args : string []) =
     let arguments = parseArgs(args)
+    let logger = NotificationManager()
     
+    let usecli = arguments.ContainsKey("u")
+
     let installMode = arguments.ContainsKey("i")
 
     let disableCodeAnalysis = arguments.ContainsKey("f")
@@ -204,11 +230,17 @@ type OptionsData(args : string []) =
 
     let verboseModeTrue = arguments.ContainsKey("g")
 
+    let cliRunnerVersion = 
+        if arguments.ContainsKey("r") then
+            arguments.["r"] |> Seq.head
+        else
+            "3.2.0.1227"
+
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "4.0.2.892"
+            "4.3.1.1372"
 
     let parentBranch = 
         if arguments.ContainsKey("b") then
@@ -253,6 +285,7 @@ type OptionsData(args : string []) =
         | _ -> false
 
     let DeployCxxTargets(options : OptionsData) =
+        
         let assembly = Assembly.GetExecutingAssembly()
         let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
         use stream = assembly.GetManifestResourceStream("after.solution.sln.targets")
@@ -261,6 +294,7 @@ type OptionsData(args : string []) =
         let content = streamreader.ReadToEnd().Split(spliters, StringSplitOptions.RemoveEmptyEntries)
 
         use outFile = new StreamWriter(options.SolutionTargetFile, false)
+        printf "Drop Cxx Targets to Solution %s\r\n" options.SolutionTargetFile
         for line in content do        
             let mutable lineToWrite = line
         
@@ -293,6 +327,7 @@ type OptionsData(args : string []) =
 
     member val SonarHost : string = "" with get, set
     member val InstallMode : bool = installMode
+    member val UserSonarScannerCli : bool = usecli
     member val ApplyFalseAndPermissionTemplate : bool = true with get, set
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
@@ -326,6 +361,7 @@ type OptionsData(args : string []) =
     member val PythonPath : string = "" with get, set
     member val CppLintPath : string = "" with get, set
     member val MSBuildRunnerPath : string = "" with get, set
+    member val CliRunnerPath : string = "" with get, set
     member val BuildLog : string = "" with get, set
     
     member val DisableCodeAnalysis = disableCodeAnalysis
@@ -334,23 +370,24 @@ type OptionsData(args : string []) =
 
     member this.ValidateSolutionOptions() = 
         if not(arguments.ContainsKey("m")) then
-            let errorMsg = sprintf "/m must be specifed. See /h for complete help"
-            printf "%s\r\n\r\n" errorMsg
-            ShowHelp()
-            raise(new Exception())
-
-        if not(arguments.ContainsKey("m")) then
-            let errorMsg = sprintf "/m must be specifed. See /h for complete help"
-            printf "%s\r\n\r\n" errorMsg
-            ShowHelp()
-            raise(new Exception())
-
-        this.Solution <- 
-            let data = arguments.["m"] |> Seq.head
-            if Path.IsPathRooted(data) then
-                data
+            printf "search for solutions files: %s\r\n" Environment.CurrentDirectory
+            let sln = Directory.GetFiles(Environment.CurrentDirectory, "*.sln")
+            if sln.Length > 1 || sln.Length = 0 then
+                let errorMsg = sprintf "/m must be specifed. multiple or no sultions found. See /h for complete help"
+                printf "%s\r\n\r\n" errorMsg
+                ShowHelp()
+                raise(new Exception())
             else
-                Path.Combine(Environment.CurrentDirectory, data)
+                printf "will use: %s\r\n" sln.[0]
+                this.Solution <- sln.[0]
+
+        else
+            this.Solution <- 
+                let data = arguments.["m"] |> Seq.head
+                if Path.IsPathRooted(data) then
+                    data
+                else
+                    Path.Combine(Environment.CurrentDirectory, data)
 
         if not(File.Exists(this.Solution)) then
             let errorMsg = sprintf "/m used does not point to existent solution: %s" this.Solution
@@ -378,22 +415,30 @@ type OptionsData(args : string []) =
         else
             this.SonarQubeTempPath <- Path.Combine(this.HomePath, ".sonarqube")
 
-
-        
-        
     // get first from command line, second from user settings file and finally from web
-    member this.ConfigureMsbuildRunner() =  
+    member this.ConfigureMsbuildRunner(options:OptionsData) =
         if sqRunnerPathFromCommandLine <> "" && File.Exists(sqRunnerPathFromCommandLine) then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Use commandline switch: " + sqRunnerPathFromCommandLine)
             this.MSBuildRunnerPath <- sqRunnerPathFromCommandLine
         else 
             try
                 this.MSBuildRunnerPath <- userCxxSettings.MsbuildRunnerPath
+                HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Use user settings file switch: " + userCxxSettings.MsbuildRunnerPath)
             with
             | _ -> this.MSBuildRunnerPath <- 
                     if File.Exists(msbuildRunnerVersion) then
                         msbuildRunnerVersion
                     else
                         InstallMsbuildRunner(msbuildRunnerVersion)
+
+        let scanner = Directory.GetFiles(Directory.GetParent(this.MSBuildRunnerPath).FullName, "sonar-scanner.bat", SearchOption.AllDirectories)
+        this.CliRunnerPath <- scanner.[0]
+
+        if options.UserSonarScannerCli then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use scanner cli: " + this.CliRunnerPath)
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use sonar msbuild scanner: " + this.MSBuildRunnerPath)
+
 
     member this.ConfigureInstallationOfTools() =
         
@@ -422,6 +467,8 @@ type OptionsData(args : string []) =
         with
         | _ -> this.CppLintPath <- InstallCppLint()
 
+        printf "Tools Installed\r\n\r\n"
+
 
     member this.CreatOptionsForAnalysis() =        
         this.ProjectKey <-
@@ -442,6 +489,15 @@ type OptionsData(args : string []) =
             else
                 "/v:" + (GetPropertyFromFile(this.DepracatedSonarPropsContent, "projectVersion"))
 
+        if this.ProjectKey = "/k:" then
+            this.ProjectKey <- ""
+
+        if this.ProjectName = "/n:" then
+            this.ProjectName <- ""
+
+        if this.ProjectVersion = "/v:" then
+            this.ProjectVersion <- ""
+
         this.VsVersion <- 
             if arguments.ContainsKey("x") then
                 arguments.["x"] |> Seq.head
@@ -449,15 +505,20 @@ type OptionsData(args : string []) =
                 "vs15"
 
         this.UseAmd64 <- 
-            if arguments.ContainsKey("a") then                
+            if arguments.ContainsKey("a") then
                 arguments.["a"] |> Seq.head
             else
                 ""
         this.Target <-
-            if arguments.ContainsKey("t") then
-                "/t:" + (arguments.["t"] |> Seq.head)
+            if arguments.ContainsKey("u") then
+                "/t:RunCodeAnalysis"
             else
-                "/t:Clean;Build"
+                if arguments.ContainsKey("t") then
+                    "/t:" + (arguments.["t"] |> Seq.head)
+                else
+                    "/t:Clean;Build"
+
+        
 
         // read settings from installation folder
         try
@@ -530,7 +591,7 @@ type OptionsData(args : string []) =
             args.Trim()
 
 
-    member this.DuplicateFalsePositives() =         
+    member this.DuplicateFalsePositives() = 
         if parentBranch <> "" && this.Branch <> "" then
 
             let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
@@ -571,7 +632,7 @@ type OptionsData(args : string []) =
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
 
             let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE,WONTFIX"
-            let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key)
+            let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key, CancellationToken(), logger).Result
 
             printf "[CxxSonarQubeMsbuidRunner] : Filter: %s  -> False Positives and Wont Fix : %i \r\n" filter falsePositivesInMaster.Count
 
@@ -588,7 +649,7 @@ type OptionsData(args : string []) =
 
 
             for comp in issuesByComp do
-                let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(token, comp.Key.Replace(parentBranch, this.Branch))
+                let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(token, comp.Key.Replace(parentBranch, this.Branch), CancellationToken(), logger).Result
                 
                 printf "[CxxSonarQubeMsbuidRunner] : Try to apply false positives in : %s  -> Issues Found : %i \r\n" (comp.Key.Replace(parentBranch, this.Branch)) issuesInComponentBranch.Count
 
@@ -716,13 +777,20 @@ type OptionsData(args : string []) =
                 else
                     printf "[CxxSonarQubeMsbuidRunner] Profile %s : already correct\r\n" profile.Name
 
-    member this.Setup() =
+    member this.Setup(options:OptionsData) =
         // read sonar project files
         if File.Exists(this.DeprecatedPropertiesFile) then
             File.Delete(this.DeprecatedPropertiesFile)
 
-        let cxxClassArguments = GetArgumentClass(this.PropsForBeginStage, this.DepracatedSonarPropsContent, this.HomePath)        
-        WriteUserSettingsFromSonarPropertiesFile(this.ConfigFile, this.PropsInSettingsFile, cxxClassArguments)                
+        if options.UserSonarScannerCli then
+            this.ConfigFile <- this.DeprecatedPropertiesFile
+
+        let cxxClassArguments = GetArgumentClass(this.PropsForBeginStage, this.DepracatedSonarPropsContent, this.HomePath)
+        if options.UserSonarScannerCli then
+            WriteUserSettingsFromSonarPropertiesFileCli(this.ConfigFile, this.PropsInSettingsFile, cxxClassArguments)
+        else
+            WriteUserSettingsFromSonarPropertiesFile(this.ConfigFile, this.PropsInSettingsFile, cxxClassArguments)
+        
         Directory.CreateDirectory(Path.Combine(this.HomePath, ".cxxresults")) |> ignore
         this.BuildLog <- Path.Combine(this.HomePath, ".cxxresults", "BuildLog.txt")
 

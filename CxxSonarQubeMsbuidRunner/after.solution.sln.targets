@@ -87,7 +87,7 @@
         <CppCheckMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       CppCheckPath="$(CppCheckPath)"
                       CppCheckOptions="$(CppCheckOptions)"
-					  CppCheckDefines="$(CppCheckDefines)"
+                      CppCheckDefines="$(CppCheckDefines)"
                       CppCheckIgnores="$(CppCheckIgnores)"
                       CppCheckOutputType="$(CppCheckOutputType)"
                       CppCheckOutputPath="$(CppCheckOutputPath)"

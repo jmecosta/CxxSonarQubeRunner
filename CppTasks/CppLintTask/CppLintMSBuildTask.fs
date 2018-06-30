@@ -99,7 +99,7 @@ type CppLintMSBuildTask(executorIn : ICommandExecutor) as this =
             for value in values do
                 builder.AppendSwitch(value)
 
-        builder.AppendSwitch(fileToAnalyse)
+        builder.AppendSwitch("\"" + fileToAnalyse + "\"")
 
         builder.ToString()
 
