@@ -54,7 +54,7 @@ let GetPropertyFromFile(content : string [], prop : string) =
     | Some(c) -> c.Trim().Split('=').[1]
     | _ -> ""
 
-let GetArgumentClass(additionalArguments : string, content : string [], home : string) = 
+let GetArgumentClass(additionalArguments : string, content : string [], home : string, useCli:bool) = 
     
     let mutable arguments = Map.empty
     
@@ -100,7 +100,8 @@ let GetArgumentClass(additionalArguments : string, content : string [], home : s
             elif data.[0].Equals("sonar.cxx.coverage.overallReportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
             elif data.[0].Equals("sonar.cxx.compiler.reportPath") then
-                arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/BuildLog.txt"))
+                if (not(useCli)) then
+                    arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/BuildLog.txt"))
             elif data.[1].Contains("\\n\\") then
                 propertyovermultiplelines <- true
                 propdata <- data.[1]
@@ -119,8 +120,11 @@ let GetArgumentClass(additionalArguments : string, content : string [], home : s
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPath", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.other.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.other.reportPath", GetPathFromHome(".cxxresults/reports-other/*.xml"))
+
+
     if not(arguments.ContainsKey("sonar.cxx.compiler.reportPath")) then
-        arguments <- arguments.Add("sonar.cxx.compiler.reportPath", GetPathFromHome(".cxxresults/BuildLog.txt"))
+        if (not(useCli)) then
+            arguments <- arguments.Add("sonar.cxx.compiler.reportPath", GetPathFromHome(".cxxresults/BuildLog.txt"))
     arguments
 
 
@@ -132,10 +136,14 @@ let WriteFile(file : string, content : Array) =
         outFile.WriteLine(elem)
 
 let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
-    printf "Apply the following changes to sonar configuration Files\r\n";
+    printf "Apply the following changes to sonar configuration Files >%s<\r\n" file
     argsPars |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s \r\n""" c d
+        let line = sprintf """"%s : %s""" c d
         printf "%s" line
+        )
+    sonarProps |> Map.iter (fun c d -> 
+        let line = sprintf """"%s : %s""" c d
+        printf "%s \r\n" line
         )
     use outFile = new StreamWriter(file)
     outFile.WriteLine("""<?xml version="1.0" encoding="utf-8" ?>""")
@@ -145,12 +153,16 @@ let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string
     outFile.WriteLine("""</SonarQubeAnalysisProperties>""")
 
 let WriteUserSettingsFromSonarPropertiesFileCli(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
-    printf "Apply the following changes to sonar configuration Files\r\n";
+    printf "Apply the following changes to sonar configuration Files >%s<\r\n" file
     argsPars |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s \r\n""" c d
-        printf "%s" line
+        let line = sprintf """"%s : %s""" c d
+        printf "%s \r\n" line
         )
-    use outFile = new StreamWriter(file)
+    sonarProps |> Map.iter (fun c d -> 
+        let line = sprintf """"%s : %s""" c d
+        printf "%s \r\n" line
+        )
+    use outFile = new StreamWriter(file, true)
     argsPars |> Map.iter (fun c d -> outFile.WriteLine((sprintf """%s=%s""" c d)))
     sonarProps |> Map.iter (fun c d -> if not(argsPars.ContainsKey(c)) then outFile.WriteLine((sprintf """%s=%s""" c d)))
 
@@ -368,15 +380,20 @@ type OptionsData(args : string []) =
     member val IsVerboseOn = verboseModeTrue
     member val FailOnFailedGate = failedOnFailedGate
 
-    member this.ValidateSolutionOptions() = 
+    member this.ValidateSolutionOptions(useCli:bool) = 
+        let mutable skipBuild = false
         if not(arguments.ContainsKey("m")) then
             printf "search for solutions files: %s\r\n" Environment.CurrentDirectory
             let sln = Directory.GetFiles(Environment.CurrentDirectory, "*.sln")
             if sln.Length > 1 || sln.Length = 0 then
-                let errorMsg = sprintf "/m must be specifed. multiple or no sultions found. See /h for complete help"
-                printf "%s\r\n\r\n" errorMsg
-                ShowHelp()
-                raise(new Exception())
+                if useCli && sln.Length = 0 then
+                    printf "Skip sonar analyis with cxx c++ tools\r\n"
+                    skipBuild <- true
+                else
+                    let errorMsg = sprintf "/m must be specifed. multiple or no sultions found. See /h for complete help"
+                    printf "%s\r\n\r\n" errorMsg
+                    ShowHelp()
+                    raise(new Exception())
             else
                 printf "will use: %s\r\n" sln.[0]
                 this.Solution <- sln.[0]
@@ -389,31 +406,39 @@ type OptionsData(args : string []) =
                 else
                     Path.Combine(Environment.CurrentDirectory, data)
 
-        if not(File.Exists(this.Solution)) then
-            let errorMsg = sprintf "/m used does not point to existent solution: %s" this.Solution
-            printf "%s\r\n\r\n" errorMsg
-            ShowHelp()
-            raise(new Exception())
+        if this.Solution <> "" then
+            this.HomePath <- Directory.GetParent(this.Solution).ToString()
+        else
+            this.HomePath <- Environment.CurrentDirectory
 
-        
-        // setup properties paths
-        this.ParallelMsbuildOption <- parallelBuilds
-        this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)
-        this.HomePath <- 
-                Directory.GetParent(this.Solution).ToString()
-
-        this.ConfigFile <- Path.GetTempFileName()
-        this.SolutionTargetFile <- Path.Combine(this.HomePath, "after." + this.SolutionName + ".sln.targets")   
         this.DeprecatedPropertiesFile <- Path.Combine(this.HomePath, "sonar-project.properties")
 
         if File.Exists(this.DeprecatedPropertiesFile) then
             this.DepracatedSonarPropsContent <- File.ReadAllLines(this.DeprecatedPropertiesFile)
 
-        if Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY") <> null then
-            this.SonarQubeTempPath <- Path.Combine(Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY"), ".sonarqube")
+        if not(skipBuild) then
+            if not(File.Exists(this.Solution)) then
+                let errorMsg = sprintf "/m used does not point to existent solution: %s" this.Solution
+                printf "%s\r\n\r\n" errorMsg
+                ShowHelp()
+                raise(new Exception())
+
+        
+            // setup properties paths
+            this.ParallelMsbuildOption <- parallelBuilds
+            this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)
+
+
+            this.ConfigFile <- Path.GetTempFileName()
+            this.SolutionTargetFile <- Path.Combine(this.HomePath, "after." + this.SolutionName + ".sln.targets")   
+
+            if Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY") <> null then
+                this.SonarQubeTempPath <- Path.Combine(Environment.GetEnvironmentVariable("AGENT_BUILDDIRECTORY"), ".sonarqube")
                 
-        else
-            this.SonarQubeTempPath <- Path.Combine(this.HomePath, ".sonarqube")
+            else
+                this.SonarQubeTempPath <- Path.Combine(this.HomePath, ".sonarqube")
+
+        skipBuild
 
     // get first from command line, second from user settings file and finally from web
     member this.ConfigureMsbuildRunner(options:OptionsData) =
@@ -777,15 +802,17 @@ type OptionsData(args : string []) =
                 else
                     printf "[CxxSonarQubeMsbuidRunner] Profile %s : already correct\r\n" profile.Name
 
-    member this.Setup(options:OptionsData) =
+    member this.Setup(options:OptionsData, skipBuild:bool) =
         // read sonar project files
         if File.Exists(this.DeprecatedPropertiesFile) then
-            File.Delete(this.DeprecatedPropertiesFile)
+            if not(options.UserSonarScannerCli) then
+                printf "Wipe sonar properties file: %s\r\n" this.DeprecatedPropertiesFile
+                File.Delete(this.DeprecatedPropertiesFile)
 
         if options.UserSonarScannerCli then
             this.ConfigFile <- this.DeprecatedPropertiesFile
 
-        let cxxClassArguments = GetArgumentClass(this.PropsForBeginStage, this.DepracatedSonarPropsContent, this.HomePath)
+        let cxxClassArguments = GetArgumentClass(this.PropsForBeginStage, this.DepracatedSonarPropsContent, this.HomePath, options.UserSonarScannerCli)
         if options.UserSonarScannerCli then
             WriteUserSettingsFromSonarPropertiesFileCli(this.ConfigFile, this.PropsInSettingsFile, cxxClassArguments)
         else
@@ -794,15 +821,18 @@ type OptionsData(args : string []) =
         Directory.CreateDirectory(Path.Combine(this.HomePath, ".cxxresults")) |> ignore
         this.BuildLog <- Path.Combine(this.HomePath, ".cxxresults", "BuildLog.txt")
 
-        let solutionData = CreateSolutionData(this.Solution)
+        if not(skipBuild) then
+            let solutionData = CreateSolutionData(this.Solution)
 
-        if not(reuseMode) then
-            let foundVcx = solutionData.Projects |> Seq.tryFind (fun c -> c.Value.Path.ToLower().EndsWith(".vcxproj"))
-            match foundVcx with
-            | Some m -> DeployCxxTargets(this)
-            | _ -> ()
+            if not(reuseMode) then
+                let foundVcx = solutionData.Projects |> Seq.tryFind (fun c -> c.Value.Path.ToLower().EndsWith(".vcxproj"))
+                match foundVcx with
+                | Some m -> DeployCxxTargets(this)
+                | _ -> ()
 
-        solutionData
+            solutionData
+        else
+            null
 
     member this.Clean() =
         if this.DepracatedSonarPropsContent <> Array.empty then
