@@ -203,16 +203,16 @@ let ShowHelp() =
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /j:1 is default. 0 uses all processors>")
         Console.WriteLine ("    /K|/k:<key : key>")
         
-        Console.WriteLine ("    /M|/m:<solution file : mandatory>")
+        Console.WriteLine ("    /M|/m:<solution file : optional>")
         Console.WriteLine ("    /N|/n:<name : name>")
+
+        Console.WriteLine ("    /O|/o delete legacy properties file")
 
         Console.WriteLine ("    /P|/p:<additional settings for msbuild - /p:Configuration=Release>")
         Console.WriteLine ("    /Q|/q:<SQ msbuild runner path>")
-        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1 or path to runner>")       
+        Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1 or path to runner>")
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
-
-        Console.WriteLine ("    /U|/u:use sonar scanner cli")
 
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
@@ -229,8 +229,6 @@ let ShowHelp() =
 type OptionsData(args : string []) =
     let arguments = parseArgs(args)
     let logger = NotificationManager()
-    
-    let usecli = arguments.ContainsKey("u")
 
     let installMode = arguments.ContainsKey("i")
 
@@ -241,6 +239,8 @@ type OptionsData(args : string []) =
     let reuseMode = arguments.ContainsKey("e")
 
     let verboseModeTrue = arguments.ContainsKey("g")
+
+    let deleteLegacyPropsFile = arguments.ContainsKey("o")
 
     let cliRunnerVersion = 
         if arguments.ContainsKey("r") then
@@ -339,7 +339,7 @@ type OptionsData(args : string []) =
 
     member val SonarHost : string = "" with get, set
     member val InstallMode : bool = installMode
-    member val UserSonarScannerCli : bool = usecli
+    member val UserSonarScannerCli : bool = false with get, set
     member val ApplyFalseAndPermissionTemplate : bool = true with get, set
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
@@ -383,21 +383,19 @@ type OptionsData(args : string []) =
     member this.ValidateSolutionOptions(useCli:bool) = 
         let mutable skipBuild = false
         if not(arguments.ContainsKey("m")) then
-            printf "search for solutions files: %s\r\n" Environment.CurrentDirectory
-            let sln = Directory.GetFiles(Environment.CurrentDirectory, "*.sln")
-            if sln.Length > 1 || sln.Length = 0 then
-                if useCli && sln.Length = 0 then
-                    printf "Skip sonar analyis with cxx c++ tools\r\n"
-                    skipBuild <- true
-                else
-                    let errorMsg = sprintf "/m must be specifed. multiple or no sultions found. See /h for complete help"
-                    printf "%s\r\n\r\n" errorMsg
-                    ShowHelp()
-                    raise(new Exception())
-            else
-                printf "will use: %s\r\n" sln.[0]
-                this.Solution <- sln.[0]
-
+            use stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("DummySolution.sln")
+            use streamreader = new StreamReader(stream)
+            let content = streamreader.ReadToEnd()
+            let outputPath = Path.Combine(Environment.CurrentDirectory, "DummySolution.sln")
+            if File.Exists(outputPath) then
+                File.Delete(outputPath)
+            File.WriteAllText(outputPath, content)
+            this.Solution <- outputPath
+            this.ConfigFile <- Path.GetTempFileName()
+            this.SolutionName <- Path.GetFileNameWithoutExtension(this.Solution)
+            this.SolutionTargetFile <- Path.Combine(this.HomePath, "after." + this.SolutionName + ".sln.targets")   
+            this.UserSonarScannerCli <- true
+            skipBuild <- true
         else
             this.Solution <- 
                 let data = arguments.["m"] |> Seq.head
@@ -412,6 +410,11 @@ type OptionsData(args : string []) =
             this.HomePath <- Environment.CurrentDirectory
 
         this.DeprecatedPropertiesFile <- Path.Combine(this.HomePath, "sonar-project.properties")
+
+        if deleteLegacyPropsFile then
+            if File.Exists(this.DeprecatedPropertiesFile) then
+                printf "Delete %s\r\n" this.DeprecatedPropertiesFile
+                File.Delete(this.DeprecatedPropertiesFile)
 
         if File.Exists(this.DeprecatedPropertiesFile) then
             this.DepracatedSonarPropsContent <- File.ReadAllLines(this.DeprecatedPropertiesFile)
@@ -736,14 +739,15 @@ type OptionsData(args : string []) =
                 | _ ->
                     // provision project
                     let returndata = (rest :> ISonarRestService).ProvisionProject(token, key, this.ProjectName.Replace("/n:", ""), this.Branch)
-                    if returndata.Contains("Could not create Project, key already exists:") || returndata = "" then
-                        ()                   
-                    else                    
+                    if returndata.Contains("Could not create Project, key already exists:") then
+                        printf "[CxxSonarQubeMsbuidRunner] Project was provisioned already, skip %s \r\n" key
+                    elif returndata = "" then
+                        printf "[CxxSonarQubeMsbuidRunner] New project was provisioned correctly %s \r\n" key
+                    else
                         raise(new Exception("Cannot provision current branch : " + returndata))
 
-                    printf "[CxxSonarQubeMsbuidRunner] New project was provisioned correctly %s \r\n" key
                     new Resource(Key = key + ":" + this.Branch, BranchName = this.Branch)
-            
+
             if permissiontemplatename <> "" then
                 HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
                 HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
@@ -761,12 +765,14 @@ type OptionsData(args : string []) =
             let propertiesofMainBranch = (rest :> ISonarRestService).GetSettings(token, projectParent.[0]).ToList()
             printf "[CxxSonarQubeMsbuidRunner] Duplicating %i properties from master\r\n" propertiesofMainBranch.Count
             for prop in propertiesofMainBranch do
-                let errormsg = (rest :> ISonarRestService).SetSetting(token, prop, branchProject)
-                if errormsg <> "" then
-                    printf "[CxxSonarQubeMsbuidRunner] %s : %s \r\n" prop.key errormsg
-                else
-                    printf "[CxxSonarQubeMsbuidRunner] %s : set with Value: %s \r\n" prop.key prop.Value
-
+                try
+                    let errormsg = (rest :> ISonarRestService).SetSetting(token, prop, branchProject)
+                    if errormsg <> "" then
+                        printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.key errormsg
+                    else
+                        printf "[CxxSonarQubeMsbuidRunner] %s : set with Value: %s \r\n" prop.key prop.Value
+                with
+                | ex -> printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.key ex.Message
             
             // clean any prop that is not in main
             //let propertiesofBranch = (rest :> ISonarRestService).GetSettings(token, branchProject).ToList()
@@ -832,6 +838,7 @@ type OptionsData(args : string []) =
 
             solutionData
         else
+            DeployCxxTargets(this)
             null
 
     member this.Clean() =

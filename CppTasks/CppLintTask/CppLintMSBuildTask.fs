@@ -61,6 +61,8 @@ type CppLintMSBuildTask(executorIn : ICommandExecutor) as this =
     member val CppLintIgnores = "" with get, set
     member val CppLintEnvironment = "" with get, set
 
+    member val IgnoreSolution = false with get, set
+
     /// Verify Xml output
     member x.VerifyOutput(logger  : TaskLoggingHelper) =
         lazy(
@@ -231,42 +233,57 @@ type CppLintMSBuildTask(executorIn : ICommandExecutor) as this =
 
         let mutable result = not(logger.HasLoggedErrors)
         if result then
+            let solutionRoot = Directory.GetParent(x.SolutionPathToAnalyse).FullName
             let stopWatchTotal = Stopwatch.StartNew()
-            let solutionHelper = new VSSolutionUtils()
-            let projectHelper = new VSProjectUtils()
 
-            if not(Directory.Exists(x.CppLintOutputPath)) then
-                Directory.CreateDirectory(x.CppLintOutputPath) |> ignore
+            if not(x.IgnoreSolution) then
+                let solutionHelper = new VSSolutionUtils()
+                let projectHelper = new VSProjectUtils()
 
-            let iterateOverFiles (file : string) (projectPath : string) =
-                let ignoreFiles = x.CppLintIgnores.Split(";".ToCharArray())
-                let projectPathDir = Directory.GetParent(projectPath).ToString()
-                let mutable skip = false
+                if not(Directory.Exists(x.CppLintOutputPath)) then
+                    Directory.CreateDirectory(x.CppLintOutputPath) |> ignore
 
-                if not(file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString())) then
-                    skip <- true
+                let iterateOverFiles (file : string) (projectPath : string) =
+                    let ignoreFiles = x.CppLintIgnores.Split(";".ToCharArray())
+                    let projectPathDir = Directory.GetParent(projectPath).ToString()
+                    let mutable skip = false
 
-                for ignore in ignoreFiles do
-                    let pathignore = Path.Combine(Directory.GetParent(x.SolutionPathToAnalyse).ToString(), ignore.Trim())
-                    if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
+                    if not(file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString())) then
+                        skip <- true
 
-                if not(skip) then
-                    let arguments = x.generateCommandLineArgs(file)                   
-                    let extension = Path.GetExtension(file).ToLower()
+                    for ignore in ignoreFiles do
+                        let pathignore = Path.Combine(solutionRoot, ignore.Trim())
+                        if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
+
+                    if not(skip) then
+                        let arguments = x.generateCommandLineArgs(file)                   
+                        let extension = Path.GetExtension(file).ToLower()
                     
+                        if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                            logger.LogMessage(sprintf "[ToolExecute] CppLint Command: %s %s" x.PythonPath arguments)
+                            x.ExecuteCppLint file |> ignore
+                    ()
+
+                let iterateOverProjectFiles(projectFile : ProjectFiles) =
+
+                    if x.ProjectNameToAnalyse = "" ||
+                        projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
+
+                        projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
+
+                (Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse))) |>  Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
+            else
+                logger.LogMessage(sprintf "Search For all source files: %u" this.totalViolations)
+                let files = Directory.GetFiles(solutionRoot, "*.*", SearchOption.AllDirectories)
+
+                let ProcessFile(file:string) =
+                    let extension = Path.GetExtension(file).ToLower()
                     if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                        let arguments = x.generateCommandLineArgs(file)
                         logger.LogMessage(sprintf "[ToolExecute] CppLint Command: %s %s" x.PythonPath arguments)
-                        x.ExecuteCppLint file |> ignore                    
-                ()
+                        x.ExecuteCppLint file |> ignore
 
-            let iterateOverProjectFiles(projectFile : ProjectFiles) =
-
-                if x.ProjectNameToAnalyse = "" ||
-                    projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
-
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
-
-            (Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse))) |>  Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
+                Array.ofSeq files |> Array.Parallel.map (fun x -> ProcessFile x) |> ignore
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "CppLint End: %u ms" stopWatchTotal.ElapsedMilliseconds)

@@ -7,6 +7,7 @@
     <UsingTask TaskName="CppCheckMSBuildTask" AssemblyFile="$(MSBuildThisFileDirectory)CppCheckMSBuildTask.dll"/>
 
     <PropertyGroup>
+        <IgnoreSolution                   Condition="'$(IgnoreSolution)' == ''">false</IgnoreSolution>
         <PythonPath                   Condition="'$(PythonPath)' == ''">c:\tools\Python2\Python.exe</PythonPath>
         <CppLintPath                   Condition="'$(CppLintPath)' == ''">$(MSBuildThisFileDirectory)\cpplint_mod.py</CppLintPath>
         <CppLintOptions                Condition="'$(CppLintOptions)' == ''"></CppLintOptions>
@@ -51,6 +52,7 @@
         <Message Text="Cpplint = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <CpplintMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       PythonPath="$(PythonPath)"
+                      IgnoreSolution="$(IgnoreSolution)"
                       CppLintPath="$(CppLintPath)"
                       CppLintOptions="$(CppLintOptions)"
                       CppLintEnvironment="$(CppLintEnvironment)"
@@ -66,6 +68,7 @@
                       VeraPath="$(VeraPath)"
                       VeraOptions="$(VeraOptions)"
                       VeraIgnores="$(VeraIgnores)"
+                      IgnoreSolution="$(IgnoreSolution)"
                       VeraOutputType="$(VeraOutputType)"
                       VeraOutputPath="$(VeraOutputPath)"
                       PathReplacementStrings="$(PathReplacementStrings)"
@@ -75,6 +78,7 @@
         <Message Text="Rats = $(SolutionDir)\$(SolutionName).sln" Importance="high"/>
         <RatsMSBuildTask SolutionPathToAnalyse="$(SolutionDir)\$(SolutionName).sln"
                       RatsPath="$(RatsPath)"
+                      IgnoreSolution="$(IgnoreSolution)"
                       RatsOptions="$(RatsOptions)"
                       RatsIgnores="$(RatsIgnores)"
                       RatsOutputType="$(RatsOutputType)"

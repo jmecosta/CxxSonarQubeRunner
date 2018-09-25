@@ -17,7 +17,6 @@ open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
 open Microsoft.Win32
 open MsbuildUtilityHelpers
-open FSharp.Collections.ParallelSeq
 
 type VeraErrorX(filename:string, line:string, severity:string, message:string, source:string) =
     member val filename = filename
@@ -49,6 +48,8 @@ type VeraMSBuildTask(executorIn : ICommandExecutor) as this =
     /// Optional result target file. Must be unique to each test run.
     [<Required>]
     member val VeraOutputPath = "" with get, set
+
+    member val IgnoreSolution = false with get, set
 
     /// path for Vera executable, default expects Vera in path
     member val VeraOutputType = "vs7" with get, set
@@ -182,48 +183,65 @@ type VeraMSBuildTask(executorIn : ICommandExecutor) as this =
 
         let mutable result = not(logger.HasLoggedErrors)
         if result then
+            let solutionRoot = Directory.GetParent(x.SolutionPathToAnalyse).FullName
             let stopWatchTotal = Stopwatch.StartNew()
-            let solutionHelper = new VSSolutionUtils()
-            let projectHelper = new VSProjectUtils()
 
-            if not(Directory.Exists(x.VeraOutputPath)) then
-                Directory.CreateDirectory(x.VeraOutputPath) |> ignore
+            if not(x.IgnoreSolution) then
 
-            let iterateOverFiles (file : string) (projectPath : string) =
-                let ignoreFiles = x.VeraIgnores.Split(";".ToCharArray())
-                let projectPathDir = Directory.GetParent(projectPath).ToString()
-                let mutable skip = false
+                let solutionHelper = new VSSolutionUtils()
+                let projectHelper = new VSProjectUtils()
 
-                if not(file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString())) then
-                    skip <- true
+                if not(Directory.Exists(x.VeraOutputPath)) then
+                    Directory.CreateDirectory(x.VeraOutputPath) |> ignore
 
-                for ignore in ignoreFiles do
-                    let pathignore = Path.Combine(Directory.GetParent(x.SolutionPathToAnalyse).ToString(), ignore.Trim())
-                    if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
+                let iterateOverFiles (file : string) (projectPath : string) =
+                    let ignoreFiles = x.VeraIgnores.Split(";".ToCharArray())
+                    let projectPathDir = Directory.GetParent(projectPath).ToString()
+                    let mutable skip = false
 
-                let IsSupported(file : string) = 
-                    file.EndsWith(".cpp") || file.EndsWith(".c") || file.EndsWith(".cc") || file.EndsWith(".h") || file.EndsWith(".hpp")
+                    if not(file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString())) then
+                        skip <- true
+
+                    for ignore in ignoreFiles do
+                        let pathignore = Path.Combine(Directory.GetParent(x.SolutionPathToAnalyse).ToString(), ignore.Trim())
+                        if Path.GetFullPath(file) = Path.GetFullPath(pathignore) then skip <- true
+
+                    let IsSupported(file : string) = 
+                        file.EndsWith(".cpp") || file.EndsWith(".c") || file.EndsWith(".cc") || file.EndsWith(".h") || file.EndsWith(".hpp")
 
 
-                let getReportName = 
-                    if not(x.ProjectNameToAnalyse = "") then 
-                        x.ProjectNameToAnalyse
-                    else
-                        ""
+                    let getReportName = 
+                        if not(x.ProjectNameToAnalyse = "") then 
+                            x.ProjectNameToAnalyse
+                        else
+                            ""
 
-                if not(skip) && IsSupported(file) then
-                    let arguments = x.generateCommandLineArgs(file)
-                    logger.LogMessage(sprintf "Vera++Command: %s %s" x.VeraPath arguments)
-                    x.ExecuteVera file |> ignore            
-                    ()
+                    if not(skip) && IsSupported(file) then
+                        let arguments = x.generateCommandLineArgs(file)
+                        logger.LogMessage(sprintf "Vera++Command: %s %s" x.VeraPath arguments)
+                        x.ExecuteVera file |> ignore
+                        ()
 
-            let iterateOverProjectFiles(projectFile : ProjectFiles) =
-                if x.ProjectNameToAnalyse = "" then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
-                elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
+                let iterateOverProjectFiles(projectFile : ProjectFiles) =
+                    if x.ProjectNameToAnalyse = "" then
+                        projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
+                    elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
+                        projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x projectFile.path)
 
-            solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse) |> PSeq.iter (fun x -> iterateOverProjectFiles x)
+                Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse)) |> Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
+
+            else
+                logger.LogMessage(sprintf "Search For all source files: %u" this.totalViolations)
+                let files = Directory.GetFiles(solutionRoot, "*.*", SearchOption.AllDirectories)
+
+                let ProcessFile(file:string) =
+                    let extension = Path.GetExtension(file).ToLower()
+                    if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                        let arguments = x.generateCommandLineArgs(file)
+                        logger.LogMessage(sprintf "Vera++Command: %s %s" x.VeraPath arguments)
+                        x.ExecuteVera file |> ignore
+
+                Array.ofSeq files |> Array.Parallel.map (fun x -> ProcessFile x) |> ignore
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "Vera End: %u ms" stopWatchTotal.ElapsedMilliseconds)

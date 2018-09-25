@@ -88,6 +88,8 @@ type RatsMSBuildTask(executorIn : ICommandExecutor) as this =
     [<Required>]
     member val RatsOutputPath = "" with get, set
 
+    member val IgnoreSolution = false with get, set
+
     /// path for Rats executable, default expects Rats in path
     member val RatsOutputType = "vs7" with get, set
     member val RatsPath = _ratsExec with get, set
@@ -222,28 +224,42 @@ type RatsMSBuildTask(executorIn : ICommandExecutor) as this =
         let mutable result = not(logger.HasLoggedErrors)
         if result then
             let stopWatchTotal = Stopwatch.StartNew()
-            let solutionHelper = new VSSolutionUtils()
-            let projectHelper = new VSProjectUtils()
+            let solutionRoot = Directory.GetParent(x.SolutionPathToAnalyse).FullName
+            if not(x.IgnoreSolution) then
+                let solutionHelper = new VSSolutionUtils()
+                let projectHelper = new VSProjectUtils()
 
-            if not(Directory.Exists(x.RatsOutputPath)) then
-                Directory.CreateDirectory(x.RatsOutputPath) |> ignore
+                if not(Directory.Exists(x.RatsOutputPath)) then
+                    Directory.CreateDirectory(x.RatsOutputPath) |> ignore
 
-            let iterateOverFiles (file : string) = 
-                let arguments = x.generateCommandLineArgs(file)
-                if file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString()) then
+                let iterateOverFiles (file : string) = 
+                    let arguments = x.generateCommandLineArgs(file)
+                    if file.Contains(Directory.GetParent(x.SolutionPathToAnalyse).ToString()) then
+                        let extension = Path.GetExtension(file).ToLower()
+                        if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                            logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
+                            x.ExecuteRats arguments |> ignore
+                    ()
+
+                let iterateOverProjectFiles(projectFile : ProjectFiles) =
+                    if x.ProjectNameToAnalyse = "" then
+                        projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
+                    elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
+                        projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
+
+                Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse)) |> Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
+            else
+                logger.LogMessage(sprintf "Search For all source files: %u" this.totalViolations)
+                let files = Directory.GetFiles(solutionRoot, "*.*", SearchOption.AllDirectories)
+
+                let ProcessFile(file:string) =
                     let extension = Path.GetExtension(file).ToLower()
                     if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
+                        let arguments = x.generateCommandLineArgs(file)
                         logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
                         x.ExecuteRats arguments |> ignore
-                ()
 
-            let iterateOverProjectFiles(projectFile : ProjectFiles) =
-                if x.ProjectNameToAnalyse = "" then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
-                elif projectFile.name.ToLower().Equals(x.ProjectNameToAnalyse.ToLower()) then
-                    projectHelper.GetCompilationFiles(projectFile.path, "", x.PathReplacementStrings)  |> Seq.iter (fun x -> iterateOverFiles x)
-
-            Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse)) |> Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
+                Array.ofSeq files |> Array.Parallel.map (fun x -> ProcessFile x) |> ignore
 
             logger.LogMessage(sprintf "Total Violations: %u" this.totalViolations)
             logger.LogMessage(sprintf "Rats End: %u ms" stopWatchTotal.ElapsedMilliseconds)

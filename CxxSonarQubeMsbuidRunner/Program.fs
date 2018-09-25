@@ -45,7 +45,7 @@ let main argv =
                         let targetFile = Path.Combine(options.SonarQubeTempPath, "bin", "Targets", "SonarQube.Integration.targets")
                         PatchMSbuildSonarRunnerTargetsFiles(targetFile, options)
                     
-                    if not(skipBuild) && SonarRunnerPhases.RunBuild(options) <> 0 then
+                    if SonarRunnerPhases.RunBuild(options) <> 0 then
                         ret <- 1
                         printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt"
                         raise(new Exception())

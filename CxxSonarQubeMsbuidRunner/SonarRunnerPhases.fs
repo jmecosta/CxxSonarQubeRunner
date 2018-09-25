@@ -256,7 +256,13 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
 
 
 let RunBuild(options : OptionsData) =
-    let arguments = options.PropsForMsbuild + " " + options.Target + " /p:VeraTaskEnabled=true /p:RatsTaskEnabled=true /p:CppLintTaskEnabled=true /p:CppCheckTaskEnabled=true "
+    let optionDisableProj =
+        if options.UserSonarScannerCli then
+            "/p:IgnoreSolution=true"
+        else
+            ""
+
+    let arguments = options.PropsForMsbuild + " " + options.Target + " /p:VeraTaskEnabled=true /p:RatsTaskEnabled=true /p:CppLintTaskEnabled=true /p:CppCheckTaskEnabled=true " + optionDisableProj + " "
 
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
@@ -302,7 +308,13 @@ let RunBuild(options : OptionsData) =
 
     if returncode <> 0 then
         let lines = File.ReadAllLines(options.BuildLog)
-        for i in (lines.Length - 100) .. (lines.Length - 1) do
+        let maxLines =
+            if lines.Length > 100 then
+                100
+            else
+                lines.Length
+
+        for i in (lines.Length - maxLines) .. (lines.Length - 1) do
             printf "%s \r\n" lines.[i]
 
     returncode

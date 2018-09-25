@@ -28,7 +28,8 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>/x:vs17 /m:D:\TSD\tsd\Vision.sln /v:work /d:sonar.host.url=http://sonar /u</StartArguments>
+    <StartArguments></StartArguments>
+    <StartWorkingDirectory>c:\prod\Fabsuite-desktop</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,7 +42,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>/x:vs15 /m:C:\prod\structures\DOT_APPS\TeklaExtensionPackage\Catalogs.sln /d:sonar.branch=feature_TTSD-6419_Take_dbv_context_into_use_in_sketch_db /b:master /c:geometricglobal /k:tekla.structures.core:Catalogs /n:Catalogs /v:work /r:3.0.2.656 /d:sonar.host.url=http://sonar /d:sonar.login=48d9a0810ba41392afd6c71c7eaccc0978c4b995 /p:SonarQubeTempPath=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.sonarqube /p:NunitRunnerTaskEnabled=true /p:ProduceCoverage=true /p:IntelInspectorTaskEnabled=true /p:IntelResultDir=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.cxxresults\reports-other /p:GtestXunitConverterOutputPath=C:\prod\structures\DOT_APPS\TeklaExtensionPackage\.cxxresults\reports-xunit /p:Platform=x64 /d:sonar.cxx.xunit.reportPath=.cxxresults/reports-xunit/*.xml /d:sonar.branch=master /j=1 /f t:"clean;build" /p:PythonPath=C:\tools\python2\python.exe /p:VeraPath=C:\ProgramData\MSBuidSonarQube\VERA\bin\vera++.exe /d:sonar.branch=feature_TTSD-6419_Take_dbv_context_into_use_in_sketch_db /j=2 /f</StartArguments>
+    <StartArguments></StartArguments>
     <StartWorkingDirectory>C:\prod\structures\DOT_APPS\TeklaExtensionPackage\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup>
@@ -70,6 +71,7 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <EmbeddedResource Include="after.solution.sln.targets" />
+    <EmbeddedResource Include="DummySolution.sln" />
     <None Include="Elevate.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
