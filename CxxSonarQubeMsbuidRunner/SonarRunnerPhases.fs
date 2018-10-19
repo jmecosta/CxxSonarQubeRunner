@@ -269,19 +269,35 @@ let RunBuild(options : OptionsData) =
     let msbuildexec = "\"" + GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64")) + "\""
     let environment = EnvForBuild(options.VsVersion, (options.UseAmd64 = "amd64"))
 
+    let consoleLogger = 
+        if options.IsVerboseOn then
+            ""
+        else
+            " /noconsolelogger "
+
     let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=\"%s\"" options.SonarQubeTempPath 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 /noconsolelogger " + options.ParallelMsbuildOption)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 " + options.ParallelMsbuildOption + consoleLogger)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
     printf "[CxxSonarQubeMsbuidRunner] The following msbuild processes have been found: \r\n"
     for pro in currentprocess do
         printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
+    
 
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, "\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 /noconsolelogger " + options.ParallelMsbuildOption, environment, options.HomePath)
+    let args = "\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 " + options.ParallelMsbuildOption + consoleLogger
+
+    let returncode =
+        if options.IsVerboseOn then
+            let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
+                if not(String.IsNullOrWhiteSpace(e.Data)) then
+                    printf "[BuildLog] : %s\r\n" e.Data
+            (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, args, environment, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+        else
+            (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, args, environment, options.HomePath)
 
     let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -293,7 +309,7 @@ let RunBuild(options : OptionsData) =
         let wasrunning = currentprocess |> Seq.tryFind (fun c -> processdata.Id = c.Id)
         match wasrunning with
         | Some c -> ()
-        | _ -> 
+        | _ ->
             try
                 printf "Will Kill : %s" (sprintf "%s : %s\r\n" (processdata.Id.ToString()) processdata.ProcessName)
                 processdata.Kill()

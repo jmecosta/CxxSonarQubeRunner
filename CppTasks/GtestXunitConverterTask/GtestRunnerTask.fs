@@ -134,7 +134,7 @@ type GtestRunnerMSBuildTask(logger : TaskLoggingHelper) as this =
     member val SeedStart = 1 with get, set
     member val SeedEnd = 1 with get, set
 
-    member val BrakeBuild = true with get, set
+    member val BrakeBuild = false with get, set
 
     /// If True GtestExe Needs to be given
     member val RunTests = false with get, set
@@ -383,12 +383,11 @@ type GtestRunnerMSBuildTask(logger : TaskLoggingHelper) as this =
                 logger.LogMessage(sprintf "GtestXunitConverter End: %u ms" stopWatchTotal.ElapsedMilliseconds)
 
         if x.BrakeBuild then
-            if result && this.buildok then
-                true
-            else
-                false
-        else
-            true
+            let message = sprintf "Test Executable %s Failed to Execute, runner configured to brake the build" x.GtestExeFile
+            let tcmessage = sprintf "##teamcity[buildProblem description='%s']" message
+            logger.LogMessage(tcmessage)
+
+        true
 
     interface ICancelableTask with
         member this.Cancel() =

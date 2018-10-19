@@ -15,7 +15,7 @@
         <SeedEnd                       Condition="'$(SeedEnd)' == ''">2</SeedEnd>
         <PathReplacementStrings        Condition="'$(PathReplacementStrings)' == ''"></PathReplacementStrings>
         <GtestRunnerTaskEnabled        Condition="'$(GtestRunnerTaskEnabled)' == ''">true</GtestRunnerTaskEnabled>
-        <BrakeBuild                    Condition="'$(BrakeBuild)' == ''">true</BrakeBuild>
+        <BrakeBuild                    Condition="'$(BrakeBuild)' == ''">false</BrakeBuild>
     </PropertyGroup>
 
     <Target Name="GTestRunnerTarget" AfterTargets="AfterBuild" Condition="'$(GtestRunnerTaskEnabled)' == 'true'">

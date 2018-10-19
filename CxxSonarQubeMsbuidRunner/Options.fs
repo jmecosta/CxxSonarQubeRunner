@@ -202,7 +202,8 @@ let ShowHelp() =
         Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /j:1 is default. 0 uses all processors>")
         Console.WriteLine ("    /K|/k:<key : key>")
-        
+
+        Console.WriteLine ("    /L|/L:Run static analyis options only")
         Console.WriteLine ("    /M|/m:<solution file : optional>")
         Console.WriteLine ("    /N|/n:<name : name>")
 
@@ -213,6 +214,7 @@ let ShowHelp() =
         Console.WriteLine ("    /R|/r:<msbuild sonarqube runner -> 1.1 or path to runner>")
         Console.WriteLine ("    /S|/s:<additional settings filekey>")
         Console.WriteLine ("    /T|/t:<msbuild target, default is /t:Rebuild>")
+        Console.WriteLine ("    /U|/u:<dont build solution>")
 
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
@@ -240,7 +242,11 @@ type OptionsData(args : string []) =
 
     let verboseModeTrue = arguments.ContainsKey("g")
 
+    let skipBuildSolution = arguments.ContainsKey("u")
+
     let deleteLegacyPropsFile = arguments.ContainsKey("o")
+
+    let runStaticAnalysisOnly = arguments.ContainsKey("l")
 
     let cliRunnerVersion = 
         if arguments.ContainsKey("r") then
@@ -356,6 +362,9 @@ type OptionsData(args : string []) =
     member val DeprecatedPropertiesFile : string = "" with get, set
     member val ConfigFile : string = "" with get, set
 
+    member val SkipBuildSolution : bool = skipBuildSolution with get, set
+    member val RunStaticAnalysisOnly : bool = runStaticAnalysisOnly with get, set
+    
     member val Solution : string = "" with get, set
     member val SolutionName : string = "" with get, set
     member val HomePath : string = "" with get, set

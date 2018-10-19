@@ -170,7 +170,7 @@ type RatsMSBuildTask(executorIn : ICommandExecutor) as this =
                 Console.WriteLine("Rats: Number of tries exceeded")
                 executor.GetStdError |> fun s -> for i in s do Console.WriteLine(i)
             else
-                logger.LogError("Rats: Number of tries exceeded")
+                logger.LogWarning("Rats: Number of tries exceeded: Cannot Analyse: ")
                 executor.GetStdError |> fun s -> for i in s do logger.LogError(i)
 
             executor.GetStdOut |> fun s -> for i in s do  if this.BuildEngine = null then Console.WriteLine(i) else logger.LogError(i)
@@ -249,15 +249,16 @@ type RatsMSBuildTask(executorIn : ICommandExecutor) as this =
 
                 Array.ofSeq (solutionHelper.GetProjectFilesFromSolutions(x.SolutionPathToAnalyse)) |> Array.Parallel.map (fun x -> iterateOverProjectFiles x) |> ignore
             else
-                logger.LogMessage(sprintf "Search For all source files: %u" this.totalViolations)
                 let files = Directory.GetFiles(solutionRoot, "*.*", SearchOption.AllDirectories)
-
+                logger.LogMessage(sprintf "Search For all source files: %u" files.Length)
                 let ProcessFile(file:string) =
                     let extension = Path.GetExtension(file).ToLower()
                     if extension.Equals(".cpp") || extension.Equals(".hpp") || extension.Equals(".c") || extension.Equals(".h") || extension.Equals(".cxx") then
                         let arguments = x.generateCommandLineArgs(file)
                         logger.LogMessage(sprintf "RatsCopCommand: %s %s" x.RatsPath arguments)
-                        x.ExecuteRats arguments |> ignore
+                        try
+                            x.ExecuteRats arguments |> ignore
+                        with | ex -> logger.LogMessage(sprintf "RatsCopCommand Failed: %s %s : %s -> %s" x.RatsPath arguments ex.Message ex.StackTrace)
 
                 Array.ofSeq files |> Array.Parallel.map (fun x -> ProcessFile x) |> ignore
 

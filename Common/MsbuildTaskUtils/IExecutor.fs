@@ -20,7 +20,6 @@ type ICommandExecutor =
   abstract member GetStdError : list<string>
   abstract member GetErrorCode : ReturnCode
   abstract member CancelExecution : ReturnCode
-  abstract member CancelExecutionAndSpanProcess : string [] -> ReturnCode
   abstract member ResetData : unit -> unit
   abstract member GetProcessIdsRunning : string -> Process []
 
@@ -38,23 +37,7 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
         if not(startInfo.EnvironmentVariables.ContainsKey(a)) then
             startInfo.EnvironmentVariables.Add(a, b)
 
-    let KillPrograms(currentProcessName : string) =
-        if not(String.IsNullOrEmpty(currentProcessName)) then
-            try
-                let processId = Process.GetCurrentProcess().Id
-                let processes = System.Diagnostics.Process.GetProcessesByName(currentProcessName)
-
-                for proc in processes do
-                    if processId <> proc.Id then
-                        try
-                            Process.GetProcessById(proc.Id).Kill()
-                        with
-                        | ex -> ()
-            with
-            | ex -> ()
-
     member val Logger = logger
-    member val stopWatch = Stopwatch.StartNew()
     member val proc : Process  = new Process() with get, set
     member val output : string list = [] with get, set
     member val error : string list = [] with get, set
@@ -83,38 +66,13 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
 
         didIkillAnybody
 
-    member this.TimerControl() =
-        async {
-            while not this.cancelSignal do
-                if this.stopWatch.ElapsedMilliseconds > timeout then
-
-                    if not(obj.ReferenceEquals(logger, null)) then
-                        logger.LogError(sprintf "Expired Timer: %x " this.stopWatch.ElapsedMilliseconds)
-
-                    try
-                        if this.killProcess(this.proc.Id) then
-                            this.returncode <- ReturnCode.Ok
-                        else
-                            this.returncode <- ReturnCode.NokAppSpecific
-                            //this.proc.Kill()
-                    with
-                     | ex -> ()
-
-                Thread.Sleep(1000)
-
-            if this.stopWatch.ElapsedMilliseconds > timeout then
-                this.returncode <- ReturnCode.Timeout
-        }
-
     member this.ProcessErrorDataReceived(e : DataReceivedEventArgs) =
-        this.stopWatch.Restart()
         if not(String.IsNullOrWhiteSpace(e.Data)) then
             this.error <- this.error @ [e.Data]
             System.Diagnostics.Debug.WriteLine("ERROR:" + e.Data)
         ()
 
     member this.ProcessOutputDataReceived(e : DataReceivedEventArgs) =
-        this.stopWatch.Restart()
         if not(String.IsNullOrWhiteSpace(e.Data)) then
             this.output <- this.output @ [e.Data]
             System.Diagnostics.Debug.WriteLine(e.Data)
@@ -143,19 +101,9 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
         member this.GetErrorCode =
             this.returncode
 
-        member this.CancelExecution =            
+        member this.CancelExecution =
             if this.proc.HasExited = false then
                 this.proc.Kill()
-            this.cancelSignal <- true
-            ReturnCode.Ok
-
-        member this.CancelExecutionAndSpanProcess(processNames : string []) =
-            
-            if this.proc.HasExited = false then
-                processNames |> Array.iter (fun name -> KillPrograms(name))
-                if this.proc.HasExited = false then
-                    this.proc.Kill()
-
             this.cancelSignal <- true
             ReturnCode.Ok
 
@@ -184,9 +132,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
             this.proc.EnableRaisingEvents <- true
             let ret = this.proc.Start()
 
-            this.stopWatch.Restart()
-            Async.Start(this.TimerControl());
-
             this.proc.BeginOutputReadLine()
             this.proc.BeginErrorReadLine()
             this.proc.WaitForExit()
@@ -213,9 +158,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
             this.proc.ErrorDataReceived.Add(errorHandler)
             let ret = this.proc.Start()
 
-            this.stopWatch.Restart()
-            Async.Start(this.TimerControl());
-
             this.proc.BeginOutputReadLine()
             this.proc.BeginErrorReadLine()
             this.proc.WaitForExit()
@@ -235,8 +177,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
 
             this.proc <- new Process(StartInfo = startInfo)
             let ret = this.proc.Start()
-            this.stopWatch.Restart()
-            Async.Start(this.TimerControl());
             this.proc.WaitForExit()
             this.cancelSignal <- true
             this.proc.ExitCode
