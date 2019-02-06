@@ -4,7 +4,6 @@ open System
 open System.IO
 open System.Threading
 open System.Diagnostics
-open System.Management
 open Microsoft.FSharp.Collections
 open Microsoft.Build.Utilities
 open System.Runtime.InteropServices
@@ -46,26 +45,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
 
     member val Program : string = "" with get, set
 
-    member this.killProcess(pid : int32) : bool =
-        let mutable didIkillAnybody = false
-        try
-            let procs = Process.GetProcesses()
-            for proc in procs do
-                if this.GetParentProcess(proc.Id) = pid then
-                    if this.killProcess(proc.Id) = true then
-                        didIkillAnybody <- true
-
-            try
-                let myProc = Process.GetProcessById(pid)
-                myProc.Kill()
-                didIkillAnybody <- true
-            with
-             | ex -> ()
-        with
-         | ex -> ()
-
-        didIkillAnybody
-
     member this.ProcessErrorDataReceived(e : DataReceivedEventArgs) =
         if not(String.IsNullOrWhiteSpace(e.Data)) then
             this.error <- this.error @ [e.Data]
@@ -77,13 +56,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
             this.output <- this.output @ [e.Data]
             System.Diagnostics.Debug.WriteLine(e.Data)
         ()
-
-        member this.GetParentProcess(Id : int32) = 
-            let mutable parentPid = 0
-            use mo = new ManagementObject("win32_process.handle='" + Id.ToString() + "'")
-            let tmp = mo.Get()
-            Convert.ToInt32(mo.["ParentProcessId"])
-
 
     interface ICommandExecutor with
 
@@ -161,7 +133,6 @@ type CommandExecutor(logger : TaskLoggingHelper, timeout : int64) =
             this.proc.BeginOutputReadLine()
             this.proc.BeginErrorReadLine()
             this.proc.WaitForExit()
-            this.proc.Id
             this.cancelSignal <- true
             this.proc.ExitCode
 

@@ -15,9 +15,9 @@
         <tags>C++ SonarQube</tags>
     </metadata>
     <files>
-        <file src="..\BuildDrop\CppCheckMSBuildTask.dll" target="build" />
+        <file src="..\BuildDrop\CxxTasks\net462\CppCheckMSBuildTask.dll" target="build" />
         <file src="CppCheckTask.targets" target="build" />
-        <file src="..\BuildDrop\FSharp*.*" target="build" exclude="**\*.xml"/>
-        <file src="..\BuildDrop\MsbuildUtilityHelpers.dll" target="build" />
+        <file src="..\BuildDrop\CxxTasks\net462\FSharp*.*" target="build" exclude="**\*.xml"/>
+        <file src="..\BuildDrop\CxxTasks\net462\MsbuildUtilityHelpers.dll" target="build" />
     </files>
 </package>

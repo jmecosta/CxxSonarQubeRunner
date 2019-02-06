@@ -1,30 +1,12 @@
-version: '{build}'
-  
-install:
-  - ps: |
-      If ($env:Platform -Match "x86") {
-        $env:PCRE_PLATFORM="Win32"
-        $env:JAVA_HOME="c:/Program Files (x86)/Java/jdk1.8.0"
-        $env:MSBuildDir="C:/Program Files (x86)/MSBuild/14.0/Bin"
-        $env:VCVARS_PLATFORM="x86"
-        $env:LANG_PLATFORM=""
-      } Else {
-        $env:PCRE_PLATFORM="x64"
-        $env:JAVA_HOME="c:/Program Files/Java/jdk1.8.0"
-        $env:MSBuildDir="C:/Program Files/MSBuild/14.0/Bin"
-        $env:VCVARS_PLATFORM="amd64"
-        $env:LANG_PLATFORM="-x64"
-      }	  
-  - cmd: SET PATH=%MSBuildDir%;C:\maven\apache-maven-3.2.5\bin;C:\Tools\NUnit3\bin;%PATH%
-  - cmd: SET
-  - cmd: nuget\nuget.exe restore
+image: Visual Studio 2017
 
-build_script:
-  - msbuild MSBuildTasks.sln /p:Configuration=Release
-  - cmd: 7z a CxxSonarQubeMsbuidRunner.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\*.*
-  - cmd: 7z a CxxSonarQubeMsbuidRunnerTest.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\*.*
-  - cmd: 7z a CxxSonarQubeMsbuidRunnerTestData.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\Test\testdata\*.*
+before_build:
+- nuget restore
 
+build:
+  project: MSBuildTasks.sln
+  verbosity: minimal
+    
 after_test:
   - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
@@ -32,14 +14,10 @@ after_test:
   - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
   - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
-  
-  
+  - cmd: 7z a CxxSonarQubeRunner.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\*.*
+    
 artifacts:
   - path: '*.nupkg'
     name: sonar-cxx-msbuild-tasks-nugets
-  - path: 'CxxSonarQubeMsbuidRunner.zip'
-    name: CxxSonarQubeMsbuidRunner
-on_failure:
-  - ps: Get-ChildItem CxxSonarQubeMsbuidRunner.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem CxxSonarQubeMsbuidRunnerTest.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-  - ps: Get-ChildItem CxxSonarQubeMsbuidRunnerTestData.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - path: 'CxxSonarQubeRunner.zip'
+    name: CxxSonarQubeRunner

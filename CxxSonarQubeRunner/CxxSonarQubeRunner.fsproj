@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net462;netcoreapp2.2</TargetFrameworks>
+    <OutputPath>..\BuildDrop\Runner\</OutputPath>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.2.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="HelpersMethods.fs" />
+    <Compile Include="InstallationModule.fs" />
+    <Compile Include="Options.fs" />
+    <Compile Include="SharedProjectImporter.fs" />
+    <Compile Include="AnalysisRunners.fs" />
+    <Compile Include="SonarRunnerPhases.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+<ItemGroup>
+  <Content Remove="resources\DummySolution.sln" />
+</ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="resources\after.solution.sln.targets" />
+    <None Include="App.config" />
+    <EmbeddedResource Include="resources\DummySolution.sln" />
+    <None Include="resources\Elevate.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="resources\Elevate64.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MsbuildAutomationHelper" Version="2.0.0" />
+    <PackageReference Include="SonarRestServiceImpl" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\MsbuildTaskUtils\MsbuildTaskUtils.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AntPathMatching">
+      <HintPath>..\refs\AntPathMatching.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
+</Project>

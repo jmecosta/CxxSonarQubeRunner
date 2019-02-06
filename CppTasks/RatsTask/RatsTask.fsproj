@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <OutputPath>..\..\BuildDrop\CxxTasks</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="RatsTask.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="15.8.166" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.8.166" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\MsbuildTaskUtils\MsbuildTaskUtils.fsproj" />
+  </ItemGroup>
+
+</Project>

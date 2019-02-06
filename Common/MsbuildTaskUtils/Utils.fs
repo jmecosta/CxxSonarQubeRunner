@@ -1,9 +1,11 @@
 ﻿namespace MsbuildUtilityHelpers
 
-open System
-open System.Resources
-open System.IO
 open System.Xml
+open System
+
+type ICheckerLogger =
+    abstract member ReportMessage : string -> unit
+    abstract member ReportException : Exception -> unit
 
 type Utils() = 
     let getEnvironmentVariable var = 

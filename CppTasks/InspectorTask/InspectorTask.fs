@@ -1,18 +1,11 @@
 ﻿// Learn more about F# at http://fsharp.net
 
 namespace InspectorMSBuildTask
-#if INTERACTIVE
-#r "Microsoft.Build.Framework.dll";;
-#r "Microsoft.Build.Utilities.v4.0.dll";;
-#endif
 open System
 open System.IO
 open System.Diagnostics
-open Microsoft.Build
 open Microsoft.Build.Framework
-open Microsoft.Build.Logging
 open Microsoft.Build.Utilities
-open Microsoft.Win32
 open System.Threading
 open MsbuildUtilityHelpers
 

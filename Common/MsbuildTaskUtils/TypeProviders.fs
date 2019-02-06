@@ -1,7 +1,6 @@
 ﻿namespace MsbuildUtilityHelpers
 
 open FSharp.Data
-open System.Xml.Linq
 
 type CppProjectFile = XmlProvider<"""<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">

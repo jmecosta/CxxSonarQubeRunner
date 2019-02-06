@@ -1,12 +1,7 @@
 ﻿namespace MsbuildUtilityHelpers
 
-open Microsoft.Build.Construction
-open System.Resources
-open System.Reflection
 open System
 open System.IO
-open FSharp.Data
-open System.Xml.Linq
 
 type ProjectFiles(projectName : string, absolutepath : string) = 
     member val name = projectName with get
