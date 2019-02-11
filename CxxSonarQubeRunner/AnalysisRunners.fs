@@ -63,12 +63,14 @@ let RunVeraRatsAndCppLint(options : OptionsData) =
                 false
         
         if not(isExclude) then
-            let executor = new CommandExecutor(null, int64(1500000))
-            VeraRunner.ExecuteVera(executor, file, options.VeraPath, options.CxxReportsVeraPath, "", options.HomePath, (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
+            if options.VeraPath <> "" then
+                let executor = new CommandExecutor(null, int64(1500000))
+                VeraRunner.ExecuteVera(executor, file, options.VeraPath, options.CxxReportsVeraPath, "", options.HomePath, (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
             let executor = new CommandExecutor(null, int64(1500000))
             CppLintRunner.ExecuteCppLint(executor, options.HomePath, file, options.CxxReportsCpplintPath, "", options.PythonPath, options.CppLintPath, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
-            let executor = new CommandExecutor(null, int64(1500000))
-            RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
+            if options.RatsPath <> "" then
+                let executor = new CommandExecutor(null, int64(1500000))
+                RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
 
     Directory.GetFiles(options.HomePath, "*.h", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
     Directory.GetFiles(options.HomePath, "*.cpp", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore

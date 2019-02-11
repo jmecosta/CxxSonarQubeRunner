@@ -247,7 +247,7 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "3.2.0.1227"
+            "3.3.0.1492"
 
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
@@ -428,9 +428,14 @@ type OptionsData(args : string []) =
                     if File.Exists(msbuildRunnerVersion) then
                         msbuildRunnerVersion
                     else
-                        InstallMsbuildRunner(msbuildRunnerVersion)
+                        InstallScannerRunner(msbuildRunnerVersion, cliRunnerVersion)
 
-        let scanner = Directory.GetFiles(Directory.GetParent(this.MSBuildRunnerPath).FullName, "sonar-scanner.bat", SearchOption.AllDirectories)
+        let scanner =
+            if InstallationModule.isWindowSystem then
+                Directory.GetFiles(Directory.GetParent(this.MSBuildRunnerPath).FullName, "sonar-scanner.bat", SearchOption.AllDirectories)
+            else
+                Directory.GetFiles(Directory.GetParent(this.MSBuildRunnerPath).FullName, "sonar-scanner", SearchOption.AllDirectories)
+
         this.CliRunnerPath <- scanner.[0]
 
         if options.UserSonarScannerCli then
