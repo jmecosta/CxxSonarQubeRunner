@@ -4,20 +4,12 @@ before_build:
 - nuget restore
 
 build:
-  project: MSBuildTasks.sln
+  project: CxxSQRunner.sln
   verbosity: minimal
     
 after_test:
-  - cmd: nuget\nuget.exe pack  Nuget\CppCheckTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\CppLintTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\GtestRunnerTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\IntelInspectorTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\RatsTask.nuspec
-  - cmd: nuget\nuget.exe pack  Nuget\VeraTask.nuspec
-  - cmd: 7z a CxxSonarQubeRunner.zip %APPVEYOR_BUILD_FOLDER%\BuildDrop\*.*
+  - cmd: PublishAndPackage.bat
     
 artifacts:
-  - path: '*.nupkg'
-    name: sonar-cxx-msbuild-tasks-nugets
   - path: 'CxxSonarQubeRunner.zip'
     name: CxxSonarQubeRunner

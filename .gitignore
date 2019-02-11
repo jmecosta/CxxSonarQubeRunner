@@ -4,3 +4,4 @@ BuildDrop
 **/obj/**
 *.suo
 **/bin/**
+/CxxSonarQubeRunner.zip
