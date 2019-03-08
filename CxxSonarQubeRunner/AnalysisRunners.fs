@@ -72,9 +72,9 @@ let RunVeraRatsAndCppLint(options : OptionsData) =
                 let executor = new CommandExecutor(null, int64(1500000))
                 RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
 
-    Directory.GetFiles(options.HomePath, "*.h", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
+    Directory.GetFiles(options.HomePath, "*.h", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
     Directory.GetFiles(options.HomePath, "*.cpp", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.hpp", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
-    Directory.GetFiles(options.HomePath, "*.c", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
-    Directory.GetFiles(options.HomePath, "*.cc", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
-    Directory.GetFiles(options.HomePath, "*.hh", SearchOption.AllDirectories) |> Seq.iter (fun file -> RunTools(file))
+    Directory.GetFiles(options.HomePath, "*.hpp", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
+    Directory.GetFiles(options.HomePath, "*.c", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
+    Directory.GetFiles(options.HomePath, "*.cc", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
+    Directory.GetFiles(options.HomePath, "*.hh", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
