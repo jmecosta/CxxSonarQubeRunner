@@ -48,7 +48,7 @@ let GetPropertyFromFile(content : string [], prop : string) =
     | Some(c) -> c.Trim().Split('=').[1]
     | _ -> ""
 
-let GetArgumentClass(additionalArguments : string, content : string [], home : string, useCli:bool) = 
+let GetArgumentClass(additionalArguments : seq<string>, content : string [], home : string, useCli:bool) = 
     
     let mutable arguments = Map.empty
     
@@ -104,6 +104,7 @@ let GetArgumentClass(additionalArguments : string, content : string [], home : s
                 arguments <- arguments.Add(data.[0], data.[1])
 
     content |> Seq.iter (fun c -> ProcessLine(c.Trim()))
+    additionalArguments |> Seq.iter (fun c -> ProcessLine(c.Trim()))
 
     // ensure stuff that we run is included
     if not(arguments.ContainsKey("sonar.cxx.rats.reportPath")) then
@@ -796,7 +797,7 @@ type OptionsData(args : string []) =
         if options.UserSonarScannerCli then
             this.ConfigFile <- this.DeprecatedPropertiesFile
 
-        options.SonarPropsToUse <- GetArgumentClass(this.PropsForBeginStage, this.DepracatedSonarPropsContent, this.HomePath, options.UserSonarScannerCli)
+        options.SonarPropsToUse <- GetArgumentClass(arguments.["d"], this.DepracatedSonarPropsContent, this.HomePath, options.UserSonarScannerCli)
         if options.UserSonarScannerCli then
             WriteUserSettingsFromSonarPropertiesFileCli(this.ConfigFile, this.PropsInSettingsFile, options.SonarPropsToUse)
         else
