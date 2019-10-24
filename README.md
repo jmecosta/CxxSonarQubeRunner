@@ -70,4 +70,4 @@ The wrapper will install the needed tools to run analysis, however in cases were
             /T|/t:<msbuild target, default is /t:Rebuild>
         
             /V|/v:<version : version>
-            /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, default is vs15>
+            /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, vs19 default is vs15>
