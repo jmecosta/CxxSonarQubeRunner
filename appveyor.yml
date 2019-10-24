@@ -1,5 +1,23 @@
-image: Visual Studio 2017
+# appveyor.yml reference see https://www.appveyor.com/docs/appveyor-yml/
 
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 2.0.0.{build}
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image: Visual Studio 2019
+
+# build cache to preserve files/folders between builds
+cache:
+  - C:\Users\appveyor\.m2
+  
 before_build:
 - nuget restore
 
