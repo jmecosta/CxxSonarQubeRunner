@@ -146,6 +146,15 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
                     elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
                         ret <- "C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
             ret
+        elif vsVersion = "vs19" then
+            let mutable ret = ""
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+                    elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+            ret            
         else
             if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
                 "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
@@ -248,6 +257,23 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
                     elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe") then
                         ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe"
         ret
+    elif vccompiler.Equals("vs19") then 
+        let mutable ret = ""
+        if useMSBuild64 then
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe"
+                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe"
+        else                
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+        ret        
     else
         if useMSBuild64 then
             @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
