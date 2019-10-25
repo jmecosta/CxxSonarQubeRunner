@@ -269,10 +269,10 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
         else                
             for flavour in flavours do 
                 if ret = "" then 
-                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
-                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
-                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
-                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                    if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                    elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                        ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
         ret        
     else
         if useMSBuild64 then
