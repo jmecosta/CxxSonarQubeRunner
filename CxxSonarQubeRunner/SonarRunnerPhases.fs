@@ -288,7 +288,7 @@ let RunBuild(options : OptionsData) =
         else
             ""
 
-    let arguments = options.PropsForMsbuild + " " + options.Target + optionDisableProj + " "
+    let arguments = options.PropsForMsbuild + " " + options.MSBuildTarget + optionDisableProj + " "
 
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
@@ -364,7 +364,16 @@ let RunBuild(options : OptionsData) =
 
 
 let BeginPhase(options : OptionsData) =
-    let arguments = options.ProjectKey + " " + options.ProjectName + " " + options.ProjectVersion + " " + options.PropsForBeginStage + " " + "/s:\"" + options.ConfigFile + "\""
+    let projetKey = 
+        if options.AuthToken.SonarVersion >= 7.9 && options.Branch <> "" && not(options.UseNewBranch) then
+            options.ProjectKey + ":" + options.Branch.Replace("/", "_")
+        else
+            options.ProjectKey
+
+    let arguments = projetKey + " " +
+                    options.ProjectName + " " + 
+                    options.ProjectVersion + " " +
+                    options.PropsForBeginStage + " " + "/s:\"" + options.ConfigFile + "\""
     let hostUrl =
         if options.SonarHost = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
@@ -388,8 +397,13 @@ let BeginPhase(options : OptionsData) =
     let branchtopass = 
         if options.Branch = "" then
             ""
-        else
+        elif options.Branch <> "" && options.UseNewBranch then
+            let targetString =  if options.TargetBranch <> "" then " /d:sonar.branch.target=" + options.TargetBranch else ""
+            "/d:sonar.branch.name=" + options.Branch + targetString
+        elif options.Branch <> "" && options.AuthToken.SonarVersion < 7.9 then
             "/d:sonar.branch=" + options.Branch
+        else
+            ""
 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
@@ -471,14 +485,6 @@ let CLiPhase(options : OptionsData) =
         (executor :> ICommandExecutor).ExecuteCommand(options.CliRunnerPath, args, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
 
 let EndPhase(options : OptionsData) =
-
-    let hostUrl =
-        if options.SonarHost = "" then
-            HelpersMethods.cprintf(ConsoleColor.Yellow, "url not specified. using default: http://localhost:9000")
-            "http://localhost:9000"
-        else
-            options.SonarHost
-
     let username = 
         if options.SonarUserName = "" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "login not specified. using default: admin")

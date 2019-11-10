@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "CxxSonarQubeRunner": {
-      "commandName": "Project",
-    }
-  }
-}

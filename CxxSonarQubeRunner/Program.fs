@@ -30,6 +30,7 @@ let main argv =
             if not(options.InstallMode) then
                 let skipBuild = options.ValidateSolutionOptions(options.UserSonarScannerCli)
                 options.CreatOptionsForAnalysis()
+                options.CreateAuthToken()
                 let solutionData = options.Setup(options, skipBuild)
                 options.ProvisionProject()
            

@@ -5,3 +5,4 @@ BuildDrop
 *.suo
 **/bin/**
 /CxxSonarQubeRunner.zip
+/CxxSonarQubeRunner/Properties/launchSettings.json

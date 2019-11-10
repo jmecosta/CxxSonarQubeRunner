@@ -130,15 +130,28 @@ let WriteFile(file : string, content : Array) =
     for elem in content do
         outFile.WriteLine(elem)
 
-let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
+let WriteUserSettingsFromSonarPropertiesFile(file: string, argsParsIn : Map<string, string>, sonarPropsIn : Map<string, string>, sonarVersion:float) =
     printf "Apply the following changes to sonar configuration Files >%s<\r\n" file
-    argsPars |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s""" c d
-        printf "%s" line
+    let argsPars =
+        if sonarVersion >= 7.9 && argsParsIn.ContainsKey("sonar.branch") then
+            argsParsIn.Remove("sonar.branch")
+        else
+            argsParsIn
+
+    let sonarProps =
+        if sonarVersion >= 7.9 && sonarPropsIn.ContainsKey("sonar.branch") then
+            sonarPropsIn.Remove("sonar.branch")
+        else
+            sonarPropsIn
+
+    argsPars |> Map.iter (fun c d ->
+            let line = sprintf """"%s : %s""" c d
+            printf "%s\r\n" line
         )
+
     sonarProps |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s""" c d
-        printf "%s \r\n" line
+            let line = sprintf """"%s : %s""" c d
+            printf "%s\r\n" line
         )
     use outFile = new StreamWriter(file)
     outFile.WriteLine("""<?xml version="1.0" encoding="utf-8" ?>""")
@@ -147,15 +160,27 @@ let WriteUserSettingsFromSonarPropertiesFile(file: string, argsPars : Map<string
     sonarProps |> Map.iter (fun c d -> if not(argsPars.ContainsKey(c)) then outFile.WriteLine((sprintf """<Property Name="%s">%s</Property>""" c d)))
     outFile.WriteLine("""</SonarQubeAnalysisProperties>""")
 
-let WriteUserSettingsFromSonarPropertiesFileCli(file: string, argsPars : Map<string, string>, sonarProps : Map<string, string>) =
+let WriteUserSettingsFromSonarPropertiesFileCli(file: string, argsParsIn : Map<string, string>, sonarPropsIn : Map<string, string>, sonarVersion:float) =
     printf "Apply the following changes to sonar configuration Files >%s<\r\n" file
-    argsPars |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s""" c d
-        printf "%s \r\n" line
+    let argsPars =
+        if sonarVersion >= 7.9 && argsParsIn.ContainsKey("sonar.branch") then
+            argsParsIn.Remove("sonar.branch")
+        else
+            argsParsIn
+
+    let sonarProps =
+        if sonarVersion >= 7.9 && sonarPropsIn.ContainsKey("sonar.branch") then
+            sonarPropsIn.Remove("sonar.branch")
+        else
+            sonarPropsIn
+
+    argsPars |> Map.iter (fun c d ->
+            let line = sprintf """"%s : %s""" c d
+            printf "%s \r\n" line
         )
     sonarProps |> Map.iter (fun c d -> 
-        let line = sprintf """"%s : %s""" c d
-        printf "%s \r\n" line
+            let line = sprintf """"%s : %s""" c d
+            printf "%s \r\n" line
         )
     use outFile = new StreamWriter(file, true)
     argsPars |> Map.iter (fun c d -> outFile.WriteLine((sprintf """%s=%s""" c d)))
@@ -212,16 +237,14 @@ let ShowHelp() =
         Console.WriteLine ("    /U|/u:<dont build solution>")
 
         Console.WriteLine ("    /V|/v:<version : version>")
+        Console.WriteLine ("    /W|/w:<skip copy false positives and apply permission template, when not defined it will copy>")
         Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
 
-        Console.WriteLine ("    /W|/w:<skip copy false positives and apply permission template, when not defined it will copy>")
         Console.WriteLine ("    /Y|/y:<skip provision during branch analysis stage>")
         Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
-
-
 
 
 type OptionsData(args : string []) =
@@ -248,13 +271,13 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "3.3.0.1492"
+            "4.2.0.1873"
 
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "4.3.1.1372"
+            "4.8.0.12008"
 
     let parentBranch = 
         if arguments.ContainsKey("b") then
@@ -304,6 +327,7 @@ type OptionsData(args : string []) =
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
     member val Branch : string = "" with get, set
+    member val UseNewBranch : bool = false with get, set
     member val Provision : bool = provision with get, set
 
     member val ProjectKey : string = "" with get, set
@@ -332,7 +356,8 @@ type OptionsData(args : string []) =
 
     member val VsVersion : string = "" with get, set
     member val UseAmd64 : string = "" with get, set
-    member val Target : string = "" with get, set
+    member val MSBuildTarget : string = "" with get, set
+    member val TargetBranch : string = parentBranch with get, set
     member val ParallelMsbuildOption = "/m:1" with get, set
 
     member val CppCheckPath : string = "" with get, set
@@ -348,6 +373,28 @@ type OptionsData(args : string []) =
     member val DisableCodeAnalysis = disableCodeAnalysis
     member val IsVerboseOn = verboseModeTrue
     member val FailOnFailedGate = failedOnFailedGate
+    member val AuthToken : Types.ConnectionConfiguration = null with get, set 
+
+    member this.CreateAuthToken() =
+        let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
+            let pass =
+                if this.SonarUserPassword = "" then
+                    "admin"
+                else
+                    this.SonarUserPassword
+
+            let user =
+                if this.SonarUserName = "" then
+                    "admin"
+                else
+                    this.SonarUserName
+
+            let token = new Types.ConnectionConfiguration(address, user, pass, 4.5)
+            token.SonarVersion <- float (service.GetServerInfo(token))
+            token
+
+        let rest = new SonarRestServiceImpl.SonarService(new JsonSonarConnector())        
+        this.AuthToken <- GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
 
     member this.ValidateSolutionOptions(useCli:bool) = 
         let mutable skipBuild = false
@@ -519,7 +566,7 @@ type OptionsData(args : string []) =
                 arguments.["a"] |> Seq.head
             else
                 ""
-        this.Target <-
+        this.MSBuildTarget <-
             if arguments.ContainsKey("t") then
                 "/t:" + (arguments.["t"] |> Seq.head)
             else
@@ -539,7 +586,10 @@ type OptionsData(args : string []) =
                 if prop.Name.Equals("sonar.password") then
                     this.SonarUserPassword <- prop.Value
                 if prop.Name.Equals("sonar.branch") then
-                    this.Branch <- prop.Value           
+                    this.Branch <- prop.Value
+                if prop.Name.Equals("sonar.branch.name") then
+                    this.Branch <- prop.Value
+                    this.UseNewBranch <- true
         with
         | _ -> ()
 
@@ -564,6 +614,9 @@ type OptionsData(args : string []) =
             this.SonarUserPassword <- this.PropsInSettingsFile.["sonar.password"]
         if this.PropsInSettingsFile.ContainsKey("sonar.branch") then
             this.Branch <- this.PropsInSettingsFile.["sonar.branch"]
+        if this.PropsInSettingsFile.ContainsKey("sonar.branch.name") then
+            this.Branch <- this.PropsInSettingsFile.["sonar.branch.name"]
+            this.UseNewBranch <- true
 
         this.PropsForBeginStage <- 
             let mutable args = ""
@@ -579,6 +632,9 @@ type OptionsData(args : string []) =
                                 this.SonarHost <- arg.Replace("sonar.host.url=", "")
                             if arg.StartsWith("sonar.branch") then
                                 this.Branch <- arg.Replace("sonar.branch=", "")
+                            if arg.StartsWith("sonar.branch.name") then
+                                this.Branch <- arg.Replace("sonar.branch.name=", "")
+                                this.UseNewBranch <- true
                         else
                             args <- args + " /d:" + arg
 
@@ -600,35 +656,16 @@ type OptionsData(args : string []) =
 
     member this.DuplicateFalsePositives() = 
         if parentBranch <> "" && this.Branch <> "" then
-
-            let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
-                let pass =
-                    if this.SonarUserPassword = "" then
-                        "admin"
-                    else
-                        this.SonarUserPassword
-
-                let user =
-                    if this.SonarUserName = "" then
-                        "admin"
-                    else
-                        this.SonarUserName
-
-                let token = new Types.ConnectionConfiguration(address, user, pass, 4.5)
-                token.SonarVersion <- float (service.GetServerInfo(token))
-                token
-
             let key = this.ProjectKey.Replace("/k:", "")
             let rest = new SonarRestServiceImpl.SonarService(new JsonSonarConnector())        
-            let token = GetConnectionToken(rest, this.SonarHost, this.SonarUserName, this.SonarUserPassword)
-            let masterProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + parentBranch).[0]
-            let branchProject = (rest :> ISonarRestService).GetResourcesData(token, key + ":" + this.Branch).[0]
+            let masterProject = (rest :> ISonarRestService).GetResourcesData(this.AuthToken, key + ":" + parentBranch).[0]
+            let branchProject = (rest :> ISonarRestService).GetResourcesData(this.AuthToken, key + ":" + this.Branch).[0]
 
             if permissiontemplatename <> "" then
                 HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
                 HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########### Apply Permission Template ############") 
                 HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
-                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(token, branchProject.Key, permissiontemplatename)
+                let errormsg = (rest :> ISonarRestService).ApplyPermissionTemplateToProject(this.AuthToken, branchProject.Key, permissiontemplatename)
                 if errormsg <> "" then
                     printf "[CxxSonarQubeMsbuidRunner] Failed to apply permission template %s : %s\r\n" permissiontemplatename errormsg
                 else
@@ -639,7 +676,7 @@ type OptionsData(args : string []) =
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "##################################################")
 
             let filter = "?componentRoots=" + masterProject.Key.Trim() + "&resolutions=FALSE-POSITIVE,WONTFIX"
-            let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(token, filter, masterProject.Key, CancellationToken(), logger).Result
+            let falsePositivesInMaster = (rest :> ISonarRestService).GetIssues(this.AuthToken, filter, masterProject.Key, CancellationToken(), logger).Result
 
             printf "[CxxSonarQubeMsbuidRunner] : Filter: %s  -> False Positives and Wont Fix : %i \r\n" filter falsePositivesInMaster.Count
 
@@ -656,7 +693,7 @@ type OptionsData(args : string []) =
 
 
             for comp in issuesByComp do
-                let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(token, comp.Key.Replace(parentBranch, this.Branch), CancellationToken(), logger).Result
+                let issuesInComponentBranch = (rest :> ISonarRestService).GetIssuesInResource(this.AuthToken, comp.Key.Replace(parentBranch, this.Branch), CancellationToken(), logger).Result
                 
                 printf "[CxxSonarQubeMsbuidRunner] : Try to apply false positives in : %s  -> Issues Found : %i \r\n" (comp.Key.Replace(parentBranch, this.Branch)) issuesInComponentBranch.Count
 
@@ -665,21 +702,11 @@ type OptionsData(args : string []) =
                     match isMatch with
                     | Some c -> let issuelist = new System.Collections.Generic.List<Issue>()
                                 issuelist.Add(c)
-                                let errormsg = 
-                                    if issuetochange.Resolution.Equals(Resolution.WONTFIX) then
-                                        (rest :> ISonarRestService).MarkIssuesAsWontFix(token, issuelist, "")
-                                    else
-                                        (rest :> ISonarRestService).MarkIssuesAsFalsePositive(token, issuelist, "")
-
-                                for msg in errormsg do
-                                    if msg.Value <> HttpStatusCode.OK then
-                                        printf "[CxxSonarQubeMsbuidRunner] Failed mark issue as %s %s %s\r\n" (issuetochange.Resolution.ToString()) msg.Key (msg.Value.ToString())
-                                    else
-                                        printf "[CxxSonarQubeMsbuidRunner] Issue %s marked as %s\r\n" msg.Key (issuetochange.Resolution.ToString())
+                                if issuetochange.Resolution.Equals(Resolution.WONTFIX) then
+                                    (rest :> ISonarRestService).MarkIssuesAsWontFix(this.AuthToken, issuelist, "", logger, (new CancellationTokenSource()).Token).GetAwaiter().GetResult() |> ignore
+                                else
+                                    (rest :> ISonarRestService).MarkIssuesAsFalsePositive(this.AuthToken, issuelist, "", logger, (new CancellationTokenSource()).Token).GetAwaiter().GetResult() |> ignore
                     | _ -> ()
-              
-
-                                    
             ()
 
     member this.ProvisionProject() =
@@ -747,11 +774,11 @@ type OptionsData(args : string []) =
                 try
                     let errormsg = (rest :> ISonarRestService).SetSetting(token, prop, branchProject)
                     if errormsg <> "" then
-                        printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.key errormsg
+                        printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.Key errormsg
                     else
-                        printf "[CxxSonarQubeMsbuidRunner] %s : set with Value: %s \r\n" prop.key prop.Value
+                        printf "[CxxSonarQubeMsbuidRunner] %s : set with Value: %s \r\n" prop.Key prop.Value
                 with
-                | ex -> printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.key ex.Message
+                | ex -> printf "[CxxSonarQubeMsbuidRunner] failed to set: %s : %s \r\n" prop.Key ex.Message
             
             // clean any prop that is not in main
             //let propertiesofBranch = (rest :> ISonarRestService).GetSettings(token, branchProject).ToList()
@@ -799,9 +826,9 @@ type OptionsData(args : string []) =
 
         options.SonarPropsToUse <- GetArgumentClass(arguments.["d"], this.DepracatedSonarPropsContent, this.HomePath, options.UserSonarScannerCli)
         if options.UserSonarScannerCli then
-            WriteUserSettingsFromSonarPropertiesFileCli(this.ConfigFile, this.PropsInSettingsFile, options.SonarPropsToUse)
+            WriteUserSettingsFromSonarPropertiesFileCli(this.ConfigFile, this.PropsInSettingsFile, options.SonarPropsToUse, options.AuthToken.SonarVersion)
         else
-            WriteUserSettingsFromSonarPropertiesFile(this.ConfigFile, this.PropsInSettingsFile, options.SonarPropsToUse)
+            WriteUserSettingsFromSonarPropertiesFile(this.ConfigFile, this.PropsInSettingsFile, options.SonarPropsToUse, options.AuthToken.SonarVersion)
         
         Directory.CreateDirectory(Path.Combine(this.HomePath, ".cxxresults")) |> ignore
         this.BuildLog <- Path.Combine(this.HomePath, ".cxxresults", "BuildLog.txt")
