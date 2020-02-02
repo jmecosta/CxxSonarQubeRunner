@@ -564,7 +564,7 @@ let EndPhase(options : OptionsData) =
                             | _ -> ""
 
                         printf "\r\n"
-                        printf "%s %s %s   %s \r\n" condition.MetricKey condition.Comparator (condition.ErrorThreshold.ToString()) perioddata
+                        printf "%s %s %s   %s \r\n" condition.MetricKey condition.Comparator ((condition.ErrorThreshold |> Option.defaultValue 0).ToString()) perioddata
                         printf "    Status : %s\r\n" condition.Status
                         printf "    Actual Value : %s\r\n" (condition.ActualValue.ToString())
 
