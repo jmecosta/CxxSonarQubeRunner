@@ -11,6 +11,7 @@ open MsbuildUtilityHelpers
 open SonarRestService
 open SonarRestServiceImpl
 open SonarRestService.Types
+open System.Diagnostics
 
 type NotificationManager() =
     interface ICheckerLogger with
@@ -205,9 +206,70 @@ type CxxSettingsType = XmlProvider<"""
 </CxxUserProperties>
 """>
 
+let flavours = [ "Enterprise"; "Community"; "Professional"; "BuildTools" ]
+
+let EnvForBuild() = 
+    let mutable buildEnvAvailable = List.Empty
+    
+    if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
+        buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat", "/x:vs15",""]
+    
+    if File.Exists("C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
+        buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat", "/x:vs10","/a"]
+        
+    for flavour in flavours do 
+        if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+            buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat", "/x:vs17",""]
+        if File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+            buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat", "/x:vs17","/a"]
+
+        if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+            buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat", "/x:vs19",""]
+
+        if File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+            buildEnvAvailable <- buildEnvAvailable @ ["C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat", "/x:vs19","/a"]
+
+    let mutable msbuildEnvAvailable = List.Empty    
+    if File.Exists(@"C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe") then
+        msbuildEnvAvailable <- msbuildEnvAvailable @ ["C:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe", "/x:vs15", "/a"]
+    if File.Exists(@"C:\Program Files\MSBuild\14.0\Bin\amd64\MSBuild.exe") then
+        msbuildEnvAvailable <- msbuildEnvAvailable @ ["C:\Program Files\MSBuild\14.0\Bin\amd64\MSBuild.exe", "/x:vs15", "/a"]
+                    
+    if File.Exists(@"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe") then
+        msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe", "/x:vs15", ""]
+        
+    if File.Exists(@"C:\Program Files\MSBuild\14.0\Bin\MSBuild.exe") then
+        msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\Program Files\MSBuild\14.0\Bin\MSBuild.exe", "/x:vs15", ""]
+        
+    for flavour in flavours do 
+        if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe", "/x:vs17", "/a"]
+        if File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\amd64\\MSBuild.exe", "/x:vs17", "/a"]
+        if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe", "/x:vs17", ""]
+        elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files\\Microsoft Visual Studio\\2017\\" + flavour + "\\MSBuild\\15.0\\Bin\\MSBuild.exe", "/x:vs17", ""]
+
+        if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe", "/x:vs19", "/a"]
+        elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe", "/x:vs19", "/a"]
+
+        if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe", "/x:vs19", ""]
+
+        if File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+            msbuildEnvAvailable <- msbuildEnvAvailable @ [@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe", "/x:vs19", ""]
+
+    buildEnvAvailable, msbuildEnvAvailable
 
 let ShowHelp() =
-        Console.WriteLine ("Usage: CxxSonarQubeMsbuidRunner [OPTIONS]")
+        let assembly = System.Reflection.Assembly.GetExecutingAssembly()
+        let fvi = FileVersionInfo.GetVersionInfo(assembly.Location)
+        let version = fvi.FileVersion
+
+        Console.WriteLine (sprintf "Usage: CxxSonarQubeMsbuidRunner [OPTIONS] ===> %s" version)
         Console.WriteLine ("Runs MSbuild Runner with Cxx Support")
         Console.WriteLine ()
         Console.WriteLine ("Options:")
@@ -218,6 +280,8 @@ let ShowHelp() =
         Console.WriteLine ("    /E|/e reuse reports mode, cxx  static tools will not run. Ensure reports are placed in default locations.")
         Console.WriteLine ("    /F|/f disable code analysis in solution.")
         Console.WriteLine ("    /G|/g enable verbose mode.")
+
+        Console.WriteLine ("    /H|/h and capabilitites.")
 
         Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /j:1 is default. 0 uses all processors>")
@@ -245,6 +309,20 @@ let ShowHelp() =
 
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
+
+
+        let cppDevEnv, msbuildOptoins = EnvForBuild()
+        printf "##### AGENT CAPABILITIES ####"
+        printf "### C++ Development Env:"
+        for cppDevOption in cppDevEnv do
+            let cpp, cppoptionX, cppoptionA = cppDevOption 
+            printf "\r\n%s ARGS: %s %s \r\n" cpp cppoptionX cppoptionA
+
+        printf "### MSBuild Development Env:" 
+        for msbuildOptoin in msbuildOptoins do
+            let cpp, cppoptionX, cppoptionA = msbuildOptoin 
+            printf "\r\n%s ARGS: %s %s \r\n" cpp cppoptionX cppoptionA
+
 
 
 type OptionsData(args : string []) =
