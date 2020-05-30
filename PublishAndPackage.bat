@@ -1,7 +1,7 @@
 @echo on
 nuget restore CxxSQRunner.sln
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
 dotnet publish -c Release -r win-x64 --self-contained true
 dotnet publish -c Release -r linux-x64 --self-contained true
 dotnet publish -c Release -r osx-x64 --self-contained true
