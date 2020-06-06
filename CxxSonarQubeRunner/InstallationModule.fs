@@ -17,8 +17,6 @@ let isMacSystem = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
 let isLinuxSystem = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
 let osNameAndVersion = System.Runtime.InteropServices.RuntimeInformation.OSDescription
 
-
-
 let UnixDist = 
     if isLinuxSystem then
         let release = Directory.GetFiles(Path.Combine("/etc"), "os-release").[0]
@@ -41,7 +39,7 @@ let executor = new CommandExecutor(null, int64(1500000))
 
 let GetPythonPath() =
     if isWindowSystem then
-        Path.Combine(Path.Combine(runnerRootPath, "Python27"), "python.exe")
+        Path.Combine(Path.Combine(runnerRootPath, "Tools", "Python27"), "python.exe")
     else
         try
             let ret = (executor :> ICommandExecutor).ExecuteCommandWait("python", "-V", Map.empty, Environment.CurrentDirectory)
@@ -58,7 +56,7 @@ let GetPythonPath() =
 
 let GetVeraPath() =
     if isWindowSystem then
-        Path.Combine(runnerRootPath, "VERA", "bin", "vera++.exe")
+        Path.Combine(runnerRootPath, "Tools", "VERA", "bin", "vera++.exe")
     else
         if not(UnixDist.Contains("Ubuntu")) then
             HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Vera++ not aviable in non Ubuntu: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
@@ -80,7 +78,7 @@ let GetVeraPath() =
 
 let GetRatsPath() =
     if isWindowSystem then
-        Path.Combine(runnerRootPath, "rats", "rats.exe")
+        Path.Combine(runnerRootPath, "Tools", "rats", "rats.exe")
     else
         if isLinuxSystem  then
             HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Rats not aviable in Unix: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
@@ -101,14 +99,14 @@ let GetRatsPath() =
 
 let GetCppCheckPath() = 
     if isWindowSystem then 
-        if File.Exists(@"C:\Program Files (x86)\Cppcheck\cppcheck.exe") then
+        if File.Exists(Path.Combine(runnerRootPath, "Tools", "Cppcheck", "cppcheck.exe")) then
+            Path.Combine(runnerRootPath, "Tools", "Cppcheck", "cppcheck.exe")
+        elif File.Exists(@"C:\Program Files (x86)\Cppcheck\cppcheck.exe") then
             @"C:\Program Files (x86)\Cppcheck\cppcheck.exe"
         elif File.Exists(@"C:\Program Files\Cppcheck\cppcheck.exe") then
             @"C:\Program Files\Cppcheck\cppcheck.exe"
-        elif File.Exists(@"C:\Program Files (x86)\Cppcheck\cppcheck.exe") then
-            @"C:\Program Files (x86)\Cppcheck\cppcheck.exe"
         else
-            Path.Combine(runnerRootPath, "Cppcheck", "cppcheck.exe")
+            Path.Combine(runnerRootPath, "Tools", "Cppcheck", "cppcheck.exe")
     else
         try
             let ret = (executor :> ICommandExecutor).ExecuteCommandWait("cppcheck", "--version", Map.empty, Environment.CurrentDirectory)
@@ -228,7 +226,7 @@ let InstallSonarScannerForLinux(version : string) =
         exe
 
 let InstallPython() = GetPythonPath()
-let InstallCppLint() = Path.Combine(runnerRootPath, "CppLint",  "cpplint_mod.py")
+let InstallCppLint() = Path.Combine(runnerRootPath, "Tools", "CppLint",  "cpplint_mod.py")
 let InstallRats() =  GetRatsPath()
 let InstallVera() = GetVeraPath()
 let InstallCppCheck() = GetCppCheckPath()

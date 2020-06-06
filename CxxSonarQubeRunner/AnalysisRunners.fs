@@ -72,9 +72,19 @@ let RunVeraRatsAndCppLint(options : OptionsData) =
                 let executor = new CommandExecutor(null, int64(1500000))
                 RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
 
-    Directory.GetFiles(options.HomePath, "*.h", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.cpp", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.hpp", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.c", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.cc", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
-    Directory.GetFiles(options.HomePath, "*.hh", SearchOption.AllDirectories) |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
+    let RunWithWithPattern(pattern:string) = 
+        try
+            let files = Directory.GetFiles(options.HomePath, pattern, SearchOption.AllDirectories)
+            if files.Length > 0 then
+                files |> Array.Parallel.map (fun file -> RunTools(file)) |> ignore
+            else
+                (options.Logger :> ICheckerLogger).ReportMessage(sprintf "No files found using %s in %s" pattern options.HomePath)
+        with
+        | ex -> (options.Logger :> ICheckerLogger).ReportMessage(sprintf "Some exception running %s in %s => %s" pattern options.HomePath ex.Message)
+                (options.Logger :> ICheckerLogger).ReportMessage(sprintf "%s" ex.StackTrace)
+    RunWithWithPattern("*.h"  )
+    RunWithWithPattern("*.cpp")
+    RunWithWithPattern("*.hpp")
+    RunWithWithPattern("*.c"  )
+    RunWithWithPattern("*.cc" )
+    RunWithWithPattern("*.hh" )

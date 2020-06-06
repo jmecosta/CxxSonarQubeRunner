@@ -52,6 +52,18 @@ let ExecuteCppCheck(executor:ICommandExecutor,
     if Directory.Exists(reportPath) then
         Directory.Delete(reportPath, true)
 
+    if not(File.Exists(cppCheckPath)) then 
+        logger.ReportMessage(sprintf "CppCheck Not Found in: %s" cppCheckPath)
+        raise(FileNotFoundException(sprintf "CppCheck Not Found in: %s" cppCheckPath))
+
+    if pathToAnalyseSlnPrjOrDir.EndsWith(".sln") && not(File.Exists(pathToAnalyseSlnPrjOrDir)) then
+        logger.ReportMessage(sprintf "Solution Not Found in: %s" pathToAnalyseSlnPrjOrDir)
+        raise(FileNotFoundException(sprintf "Solution Not Found in: %s" pathToAnalyseSlnPrjOrDir))
+
+    if not(pathToAnalyseSlnPrjOrDir.EndsWith(".sln")) && not(Directory.Exists(pathToAnalyseSlnPrjOrDir)) then
+        logger.ReportMessage(sprintf "Folder Not Found in: %s" pathToAnalyseSlnPrjOrDir)
+        raise(FileNotFoundException(sprintf "Folder Not Found in: %s" pathToAnalyseSlnPrjOrDir))
+
     Directory.CreateDirectory(reportPath) |> ignore
     let cmdLineArgs = generateCommandLineArgs(defines, options, ignores, pathToAnalyseSlnPrjOrDir, Path.Combine(reportPath, reportName))
     let env = Map.ofList [("CPPCHECK_INPUT", cppCheckPath)]

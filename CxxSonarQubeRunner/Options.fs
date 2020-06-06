@@ -78,25 +78,30 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
 
             let data = c.Split('=')
 
-            if data.[0].Equals("sonar.cxx.cppcheck.reportPath") then
+            if data.[0].Contains("sonar.cxx.cppcheck.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
-            elif data.[0].Equals("sonar.cxx.other.reportPath") then
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
+            elif data.[0].Contains("sonar.cxx.other.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-other/*.xml"))
-            elif data.[0].Equals("sonar.cxx.rats.reportPath") then
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-other/*.xml"))
+            elif data.[0].Contains("sonar.cxx.rats.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-rats/*.xml"))
-            elif data.[0].Equals("sonar.cxx.vera.reportPath") then
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+            elif data.[0].Contains("sonar.cxx.vera.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-vera/*.xml"))
-            elif data.[0].Equals("sonar.cxx.xunit.reportPath") then
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
+            elif data.[0].Contains("sonar.cxx.xunit.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
-            elif data.[0].Equals("sonar.cxx.coverage.reportPath") then
+            elif data.[0].Contains("sonar.cxx.coverage.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
-            elif data.[0].Equals("sonar.cxx.coverage.itReportPath") then
+            elif data.[0].Contains("sonar.cxx.coverage.itReportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
-            elif data.[0].Equals("sonar.cxx.coverage.overallReportPath") then
+            elif data.[0].Contains("sonar.cxx.coverage.overallReportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
-            elif data.[0].Equals("sonar.cxx.compiler.reportPath") then
+            elif data.[0].Contains("sonar.cxx.compiler.reportPath") then
                 if (not(useCli)) then
                     arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/BuildLog.txt"))
+                    arguments <- arguments.Add("sonar.cxx.msbuild.reportPaths", GetPathFromHome(".cxxresults/BuildLog.txt"))
             elif data.[1].Contains("\\n\\") then
                 propertyovermultiplelines <- true
                 propdata <- data.[1]
@@ -110,17 +115,22 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
     // ensure stuff that we run is included
     if not(arguments.ContainsKey("sonar.cxx.rats.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.rats.reportPath", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.rats.reportPaths", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.vera.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.vera.reportPath", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.vera.reportPaths", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.cppcheck.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPath", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.cppcheck.reportPaths", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.other.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.other.reportPath", GetPathFromHome(".cxxresults/reports-other/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.other.reportPaths", GetPathFromHome(".cxxresults/reports-other/*.xml"))
 
 
     if not(arguments.ContainsKey("sonar.cxx.compiler.reportPath")) then
         if (not(useCli)) then
             arguments <- arguments.Add("sonar.cxx.compiler.reportPath", GetPathFromHome(".cxxresults/BuildLog.txt"))
+            arguments <- arguments.Add("sonar.cxx.msbuild.reportPaths", GetPathFromHome(".cxxresults/BuildLog.txt"))
     arguments
 
 
