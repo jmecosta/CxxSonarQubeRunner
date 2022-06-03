@@ -10,7 +10,7 @@ open MsbuildUtilityHelpers
 
 let ChocoExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "chocolatey", "choco.exe")
 let InstallationPathHome = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "MSBuidSonarQube")
-let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", "")).ToString()
+let executingPath = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location.Replace("file:///", "")).ToString()
 let runnerRootPath = Directory.GetParent(executingPath).FullName
 let isWindowSystem = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 let isMacSystem = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)

@@ -355,6 +355,20 @@ type OptionsData(args : string []) =
 
     let runStaticAnalysisOnly = arguments.ContainsKey("l")
 
+    let skipGateValidation = not(arguments.ContainsKey("y"))
+
+    let vsVersion =
+        if arguments.ContainsKey("x") then
+            arguments.["x"] |> Seq.head
+        else
+            "vs15"
+
+    let useAmd64 = 
+        if arguments.ContainsKey("a") then
+            arguments.["a"] |> Seq.head
+        else
+            ""
+
     let cliRunnerVersion = 
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
@@ -430,6 +444,7 @@ type OptionsData(args : string []) =
 
     member val SkipBuildSolution : bool = skipBuildSolution with get, set
     member val RunStaticAnalysisOnly : bool = runStaticAnalysisOnly with get, set
+    member val SkipGateValidation : bool = skipGateValidation with get, set    
     
     member val Solution : string = "" with get, set
     member val SolutionName : string = "" with get, set
@@ -442,8 +457,8 @@ type OptionsData(args : string []) =
     member val SolutionTargetFile : string = "" with get, set
     member val SonarQubeTempPath : string = "" with get, set
 
-    member val VsVersion : string = "" with get, set
-    member val UseAmd64 : string = "" with get, set
+    member val VsVersion : string = vsVersion with get, set
+    member val UseAmd64 : string = useAmd64 with get, set
     member val MSBuildTarget : string = "" with get, set
     member val TargetBranch : string = parentBranch with get, set
     member val ParallelMsbuildOption = "/m:1" with get, set
@@ -466,7 +481,7 @@ type OptionsData(args : string []) =
     member this.CreateAuthToken() =
         let GetConnectionToken(service : ISonarRestService, address : string , userName : string, password : string) = 
             let pass =
-                if this.SonarUserPassword = "" then
+                if this.SonarUserPassword = "" && this.SonarUserName = "" then
                     "admin"
                 else
                     this.SonarUserPassword
@@ -574,7 +589,9 @@ type OptionsData(args : string []) =
 
         this.CliRunnerPath <- scanner.[0]
 
-        if options.UserSonarScannerCli then
+        if vsVersion = "dotnet" then
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use dotnet sonarscanner tooling")
+        elif options.UserSonarScannerCli then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use scanner cli: " + this.CliRunnerPath)
         else
             HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use sonar msbuild scanner: " + this.MSBuildRunnerPath)
@@ -643,17 +660,7 @@ type OptionsData(args : string []) =
         if this.ProjectVersion = "/v:" then
             this.ProjectVersion <- ""
 
-        this.VsVersion <- 
-            if arguments.ContainsKey("x") then
-                arguments.["x"] |> Seq.head
-            else
-                "vs15"
 
-        this.UseAmd64 <- 
-            if arguments.ContainsKey("a") then
-                arguments.["a"] |> Seq.head
-            else
-                ""
         this.MSBuildTarget <-
             if arguments.ContainsKey("t") then
                 "/t:" + (arguments.["t"] |> Seq.head)

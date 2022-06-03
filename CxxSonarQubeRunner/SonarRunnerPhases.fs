@@ -154,41 +154,49 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
                         ret <- "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
                     elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
                         ret <- "C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
-            ret            
+            ret
+        elif vsVersion = "vs22" then
+            let mutable ret = ""
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+                    elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+            ret 
+        elif vsVersion = "dotnet" then
+            "dotnet"
         else
-            if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat") then
-                "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
-            else
-                "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+            raise(Exception("/x option not correct defined"))
 
     let processOutputDataReceived(e : DataReceivedEventArgs) =
         if not(String.IsNullOrWhiteSpace(e.Data)) then
             System.Diagnostics.Debug.WriteLine(e.Data)
         ()
 
-
-    printf "[CxxSonarQubeMsbuidRunner] Capture Environment For Build cmd.exe /c \"%s\" && set \r\n" (buildEnvironmentBatFile + " " + buildEnvironmentPlatform)
-    
-    let startInfo = ProcessStartInfo(FileName = "cmd.exe",
-                                        Arguments = "/c \"" + buildEnvironmentBatFile + "\" " + buildEnvironmentPlatform + " && set",
-                                        WindowStyle = ProcessWindowStyle.Normal,
-                                        UseShellExecute = false,
-                                        RedirectStandardOutput = true,
-                                        RedirectStandardError = true,
-                                        RedirectStandardInput = true,
-                                        CreateNoWindow = true)
-
-    let proc = new Process(StartInfo = startInfo)
-    proc.Start() |> ignore
-
     let mutable map = Map.empty
-    let output = proc.StandardOutput.ReadToEnd()
-    for line in Regex.Split(output, "\r\n") do
-        if line <> "" then
-            let data = line.Split('=')
-            if data.Length = 2 then
-                map <- map.Add(data.[0], data.[1])
+    if vsVersion <> "dotnet" then
+        printf "[CxxSonarQubeMsbuidRunner] Capture Environment For Build cmd.exe /c \"%s\" && set \r\n" (buildEnvironmentBatFile + " " + buildEnvironmentPlatform)
+    
+        let startInfo = ProcessStartInfo(FileName = "cmd.exe",
+                                            Arguments = "/c \"" + buildEnvironmentBatFile + "\" " + buildEnvironmentPlatform + " && set",
+                                            WindowStyle = ProcessWindowStyle.Normal,
+                                            UseShellExecute = false,
+                                            RedirectStandardOutput = true,
+                                            RedirectStandardError = true,
+                                            RedirectStandardInput = true,
+                                            CreateNoWindow = true)
 
+        let proc = new Process(StartInfo = startInfo)
+        proc.Start() |> ignore
+
+
+        let output = proc.StandardOutput.ReadToEnd()
+        for line in Regex.Split(output, "\r\n") do
+            if line <> "" then
+                let data = line.Split('=')
+                if data.Length = 2 then
+                    map <- map.Add(data.[0], data.[1])
     map
 
 let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
@@ -261,7 +269,7 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
         let mutable ret = ""
         if useMSBuild64 then
             for flavour in flavours do 
-                if ret = "" then 
+                if ret = "" then
                     if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
                         ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe"
                     elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe") then
@@ -273,12 +281,21 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
                         ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
                     elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
                         ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2019\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
-        ret        
+        ret
+    elif vccompiler.Equals("vs22") then 
+        let mutable ret = ""
+
+        for flavour in flavours do 
+            if ret = "" then 
+                if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                    ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                    ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+        ret 
+    elif vccompiler.Equals("dotnet") then
+        "dotnet"
     else
-        if useMSBuild64 then
-            @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe"
-        else
-            @"C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"
+        raise(Exception("/x option not correct defined"))
 
 
 let RunBuild(options : OptionsData) =
@@ -292,7 +309,15 @@ let RunBuild(options : OptionsData) =
 
     let executor = new CommandExecutor(null, int64(1500000))
     let mutable buffer = ""
-    let msbuildexec = "\"" + GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64")) + "\""
+    let toolToBuild = GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64"))
+    
+    let buildexec, isDotNetArg = 
+        if toolToBuild = "dotnet" then
+            File.WriteAllText(options.BuildLog, "dotnet build => no need to do c++ static analsysi checks")
+            toolToBuild, "build"
+        else
+            "\"" + toolToBuild + "\"", ""
+
     let environment = EnvForBuild(options.VsVersion, (options.UseAmd64 = "amd64"))
 
     let consoleLogger = 
@@ -301,11 +326,17 @@ let RunBuild(options : OptionsData) =
         else
             " /noconsolelogger "
 
+    let msbuildArgs =
+        if toolToBuild <> "dotnet" then
+            " /v:Detailed /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 " + options.ParallelMsbuildOption + consoleLogger
+        else
+            ""
+
     let sonarQubeTempPathProp = sprintf "/p:SonarQubeTempPath=\"%s\"" options.SonarQubeTempPath 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "######## Build Solution ###########")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s \r\n" msbuildexec ("\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 " + options.ParallelMsbuildOption + consoleLogger)))
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s %s \r\n" buildexec isDotNetArg  (" \"" + options.Solution + "\" " + sonarQubeTempPathProp + " " + arguments + msbuildArgs)))
 
     let currentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -314,16 +345,16 @@ let RunBuild(options : OptionsData) =
         printf "%s" (sprintf "%s : %s\r\n" (pro.Id.ToString()) pro.ProcessName)
     
 
-    let args = "\"" + options.Solution + "\" /v:Detailed " + sonarQubeTempPathProp + " " + arguments + " /l:FileLogger,Microsoft.Build.Engine;logfile=\"" + options.BuildLog + "\";Encoding=UTF-8 " + options.ParallelMsbuildOption + consoleLogger
+    let args = isDotNetArg + " \"" + options.Solution + "\" " + sonarQubeTempPathProp + " " + arguments + msbuildArgs + consoleLogger
 
     let returncode =
         if options.IsVerboseOn then
             let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
                 if not(String.IsNullOrWhiteSpace(e.Data)) then
                     printf "[BuildLog] : %s\r\n" e.Data
-            (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, args, environment, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+            (executor :> ICommandExecutor).ExecuteCommand(buildexec, args, environment, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
         else
-            (executor :> ICommandExecutor).ExecuteCommand(msbuildexec, args, environment, options.HomePath)
+            (executor :> ICommandExecutor).ExecuteCommand(buildexec, args, environment, options.HomePath)
 
     let newcurrentprocess = (executor :> ICommandExecutor).GetProcessIdsRunning("msbuild")
 
@@ -411,13 +442,30 @@ let BeginPhase(options : OptionsData) =
 
     let returnCode =
         if not(options.UserSonarScannerCli) then
+
+            
             let executor = new CommandExecutor(null, int64(1500000))
-            if options.IsVerboseOn then
-                HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.verbose=true /d:sonar.host.url=%s %s %s\r\n" options.MSBuildRunnerPath hostUrl arguments branchtopass))
-                (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin /d:sonar.verbose=true " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
-            else
-                HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s begin /d:sonar.host.url=%s %s %s\r\n" options.MSBuildRunnerPath hostUrl arguments branchtopass))
-                (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "begin " + "/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+            
+            let verBoseArg = 
+                if options.IsVerboseOn then
+                    "/d:sonar.verbose=true"
+                else
+                    ""
+            let msbuildexec = GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64"))
+            let scannerArgs =
+                if msbuildexec = "dotnet" then
+                    "sonarscanner"
+                else
+                    ""
+
+            let scannerExec =
+                if msbuildexec = "dotnet" then
+                    "dotnet"
+                else
+                    options.MSBuildRunnerPath
+            
+            HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s begin %s /d:sonar.host.url=%s %s %s\r\n" scannerExec scannerArgs verBoseArg hostUrl arguments branchtopass))
+            (executor :> ICommandExecutor).ExecuteCommand(scannerExec, scannerArgs + " begin " + verBoseArg + " /d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
         else
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "DONE")
             0
@@ -585,17 +633,34 @@ let EndPhase(options : OptionsData) =
         else
             " /d:sonar.password=" + options.SonarUserPassword
 
-    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s end" options.MSBuildRunnerPath))
-    let returncode = (executor :> ICommandExecutor).ExecuteCommand(options.MSBuildRunnerPath, "end /d:sonar.login=" + username + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
+    let msbuildexec = GetMsbuildExec(options.VsVersion, (options.UseAmd64 = "amd64"))
+
+    let scannerArgs =
+        if msbuildexec = "dotnet" then
+            "sonarscanner"
+        else
+            ""
+
+    let scannerExec =
+        if msbuildexec = "dotnet" then
+            "dotnet"
+        else
+            options.MSBuildRunnerPath
+
+    HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[EndPhase] : %s %s end" scannerExec scannerArgs))
+    let returncode = (executor :> ICommandExecutor).ExecuteCommand(scannerExec, scannerArgs + " end /d:sonar.login=" + username + password, Map.empty, ProcessEndPhaseData, ProcessEndPhaseData, options.HomePath)
     
     if returncode = 0 then
-        if urlForChecking <> "" then
-            printf  "[EndPhase] : Check Analysis Results in Server every 2 seconds\r\n"
-            loopTimerCheck()
+        if options.SkipGateValidation then
             0
         else
-            printf  "[EndPhase] : Cannot Check Analysis results in Server, available only for 5.2 or above\r"
-            0
+            if urlForChecking <> "" then
+                printf  "[EndPhase] : Check Analysis Results in Server every 2 seconds\r\n"
+                loopTimerCheck()
+                0
+            else
+                printf  "[EndPhase] : Cannot Check Analysis results in Server, available only for 5.2 or above\r"
+                0
     else
         HelpersMethods.cprintf(ConsoleColor.Red, "[EndPhase] : Failed. Check Log")
         printf "##teamcity[buildProblem description='sonar-scanner return non 0 error code']]\r\n"
