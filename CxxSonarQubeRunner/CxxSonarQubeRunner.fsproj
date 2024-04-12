@@ -2,11 +2,10 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputPath>..\BuildDrop\Runner\</OutputPath>
     <AssemblyVersion>3.2.2.0</AssemblyVersion>
     <FileVersion>3.2.2.0</FileVersion>
-    <RuntimeIdentifiers>ubuntu.14.04-x64;win7-x64</RuntimeIdentifiers>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -38,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="MsbuildAutomationHelper" Version="2.0.5" />
-    <PackageReference Include="SonarRestApiImpl" Version="1.4.0" />
+    <PackageReference Include="Trimble.SonarRestApiImpl" Version="1.8.1" />
   </ItemGroup>
 
   <ItemGroup>
