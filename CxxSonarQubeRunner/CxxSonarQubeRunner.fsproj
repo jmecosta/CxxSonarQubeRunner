@@ -36,8 +36,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MsbuildAutomationHelper" Version="2.0.5" />
+    <PackageReference Include="MsbuildAutomationHelper" Version="3.1.0" />
     <PackageReference Include="Trimble.SonarRestApiImpl" Version="1.8.1" />
+    <PackageReference Include="FSharp.Data" Version="6.3.0" />
   </ItemGroup>
 
   <ItemGroup>
