@@ -47,7 +47,7 @@ let main argv =
                     
                         if SonarRunnerPhases.RunBuild(options) <> 0 then
                             ret <- 1
-                            printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt"
+                            printf "[CxxSonarQubeMsbuidRunner] Failed to build project, check log in .cxxresults\BuildLog.txt\r\n"
                             raise(new Exception())
                     else
                         printf "[CxxSonarQubeMsbuidRunner] Ingore Solution Build\r\n"

@@ -321,7 +321,7 @@ let RunBuild(options : OptionsData) =
     let environment = EnvForBuild(options.VsVersion, (options.UseAmd64 = "amd64"))
 
     let consoleLogger = 
-        if options.IsVerboseOn then
+        if options.IsVerboseOn || toolToBuild = "dotnet" then
             ""
         else
             " /noconsolelogger "
@@ -348,7 +348,7 @@ let RunBuild(options : OptionsData) =
     let args = isDotNetArg + " \"" + options.Solution + "\" " + sonarQubeTempPathProp + " " + arguments + msbuildArgs + consoleLogger
 
     let returncode =
-        if options.IsVerboseOn then
+        if options.IsVerboseOn || toolToBuild = "dotnet" then
             let ProcessOutputDataReceived(e : DataReceivedEventArgs) =
                 if not(String.IsNullOrWhiteSpace(e.Data)) then
                     printf "[BuildLog] : %s\r\n" e.Data
