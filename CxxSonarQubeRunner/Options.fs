@@ -312,7 +312,7 @@ let ShowHelp() =
 
         Console.WriteLine ("    /V|/v:<version : version>")
         Console.WriteLine ("    /W|/w:<skip copy false positives and apply permission template, when not defined it will copy>")
-        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, default is vs15>")
+        Console.WriteLine ("    /X|/x:<version of msbuild : vs10, vs12, vs13, vs15, vs17, vs22, dotnet default is dotnet")
 
         Console.WriteLine ("    /Y|/y:<skip provision during branch analysis stage>")
         Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
@@ -361,7 +361,7 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("x") then
             arguments.["x"] |> Seq.head
         else
-            "vs15"
+            "dotnet"
 
     let useAmd64 = 
         if arguments.ContainsKey("a") then
