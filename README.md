@@ -11,13 +11,12 @@ This repository contains a build wrapper for run SonarQube analysis in a more au
 6. Supports Visual Studio Shared projects
 
 # Installation
-1. Download wrapper from https://github.com/jmecsoftware/sonar-cxx-msbuild-tasks/releases and unzip to some location in your hard drive. Last snapshot is available in AppVeyour in the artifacts section after followign the build icon above.
-2. If you use Teamcity, you can use this metarunner https://gist.github.com/jmecosta/32bfc907668256bd7763 that will automate the download of the wrapper.
+dotnet tool install --global CxxSonarQubeRunner
 
 # Basic Usage
-1. Run CxxSonarQubeMsbuidRunner.exe (/h to see the usage)
+1. Run CxxSonarQubeMsbuidRunner (/h to see the usage)
 
-   Example: CxxSonarQubeMsbuidRunner.exe /k:key /n:name /v:work /m:solution.sln > these are the mandatory arguments
+   Example: CxxSonarQubeMsbuidRunner /k:key /n:name /v:work /m:solution.sln > these are the mandatory arguments
 
 ## Feature branch flow 
 1. in command line set /d:sonar.branch=your_branch /b:main_branch
