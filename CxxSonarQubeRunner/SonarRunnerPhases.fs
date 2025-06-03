@@ -465,7 +465,7 @@ let BeginPhase(options : OptionsData) =
                     options.MSBuildRunnerPath
             
             HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s begin %s /d:sonar.host.url=%s %s %s\r\n" scannerExec scannerArgs verBoseArg hostUrl arguments branchtopass))
-            (executor :> ICommandExecutor).ExecuteCommand(scannerExec, scannerArgs + " begin " + verBoseArg + " /d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
+            (executor :> ICommandExecutor).ExecuteCommand(scannerExec, scannerArgs + " begin " + verBoseArg + " /d:sonar.host.url=" + hostUrl + " /d:sonar.token=" + userName + userPass + " " + arguments + " " + branchtopass, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
         else
             HelpersMethods.cprintf(ConsoleColor.DarkCyan, "DONE")
             0

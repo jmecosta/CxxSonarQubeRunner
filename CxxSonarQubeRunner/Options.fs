@@ -678,6 +678,8 @@ type OptionsData(args : string []) =
                     this.SonarHost <- prop.Value
                 if prop.Name.Equals("sonar.login") then
                     this.SonarUserName <- prop.Value
+                if prop.Name.Equals("sonar.token") then
+                    this.SonarUserName <- prop.Value
                 if prop.Name.Equals("sonar.password") then
                     this.SonarUserPassword <- prop.Value
                 if prop.Name.Equals("sonar.branch") then
@@ -705,6 +707,8 @@ type OptionsData(args : string []) =
             this.SonarHost <- this.PropsInSettingsFile.["sonar.host.url"]
         if this.PropsInSettingsFile.ContainsKey("sonar.login") then
             this.SonarUserName <- this.PropsInSettingsFile.["sonar.login"]
+        if this.PropsInSettingsFile.ContainsKey("sonar.token") then
+            this.SonarUserName <- this.PropsInSettingsFile.["sonar.token"]
         if this.PropsInSettingsFile.ContainsKey("sonar.password") then
             this.SonarUserPassword <- this.PropsInSettingsFile.["sonar.password"]
         if this.PropsInSettingsFile.ContainsKey("sonar.branch") then
@@ -718,9 +722,11 @@ type OptionsData(args : string []) =
             if arguments.ContainsKey("d") then
                 for arg in arguments.["d"] do
                     if arg <> "" then
-                        if arg.StartsWith("sonar.login") || arg.StartsWith("sonar.password") ||  arg.StartsWith("sonar.host.url") ||  arg.StartsWith("sonar.branch") then
+                        if arg.StartsWith("sonar.token") || arg.StartsWith("sonar.login") || arg.StartsWith("sonar.password") ||  arg.StartsWith("sonar.host.url") ||  arg.StartsWith("sonar.branch") then
                             if arg.StartsWith("sonar.login") then
                                 this.SonarUserName <- arg.Replace("sonar.login=", "")
+                            if arg.StartsWith("sonar.token") then
+                                this.SonarUserName <- arg.Replace("sonar.token=", "")
                             if arg.StartsWith("sonar.password") then
                                 this.SonarUserPassword <- arg.Replace("sonar.password=", "")
                             if arg.StartsWith("sonar.host.url") then
