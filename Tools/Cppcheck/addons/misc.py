@@ -16,7 +16,7 @@ VERIFY_EXPECTED = []
 VERIFY_ACTUAL = []
 
 def reportError(token, severity, msg, id):
-    if id == 'debug' and DEBUG == False:
+    if id == 'debug' and not DEBUG:
         return
     if VERIFY:
         VERIFY_ACTUAL.append(str(token.linenr) + ':' + id)
@@ -24,11 +24,7 @@ def reportError(token, severity, msg, id):
         cppcheckdata.reportError(token, severity, msg, 'misc', id)
 
 def simpleMatch(token, pattern):
-    for p in pattern.split(' '):
-        if not token or token.str != p:
-            return False
-        token = token.next
-    return True
+    return cppcheckdata.simpleMatch(token, pattern)
 
 # Get function arguments
 def getArgumentsRecursive(tok, arguments):
@@ -163,3 +159,5 @@ for arg in sys.argv[1:]:
             if actual not in VERIFY_EXPECTED:
                 print('Not expected: ' + actual)
                 sys.exit(1)
+
+sys.exit(cppcheckdata.EXIT_CODE)

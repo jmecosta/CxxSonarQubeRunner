@@ -373,13 +373,13 @@ type OptionsData(args : string []) =
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "4.2.0.1873"
+            "7.1.0.4889"
 
     let msbuildRunnerVersion = 
         if arguments.ContainsKey("r") then
             arguments.["r"] |> Seq.head
         else
-            "4.8.0.12008"
+            "10.1.2.114627"
 
     let parentBranch = 
         if arguments.ContainsKey("b") then

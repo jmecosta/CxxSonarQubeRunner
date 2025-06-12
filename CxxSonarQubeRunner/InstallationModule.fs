@@ -40,7 +40,10 @@ let executor = new CommandExecutor(null, int64(1500000))
 
 let GetPythonPath() =
     if isWindowSystem then
-        Path.Combine(Path.Combine(runnerRootPath, "any", "Tools", "Python27"), "python.exe")
+        if File.Exists(Path.Combine(Path.Combine(runnerRootPath, "any", "Tools", "Python27"), "python.exe")) then
+            Path.Combine(Path.Combine(runnerRootPath, "any", "Tools", "Python27"), "python.exe")
+        else
+            Path.Combine(Path.Combine(runnerRootPath, "Tools", "Python27"), "python.exe")
     else
         try
             let ret = (executor :> ICommandExecutor).ExecuteCommandWait("python", "-V", Map.empty, Environment.CurrentDirectory)
@@ -57,7 +60,10 @@ let GetPythonPath() =
 
 let GetVeraPath() =
     if isWindowSystem then
-        Path.Combine(runnerRootPath, "any", "Tools", "VERA", "bin", "vera++.exe")
+        if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "VERA", "bin", "vera++.exe")) then
+            Path.Combine(runnerRootPath, "any", "Tools", "VERA", "bin", "vera++.exe")
+        else
+            Path.Combine(runnerRootPath, "Tools", "VERA", "bin", "vera++.exe")
     else
         if not(UnixDist.Contains("Ubuntu")) then
             HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Vera++ not aviable in non Ubuntu: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
@@ -79,7 +85,10 @@ let GetVeraPath() =
 
 let GetRatsPath() =
     if isWindowSystem then
-        Path.Combine(runnerRootPath, "any", "Tools", "rats", "rats.exe")
+        if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "rats", "rats.exe")) then
+            Path.Combine(runnerRootPath, "any", "Tools", "rats", "rats.exe")
+        else
+            Path.Combine(runnerRootPath, "Tools", "rats", "rats.exe")
     else
         if isLinuxSystem  then
             HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Rats not aviable in Unix: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
@@ -102,6 +111,8 @@ let GetCppCheckPath() =
     if isWindowSystem then 
         if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "Cppcheck", "cppcheck.exe")) then
             Path.Combine(runnerRootPath, "any", "Tools", "Cppcheck", "cppcheck.exe")
+        elif File.Exists(Path.Combine(runnerRootPath, "Tools", "Cppcheck", "cppcheck.exe")) then
+            Path.Combine(runnerRootPath, "Tools", "Cppcheck", "cppcheck.exe")
         elif File.Exists(@"C:\Program Files (x86)\Cppcheck\cppcheck.exe") then
             @"C:\Program Files (x86)\Cppcheck\cppcheck.exe"
         elif File.Exists(@"C:\Program Files\Cppcheck\cppcheck.exe") then
@@ -158,10 +169,16 @@ let InstallMsbuildRunnerWindows(version : string) =
             Directory.Delete(Path.Combine(InstallationPathHome, version), true)
 
         printf "Download and install msbuild runner from github, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
-
-        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/%s/sonar-scanner-msbuild-%s-net46.zip""" version version
+        
+        let downloadUrl = sprintf """https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/%s/sonar-scanner-%s-net-framework.zip""" version version
         printf "Download %s\r\n" downloadUrl
         let mutable exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "SonarScanner.MSBuild.exe")
+
+        if not(File.Exists(exe)) then
+            let downloadUrl = sprintf """https://github.com/SonarSource/sonar-scanner-msbuild/releases/download/%s/sonar-scanner-msbuild-%s-net46.zip""" version version
+            printf "Download %s\r\n" downloadUrl
+            exe <- Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), "SonarScanner.MSBuild.exe")
+
 
         if not(File.Exists(exe)) then
             let downloadUrl = sprintf """https://github.com/SonarSource/sonar-msbuild-runner/releases/download/%s/MSBuild.SonarQube.Runner-%s.zip""" version version
@@ -202,10 +219,10 @@ let InstallSonarScannerForLinux(version : string) =
         let downloadUrl = 
             if isLinuxSystem then
                 printf "Download and install cli scanner for linux in binaries, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
-                sprintf """https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-%s-linux.zip""" version
+                sprintf """https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-%s-linux-x64.zip""" version
             else
                 printf "Download and install cli scanner for osx in binaries, make sure you have access to Internet or use settings in home folder to specify a external location\r\n";
-                sprintf """https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-%s-macosx.zip""" version
+                sprintf """https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-%s-macosx-x64.zip""" version
 
         printf "Download %s\r\n" downloadUrl
         let mutable exe = Path.Combine(DownloadAndInstallZipDist(downloadUrl, version), versionPath, "bin", "sonar-scanner")

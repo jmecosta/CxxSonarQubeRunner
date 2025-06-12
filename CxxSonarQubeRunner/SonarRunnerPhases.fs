@@ -523,12 +523,22 @@ let CLiPhase(options : OptionsData) =
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
 
     if options.IsVerboseOn then
-        let args = ("/d:sonar.verbose=true /d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass + " -Dsonar.sources=.").Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
-        
+        let args =         
+            if not(arguments.Contains("sonar.sources")) then
+                ("/d:sonar.verbose=true /d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass + " -Dsonar.sources=.").Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
+            else
+                ("/d:sonar.verbose=true /d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass).Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
+            
+
         HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s /d:sonar.verbose=true /d:sonar.host.url=%s %s %s\r\n" options.CliRunnerPath hostUrl arguments branchtopass))
         (executor :> ICommandExecutor).ExecuteCommand(options.CliRunnerPath, args, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
     else
-        let args = ("/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass + " -Dsonar.sources=.").Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
+        let args =         
+            if not(arguments.Contains("sonar.sources")) then
+                ("/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass + " -Dsonar.sources=.").Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
+            else
+                ("/d:sonar.host.url=" + hostUrl + " /d:sonar.login=" + userName + userPass + " " + arguments + " " + branchtopass).Replace("/d:", "-D").Replace("/k:", "-Dsonar.projectKey=").Replace("/k:", "-Dsonar.projectKey=").Replace("/n:", "-Dsonar.projectName=").Replace("/v:", "-Dsonar.projectVersion=")
+
         HelpersMethods.cprintf(ConsoleColor.Blue, (sprintf "[Execute] : %s %s\r\n" options.CliRunnerPath (args.Replace(userName, "xxxx"))))
         (executor :> ICommandExecutor).ExecuteCommand(options.CliRunnerPath, args, Map.empty, ProcessOutputDataReceived, ProcessOutputDataReceived, options.HomePath)
 

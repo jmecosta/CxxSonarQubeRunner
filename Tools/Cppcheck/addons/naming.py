@@ -17,7 +17,7 @@ def validate_regex(expr):
         re.compile(expr)
     except re.error:
         print('Error: "{}" is not a valid regular expression.'.format(expr))
-        exit(1)
+        sys.exit(1)
 
 
 RE_VARNAME = None
@@ -37,6 +37,7 @@ for arg in sys.argv[1:]:
     elif arg[:11] == '--function=':
         RE_FUNCTIONNAME = arg[11:]
         validate_regex(RE_FUNCTIONNAME)
+    # TODO: bail out on unknown parameter
 
 
 def reportError(token, severity, msg, errorId):
@@ -81,9 +82,11 @@ for arg in sys.argv[1:]:
             for scope in cfg.scopes:
                 if scope.type == 'Function':
                     function = scope.function
-                    if function is not None and function.type in ('Constructor', 'Destructor'):
+                    if function is not None and function.type in ('Constructor', 'Destructor', 'CopyConstructor', 'MoveConstructor'):
                         continue
                     res = re.match(RE_FUNCTIONNAME, scope.className)
                     if not res:
                         reportError(
                             scope.bodyStart, 'style', 'Function ' + scope.className + ' violates naming convention', 'functionName')
+
+sys.exit(cppcheckdata.EXIT_CODE)
