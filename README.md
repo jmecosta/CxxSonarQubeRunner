@@ -58,15 +58,23 @@ The wrapper will install the needed tools to run analysis, however in cases were
             /I|/i wrapper will install tools only. No analysis is performed
             /J|/j:<number of processor used for msbuild : /m:1 is default. 0 uses all processors /m>
             /K|/k:<key : key>
+            /L|/L:Run static analysis options only
         
             /M|/m:<solution file : mandatory>
             /N|/n:<name : name>
+
+            /O|/o delete legacy properties file
         
             /P|/p:<additional settings for msbuild - /p:Configuration=Release>
             /Q|/q:<SQ msbuild runner path>
             /R|/r:<msbuild sonarqube runner -> 1.1>       
             /S|/s:<additional settings filekey>
             /T|/t:<msbuild target, default is /t:Rebuild>
+            /U|/u:<dont build solution>
         
             /V|/v:<version : version>
+            /W|/w:<skip copy false positives and apply permission template, when not defined it will copy>
             /X|/x:<version of msbuild : dotnet, vs22, vs10, vs12, vs13, vs15, vs17, vs19 default is vs22
+
+            /Y|/y:<skip provision during branch analysis stage>
+            /Z|/z:<fail build if Gate fails>

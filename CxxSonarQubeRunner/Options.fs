@@ -291,12 +291,12 @@ let ShowHelp() =
         Console.WriteLine ("    /F|/f disable code analysis in solution.")
         Console.WriteLine ("    /G|/g enable verbose mode.")
 
-        Console.WriteLine ("    /H|/h and capabilitites.")
+        Console.WriteLine ("    /H|/h help menu.")
 
         Console.WriteLine ("    /I|/i wrapper will install tools only. No analysis is performed")
         Console.WriteLine ("    /J|/j:<number of processor used for msbuild : /j:1 is default. 0 uses all processors>")
-        Console.WriteLine ("    /L|/L:Run static analyis options only")
         Console.WriteLine ("    /K|/k:<key : key>")
+        Console.WriteLine ("    /L|/L:Run static analysis options only")
         
         Console.WriteLine ("    /M|/m:<solution file or workdir : optional>")
         Console.WriteLine ("    /N|/n:<name : name>")
