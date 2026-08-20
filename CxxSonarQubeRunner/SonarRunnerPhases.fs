@@ -164,6 +164,15 @@ let EnvForBuild(vsVersion : string, useAmd64 : bool) =
                     elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
                         ret <- "C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
             ret 
+        elif vsVersion = "vs26" then
+            let mutable ret = ""
+            for flavour in flavours do 
+                if ret = "" then 
+                    if File.Exists("C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+                    elif File.Exists("C:\\Program Files\\Microsoft Visual Studio\\18\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat") then
+                        ret <- "C:\\Program Files\\Microsoft Visual Studio\\18\\" + flavour + "\\Common7\\Tools\\vsdevcmd\\core\\vsdevcmd_start.bat"
+            ret 
         elif vsVersion = "dotnet" then
             "dotnet"
         else
@@ -292,6 +301,16 @@ let GetMsbuildExec(vccompiler : string, useMSBuild64 : bool) =
                 elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
                     ret <- @"C:\\Program Files\\Microsoft Visual Studio\\2022\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
         ret 
+    elif vccompiler.Equals("vs26") then 
+        let mutable ret = ""
+
+        for flavour in flavours do 
+            if ret = "" then 
+                if File.Exists(@"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                    ret <- @"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+                elif File.Exists(@"C:\\Program Files\\Microsoft Visual Studio\\18\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe") then
+                    ret <- @"C:\\Program Files\\Microsoft Visual Studio\\18\\" + flavour + "\\MSBuild\\Current\\Bin\\MSBuild.exe"
+        ret 
     elif vccompiler.Equals("dotnet") then
         "dotnet"
     else
@@ -396,7 +415,7 @@ let RunBuild(options : OptionsData) =
 
 let BeginPhase(options : OptionsData) =
     let projetKey = 
-        if options.AuthToken.SonarVersion >= 7.9 && options.Branch <> "" && not(options.UseNewBranch) then
+        if options.AuthToken.SonarVersion >= 7.9 && options.Branch <> "" then
             options.ProjectKey + ":" + options.Branch.Replace("/", "_")
         else
             options.ProjectKey
@@ -428,13 +447,9 @@ let BeginPhase(options : OptionsData) =
     let branchtopass = 
         if options.Branch = "" then
             ""
-        elif options.Branch <> "" && options.UseNewBranch then
+        else
             let targetString =  if options.TargetBranch <> "" then " /d:sonar.branch.target=" + options.TargetBranch else ""
             "/d:sonar.branch.name=" + options.Branch + targetString
-        elif options.Branch <> "" && options.AuthToken.SonarVersion < 7.9 then
-            "/d:sonar.branch=" + options.Branch
-        else
-            ""
 
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## Begin Stage  ###########")
@@ -476,7 +491,7 @@ let BeginPhase(options : OptionsData) =
             HelpersMethods.cprintf(ConsoleColor.Cyan, "########## Execute Static Analysis ###########")
             HelpersMethods.cprintf(ConsoleColor.Cyan, "##############################################")
             HelpersMethods.cprintf(ConsoleColor.White, "   ")
-            AnalysisRunners.RunVeraRatsAndCppLint(options) |> ignore
+            AnalysisRunners.RunCppLint(options) |> ignore
             AnalysisRunners.RunCppCheck(options) |> ignore
         else
             HelpersMethods.cprintf(ConsoleColor.Cyan, "######################################################")
@@ -516,7 +531,7 @@ let CLiPhase(options : OptionsData) =
         if options.Branch = "" then
             ""
         else
-            "/d:sonar.branch=" + options.Branch
+            "/d:sonar.branch.name=" + options.Branch
     
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "###################################")
     HelpersMethods.cprintf(ConsoleColor.DarkCyan, "########## CLI Stage  ###########")

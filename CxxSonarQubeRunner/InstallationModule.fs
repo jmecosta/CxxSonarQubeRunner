@@ -58,56 +58,7 @@ let GetPythonPath() =
         | ex -> raise (new Exception(sprintf "Python not installed in Machine, install python using linux package manager, yum, apt, brew: return code %s\r" ex.Message))
                 ""
 
-let GetVeraPath() =
-    if isWindowSystem then
-        if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "VERA", "bin", "vera++.exe")) then
-            Path.Combine(runnerRootPath, "any", "Tools", "VERA", "bin", "vera++.exe")
-        else
-            Path.Combine(runnerRootPath, "Tools", "VERA", "bin", "vera++.exe")
-    else
-        if not(UnixDist.Contains("Ubuntu")) then
-            HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Vera++ not aviable in non Ubuntu: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
-            ""
-        else
-            try
-                let ret = (executor :> ICommandExecutor).ExecuteCommandWait("vera++", "--version", Map.empty, Environment.CurrentDirectory)
-
-                if ret = 0 then
-                    HelpersMethods.cprintf(ConsoleColor.Green, sprintf "Vera is available: %s\r" "vera++")
-                    "vera++"
-                 else
-                    raise (new Exception(sprintf "Vera++ not installed in Machine, install Vera with 'brew install vera++' or 'apt install vera++': return code %i\r" ret))
-                    ""
-
-            with
-            | ex -> raise (new Exception(sprintf "Vera++ not installed in Machine, install Vera with 'brew install vera++' or 'apt install vera++': error message %s\r" ex.Message))
-                    ""
-
-let GetRatsPath() =
-    if isWindowSystem then
-        if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "rats", "rats.exe")) then
-            Path.Combine(runnerRootPath, "any", "Tools", "rats", "rats.exe")
-        else
-            Path.Combine(runnerRootPath, "Tools", "rats", "rats.exe")
-    else
-        if isLinuxSystem  then
-            HelpersMethods.cprintf(ConsoleColor.Red, sprintf "Rats not aviable in Unix: %A\r" System.Runtime.InteropServices.RuntimeInformation.OSDescription)
-            ""
-        else
-            try
-                let ret = (executor :> ICommandExecutor).ExecuteCommandWait("rats", "", Map.empty, Environment.CurrentDirectory)
-
-                if ret = 0 then
-                    "rats"
-                 else
-                    raise (new Exception(sprintf "rats not installed in Machine, install Vera with 'brew install rats': return code %i\r" ret))
-                    ""
-
-            with
-            | ex -> raise (new Exception(sprintf "rats not installed in Machine, install rats with 'brew install rats': error message %s\r" ex.Message))
-                    ""
-
-let GetCppCheckPath() = 
+let GetCppCheckPath() =
     if isWindowSystem then 
         if File.Exists(Path.Combine(runnerRootPath, "any", "Tools", "Cppcheck", "cppcheck.exe")) then
             Path.Combine(runnerRootPath, "any", "Tools", "Cppcheck", "cppcheck.exe")
@@ -244,8 +195,6 @@ let InstallSonarScannerForLinux(version : string) =
 
 let InstallPython() = GetPythonPath()
 let InstallCppLint() = Path.Combine(runnerRootPath, "any", "Tools", "CppLint",  "cpplint_mod.py")
-let InstallRats() =  GetRatsPath()
-let InstallVera() = GetVeraPath()
 let InstallCppCheck() = GetCppCheckPath()
 let InstallScannerRunner(msbuildversion:string,cliscanner:string) = 
     if isWindowSystem then

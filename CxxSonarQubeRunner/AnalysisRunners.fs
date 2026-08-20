@@ -30,22 +30,13 @@ let RunCppCheck(options : OptionsData) =
                     options.CxxReportsCppCheckPath,
                     (options.Logger :> ICheckerLogger), options.IsVerboseOn)
 
-let RunVeraRatsAndCppLint(options : OptionsData) =
-
-    if Directory.Exists(options.CxxReportsRatsPath) then
-        Directory.Delete(options.CxxReportsRatsPath, true)
-    Directory.CreateDirectory(options.CxxReportsRatsPath) |> ignore
+let RunCppLint(options : OptionsData) =
 
     if Directory.Exists(options.CxxReportsCpplintPath) then
         Directory.Delete(options.CxxReportsCpplintPath, true)
     Directory.CreateDirectory(options.CxxReportsCpplintPath) |> ignore
 
-    if Directory.Exists(options.CxxReportsVeraPath) then
-        Directory.Delete(options.CxxReportsVeraPath, true)
-
-    Directory.CreateDirectory(options.CxxReportsVeraPath) |> ignore
-
-    let RunTools(file:string) = 
+    let RunTools(file:string) =
         
         let IsExcludedByAntPattern(patternIn:string) = 
             let pattern = "/" + patternIn
@@ -63,14 +54,8 @@ let RunVeraRatsAndCppLint(options : OptionsData) =
                 false
         
         if not(isExclude) then
-            if options.VeraPath <> "" then
-                let executor = new CommandExecutor(null, int64(1500000))
-                VeraRunner.ExecuteVera(executor, file, options.VeraPath, options.CxxReportsVeraPath, "", options.HomePath, (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
             let executor = new CommandExecutor(null, int64(1500000))
             CppLintRunner.ExecuteCppLint(executor, options.HomePath, file, options.CxxReportsCpplintPath, "", options.PythonPath, options.CppLintPath, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
-            if options.RatsPath <> "" then
-                let executor = new CommandExecutor(null, int64(1500000))
-                RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
 
     let RunWithWithPattern(pattern:string) = 
         try

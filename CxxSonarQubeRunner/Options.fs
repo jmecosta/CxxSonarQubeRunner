@@ -84,12 +84,6 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
             elif data.[0].Contains("sonar.cxx.other.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-other/*.xml"))
                 arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-other/*.xml"))
-            elif data.[0].Contains("sonar.cxx.rats.reportPath") then
-                arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-rats/*.xml"))
-                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
-            elif data.[0].Contains("sonar.cxx.vera.reportPath") then
-                arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-vera/*.xml"))
-                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
             elif data.[0].Contains("sonar.cxx.xunit.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(data.[1]))
             elif data.[0].Contains("sonar.cxx.coverage.reportPath") then
@@ -113,12 +107,6 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
     additionalArguments |> Seq.iter (fun c -> ProcessLine(c.Trim()))
 
     // ensure stuff that we run is included
-    if not(arguments.ContainsKey("sonar.cxx.rats.reportPath")) then
-        arguments <- arguments.Add("sonar.cxx.rats.reportPath", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
-        arguments <- arguments.Add("sonar.cxx.rats.reportPaths", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
-    if not(arguments.ContainsKey("sonar.cxx.vera.reportPath")) then
-        arguments <- arguments.Add("sonar.cxx.vera.reportPath", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
-        arguments <- arguments.Add("sonar.cxx.vera.reportPaths", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.cppcheck.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPath", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPaths", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
@@ -207,8 +195,6 @@ type UserSettingsFileType = XmlProvider<"""
 type CxxSettingsType = XmlProvider<"""
 <CxxUserProperties>
   <CppCheck>c:\path</CppCheck>
-  <Rats>c:\path</Rats>
-  <Vera>c:\path</Vera>
   <Python>c:\path</Python>
   <Cpplint>c:\path</Cpplint>
   <MsbuildRunnerPath>c:\path</MsbuildRunnerPath>
@@ -429,7 +415,6 @@ type OptionsData(args : string []) =
     member val SonarUserName : string = "" with get, set
     member val SonarUserPassword : string = "" with get, set
     member val Branch : string = "" with get, set
-    member val UseNewBranch : bool = false with get, set
     member val Provision : bool = provision with get, set
 
     member val ProjectKey : string = "" with get, set
@@ -451,8 +436,6 @@ type OptionsData(args : string []) =
     member val HomePath : string = "" with get, set
     member val CxxResultsPath : string = "" with get, set
     member val CxxReportsCppCheckPath : string = "" with get, set
-    member val CxxReportsVeraPath : string = "" with get, set
-    member val CxxReportsRatsPath : string = "" with get, set
     member val CxxReportsCpplintPath : string = "" with get, set
     member val SolutionTargetFile : string = "" with get, set
     member val SonarQubeTempPath : string = "" with get, set
@@ -464,8 +447,6 @@ type OptionsData(args : string []) =
     member val ParallelMsbuildOption = "/m:1" with get, set
 
     member val CppCheckPath : string = "" with get, set
-    member val RatsPath : string = "" with get, set
-    member val VeraPath : string = "" with get, set
     member val PythonPath : string = "" with get, set
     member val CppLintPath : string = "" with get, set
     member val MSBuildRunnerPath : string = "" with get, set
@@ -560,8 +541,6 @@ type OptionsData(args : string []) =
 
         this.CxxResultsPath <- Path.Combine(this.HomePath, ".cxxresults")
         this.CxxReportsCppCheckPath <- Path.Combine(this.CxxResultsPath, "reports-cppcheck")
-        this.CxxReportsVeraPath <- Path.Combine(this.CxxResultsPath, "reports-vera")
-        this.CxxReportsRatsPath <- Path.Combine(this.CxxResultsPath, "reports-rats")
         this.CxxReportsCpplintPath <- Path.Combine(this.CxxResultsPath, "reports-other")
         skipBuild
 
@@ -587,7 +566,15 @@ type OptionsData(args : string []) =
             else
                 Directory.GetFiles(Directory.GetParent(this.MSBuildRunnerPath).FullName, "sonar-scanner", SearchOption.AllDirectories)
 
-        this.CliRunnerPath <- scanner.[0]
+        // Guard against empty results from Directory.GetFiles which will throw
+        // IndexOutOfRangeException when accessed as scanner.[0]. If no cli
+        // scanner script is found in the msbuild runner folder, fall back to
+        // using the msbuild runner executable itself and log a warning.
+        if scanner.Length > 0 then
+            this.CliRunnerPath <- scanner.[0]
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Warning: no cli scanner found alongside MSBuild runner; falling back to MSBuild runner executable")
+            this.CliRunnerPath <- this.MSBuildRunnerPath
 
         if vsVersion = "dotnet" then
             HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Will use dotnet sonarscanner tooling")
@@ -603,16 +590,6 @@ type OptionsData(args : string []) =
             this.CppCheckPath <- userCxxSettings.CppCheck
         with
         | _ -> this.CppCheckPath <- InstallCppCheck()
-
-        try
-            this.RatsPath <- userCxxSettings.Rats
-        with
-        | _ -> this.RatsPath <- InstallRats()
-
-        try
-            this.VeraPath <- userCxxSettings.Vera
-        with
-        | _ -> this.VeraPath <- InstallVera()
 
         try
             this.PythonPath <- userCxxSettings.Python
@@ -686,7 +663,6 @@ type OptionsData(args : string []) =
                     this.Branch <- prop.Value
                 if prop.Name.Equals("sonar.branch.name") then
                     this.Branch <- prop.Value
-                    this.UseNewBranch <- true
         with
         | _ -> ()
 
@@ -715,7 +691,6 @@ type OptionsData(args : string []) =
             this.Branch <- this.PropsInSettingsFile.["sonar.branch"]
         if this.PropsInSettingsFile.ContainsKey("sonar.branch.name") then
             this.Branch <- this.PropsInSettingsFile.["sonar.branch.name"]
-            this.UseNewBranch <- true
 
         this.PropsForBeginStage <- 
             let mutable args = ""
@@ -735,7 +710,6 @@ type OptionsData(args : string []) =
                                 this.Branch <- arg.Replace("sonar.branch=", "")
                             if arg.StartsWith("sonar.branch.name") then
                                 this.Branch <- arg.Replace("sonar.branch.name=", "")
-                                this.UseNewBranch <- true
                         else
                             args <- args + " /d:" + arg
 

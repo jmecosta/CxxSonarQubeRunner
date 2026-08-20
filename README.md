@@ -5,7 +5,7 @@ This repository contains a build wrapper for run SonarQube analysis in a more au
 
 1. Runs complete analysis in single command, runs begin, end and build solution.
 2. You can use it for feature branch flow, the wrapper will provision project, setup permissions and quality profiles and in the end duplicate false positives into feature branch.
-3. Supports C++ community edition by running Vera, Rats, Cpplint and CppCheck before the end stage. This allows issues to be reported without any other configuration
+3. Supports C++ community edition by running Cpplint and CppCheck before the end stage. This allows issues to be reported without any other configuration
 4. Wrapper uses buildlog to retrieve build information the C++ requires 
 5. Validates Gate and Compute Engine sucess and brakes the builds if they are not ok. This is the default strategy to SonarQube 5.2 and above
 6. Supports Visual Studio Shared projects
@@ -33,8 +33,6 @@ The wrapper will install the needed tools to run analysis, however in cases were
 ```
 <CxxUserProperties>
   <CppCheck>c:\path</CppCheck>
-  <Rats>c:\path</Rats>
-  <Vera>c:\path</Vera>
   <Python>c:\path</Python>
   <Cpplint>c:\path</Cpplint>
   <MsbuildRunnerPath>c:\path</MsbuildRunnerPath>

@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputPath>..\BuildDrop\Runner\</OutputPath>
-    <AssemblyVersion>3.6.4.0</AssemblyVersion>
-    <FileVersion>3.6.4.0</FileVersion>
-	<Version>3.6.4</Version>
+    <AssemblyVersion>3.7.0.0</AssemblyVersion>
+    <FileVersion>3.7.0.0</FileVersion>
+	<Version>3.7.0</Version>
 	<PackAsTool>true</PackAsTool>
 	<ToolCommandName>CxxSonarQubeRunner</ToolCommandName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -42,7 +42,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\Tools\**\**">
+		<None Include="..\Tools\**\**" Exclude="..\Tools\vera\**;..\Tools\rats\**">
 			<Link>Tools\%(RecursiveDir)%(FileName)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -50,7 +50,7 @@
 	
 	<ItemGroup>    
     <PackageReference Include="MsbuildAutomationHelper" Version="3.1.0" />    
-    <PackageReference Include="Trimble.SonarRestApiImpl" Version="1.8.1" />
+    <PackageReference Include="Trimble.SonarRestApiImpl" Version="2.0.1" />
     <PackageReference Include="FSharp.Data" Version="6.3.0" />
   </ItemGroup>
 
