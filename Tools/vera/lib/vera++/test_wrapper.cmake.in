@@ -1,0 +1,29 @@
+message("Running: \"${VERA_PROGRAM}\" @protected_args@")
+execute_process(COMMAND "${VERA_PROGRAM}"
+  @args@
+  RESULT_VARIABLE ret
+  OUTPUT_VARIABLE output
+  ERROR_VARIABLE error
+  @input_option@)
+message("return value: ${ret}")
+message("---output---\n${output}---error----\n${error}------------")
+
+set(fail OFF)
+if(NOT ${ret} EQUAL @retcode@)
+  message("Invalid return code. Expected return code was @retcode@.")
+  set(fail ON)
+endif()
+if(NOT "${output}" STREQUAL "@protected_output@")
+  message("Output mismatch. Expected content was:")
+  message("@protected_output@---")
+  set(fail ON)
+endif()
+if(NOT "${error}" STREQUAL "@protected_error@")
+  message("Output mismatch. Expected content was:")
+  message("@protected_error@---")
+  set(fail ON)
+endif()
+
+if(fail)
+  message(FATAL_ERROR "some errors occurred.")
+endif()

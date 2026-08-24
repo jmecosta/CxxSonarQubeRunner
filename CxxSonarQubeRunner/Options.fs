@@ -22,7 +22,7 @@ type NotificationManager() =
         member this.ReportMessage(message:string) = HelpersMethods.cprintf(ConsoleColor.Cyan, message)
 
 let (|Command|_|) (s:string) =
-    let r = new Regex(@"^(?:-{1,2}|\/)(?<command>\w+)[=:]*(?<value>.*)$",RegexOptions.IgnoreCase)
+    let r = new Regex(@"^(?:-{1,2}|\/)(?<command>[\w\-]+)[=:]*(?<value>.*)$",RegexOptions.IgnoreCase)
     let m = r.Match(s)
     if m.Success then 
         Some(m.Groups.["command"].Value.ToLower(), m.Groups.["value"].Value)
@@ -78,7 +78,13 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
 
             let data = c.Split('=')
 
-            if data.[0].Contains("sonar.cxx.cppcheck.reportPath") then
+            if data.[0].Contains("sonar.cxx.rats.reportPath") then
+                arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+            elif data.[0].Contains("sonar.cxx.vera.reportPath") then
+                arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-vera/*.xml"))
+                arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
+            elif data.[0].Contains("sonar.cxx.cppcheck.reportPath") then
                 arguments <- arguments.Add(data.[0], GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
                 arguments <- arguments.Add(data.[0] + "s", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
             elif data.[0].Contains("sonar.cxx.other.reportPath") then
@@ -107,6 +113,12 @@ let GetArgumentClass(additionalArguments : seq<string>, content : string [], hom
     additionalArguments |> Seq.iter (fun c -> ProcessLine(c.Trim()))
 
     // ensure stuff that we run is included
+    if not(arguments.ContainsKey("sonar.cxx.rats.reportPath")) then
+        arguments <- arguments.Add("sonar.cxx.rats.reportPath", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.rats.reportPaths", GetPathFromHome(".cxxresults/reports-rats/*.xml"))
+    if not(arguments.ContainsKey("sonar.cxx.vera.reportPath")) then
+        arguments <- arguments.Add("sonar.cxx.vera.reportPath", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
+        arguments <- arguments.Add("sonar.cxx.vera.reportPaths", GetPathFromHome(".cxxresults/reports-vera/*.xml"))
     if not(arguments.ContainsKey("sonar.cxx.cppcheck.reportPath")) then
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPath", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
         arguments <- arguments.Add("sonar.cxx.cppcheck.reportPaths", GetPathFromHome(".cxxresults/reports-cppcheck/*.xml"))
@@ -195,6 +207,8 @@ type UserSettingsFileType = XmlProvider<"""
 type CxxSettingsType = XmlProvider<"""
 <CxxUserProperties>
   <CppCheck>c:\path</CppCheck>
+  <Rats>c:\path</Rats>
+  <Vera>c:\path</Vera>
   <Python>c:\path</Python>
   <Cpplint>c:\path</Cpplint>
   <MsbuildRunnerPath>c:\path</MsbuildRunnerPath>
@@ -303,6 +317,11 @@ let ShowHelp() =
         Console.WriteLine ("    /Y|/y:<skip provision during branch analysis stage>")
         Console.WriteLine ("    /Z|/z:<fail build if Gate fails>")
 
+        Console.WriteLine ("    --no-cppcheck skip CppCheck during static analysis.")
+        Console.WriteLine ("    --no-cpplint skip CppLint during static analysis.")
+        Console.WriteLine ("    --no-rats skip Rats during static analysis.")
+        Console.WriteLine ("    --no-vera skip Vera++ during static analysis.")
+
         printf "\r\n Additional settings file cxx-user-options.xml in user home folder can be used with following format: \r\n"
         printf "\r\n%s\r\n" (CxxSettingsType.GetSample().XElement.ToString())
 
@@ -340,6 +359,14 @@ type OptionsData(args : string []) =
     let deleteLegacyPropsFile = arguments.ContainsKey("o")
 
     let runStaticAnalysisOnly = arguments.ContainsKey("l")
+
+    let runVera = not(arguments.ContainsKey("no-vera"))
+
+    let runRats = not(arguments.ContainsKey("no-rats"))
+
+    let runCppCheck = not(arguments.ContainsKey("no-cppcheck"))
+
+    let runCppLint = not(arguments.ContainsKey("no-cpplint"))
 
     let skipGateValidation = not(arguments.ContainsKey("y"))
 
@@ -436,6 +463,8 @@ type OptionsData(args : string []) =
     member val HomePath : string = "" with get, set
     member val CxxResultsPath : string = "" with get, set
     member val CxxReportsCppCheckPath : string = "" with get, set
+    member val CxxReportsVeraPath : string = "" with get, set
+    member val CxxReportsRatsPath : string = "" with get, set
     member val CxxReportsCpplintPath : string = "" with get, set
     member val SolutionTargetFile : string = "" with get, set
     member val SonarQubeTempPath : string = "" with get, set
@@ -447,6 +476,8 @@ type OptionsData(args : string []) =
     member val ParallelMsbuildOption = "/m:1" with get, set
 
     member val CppCheckPath : string = "" with get, set
+    member val RatsPath : string = "" with get, set
+    member val VeraPath : string = "" with get, set
     member val PythonPath : string = "" with get, set
     member val CppLintPath : string = "" with get, set
     member val MSBuildRunnerPath : string = "" with get, set
@@ -454,6 +485,10 @@ type OptionsData(args : string []) =
     member val BuildLog : string = "" with get, set
     member val Logger : NotificationManager = logger with get, set
     member val SonarPropsToUse : Map<string, string> = Map.empty with get, set
+    member val RunVera = runVera
+    member val RunRats = runRats
+    member val RunCppCheck = runCppCheck
+    member val RunCppLint = runCppLint
     member val DisableCodeAnalysis = disableCodeAnalysis
     member val IsVerboseOn = verboseModeTrue
     member val FailOnFailedGate = failedOnFailedGate
@@ -541,6 +576,8 @@ type OptionsData(args : string []) =
 
         this.CxxResultsPath <- Path.Combine(this.HomePath, ".cxxresults")
         this.CxxReportsCppCheckPath <- Path.Combine(this.CxxResultsPath, "reports-cppcheck")
+        this.CxxReportsVeraPath <- Path.Combine(this.CxxResultsPath, "reports-vera")
+        this.CxxReportsRatsPath <- Path.Combine(this.CxxResultsPath, "reports-rats")
         this.CxxReportsCpplintPath <- Path.Combine(this.CxxResultsPath, "reports-other")
         skipBuild
 
@@ -586,20 +623,42 @@ type OptionsData(args : string []) =
 
     member this.ConfigureInstallationOfTools() =
         
-        try
-            this.CppCheckPath <- userCxxSettings.CppCheck
-        with
-        | _ -> this.CppCheckPath <- InstallCppCheck()
+        if runCppCheck then
+            try
+                this.CppCheckPath <- userCxxSettings.CppCheck
+            with
+            | _ -> this.CppCheckPath <- InstallCppCheck()
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] CppCheck disabled by --no-cppcheck")
 
-        try
-            this.PythonPath <- userCxxSettings.Python
-        with
-        | _ -> this.PythonPath <- InstallPython()
+        if runRats then
+            try
+                this.RatsPath <- userCxxSettings.Rats
+            with
+            | _ -> this.RatsPath <- InstallRats()
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Rats disabled by --no-rats")
 
-        try
-            this.CppLintPath <- userCxxSettings.Cpplint
-        with
-        | _ -> this.CppLintPath <- InstallCppLint()
+        if runVera then
+            try
+                this.VeraPath <- userCxxSettings.Vera
+            with
+            | _ -> this.VeraPath <- InstallVera()
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] Vera++ disabled by --no-vera")
+
+        if runCppLint then
+            try
+                this.PythonPath <- userCxxSettings.Python
+            with
+            | _ -> this.PythonPath <- InstallPython()
+
+            try
+                this.CppLintPath <- userCxxSettings.Cpplint
+            with
+            | _ -> this.CppLintPath <- InstallCppLint()
+        else
+            HelpersMethods.cprintf(ConsoleColor.Yellow, "[CxxSonarQubeMsbuidRunner] CppLint disabled by --no-cpplint")
 
         printf "Tools Installed\r\n\r\n"
 

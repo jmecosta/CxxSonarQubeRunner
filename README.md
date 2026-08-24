@@ -5,7 +5,7 @@ This repository contains a build wrapper for run SonarQube analysis in a more au
 
 1. Runs complete analysis in single command, runs begin, end and build solution.
 2. You can use it for feature branch flow, the wrapper will provision project, setup permissions and quality profiles and in the end duplicate false positives into feature branch.
-3. Supports C++ community edition by running Cpplint and CppCheck before the end stage. This allows issues to be reported without any other configuration
+3. Supports C++ community edition by running Vera, Rats, Cpplint and CppCheck before the end stage. This allows issues to be reported without any other configuration
 4. Wrapper uses buildlog to retrieve build information the C++ requires 
 5. Validates Gate and Compute Engine sucess and brakes the builds if they are not ok. This is the default strategy to SonarQube 5.2 and above
 6. Supports Visual Studio Shared projects
@@ -33,6 +33,8 @@ The wrapper will install the needed tools to run analysis, however in cases were
 ```
 <CxxUserProperties>
   <CppCheck>c:\path</CppCheck>
+  <Rats>c:\path</Rats>
+  <Vera>c:\path</Vera>
   <Python>c:\path</Python>
   <Cpplint>c:\path</Cpplint>
   <MsbuildRunnerPath>c:\path</MsbuildRunnerPath>
@@ -76,3 +78,12 @@ The wrapper will install the needed tools to run analysis, however in cases were
 
             /Y|/y:<skip provision during branch analysis stage>
             /Z|/z:<fail build if Gate fails>
+
+            --no-cppcheck skip CppCheck during static analysis.
+            --no-cpplint skip CppLint during static analysis.
+            --no-rats skip Rats during static analysis.
+            --no-vera skip Vera++ during static analysis.
+
+Each static analysis tool can be skipped individually. A skipped tool is not installed either, so
+`--no-vera --no-rats` is also the way to run on a platform where those tools are not available. Use
+`/f` to skip static analysis altogether.

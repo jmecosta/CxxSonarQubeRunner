@@ -491,8 +491,10 @@ let BeginPhase(options : OptionsData) =
             HelpersMethods.cprintf(ConsoleColor.Cyan, "########## Execute Static Analysis ###########")
             HelpersMethods.cprintf(ConsoleColor.Cyan, "##############################################")
             HelpersMethods.cprintf(ConsoleColor.White, "   ")
-            AnalysisRunners.RunCppLint(options) |> ignore
-            AnalysisRunners.RunCppCheck(options) |> ignore
+            if options.RunVera || options.RunRats || options.RunCppLint then
+                AnalysisRunners.RunVeraRatsAndCppLint(options) |> ignore
+            if options.RunCppCheck then
+                AnalysisRunners.RunCppCheck(options) |> ignore
         else
             HelpersMethods.cprintf(ConsoleColor.Cyan, "######################################################")
             HelpersMethods.cprintf(ConsoleColor.Cyan, "########## Execute Static Analysis SKIPPED ###########")

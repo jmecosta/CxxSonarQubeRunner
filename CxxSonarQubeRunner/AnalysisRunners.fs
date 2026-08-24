@@ -30,11 +30,22 @@ let RunCppCheck(options : OptionsData) =
                     options.CxxReportsCppCheckPath,
                     (options.Logger :> ICheckerLogger), options.IsVerboseOn)
 
-let RunCppLint(options : OptionsData) =
+let RunVeraRatsAndCppLint(options : OptionsData) =
 
-    if Directory.Exists(options.CxxReportsCpplintPath) then
-        Directory.Delete(options.CxxReportsCpplintPath, true)
-    Directory.CreateDirectory(options.CxxReportsCpplintPath) |> ignore
+    if options.RunRats then
+        if Directory.Exists(options.CxxReportsRatsPath) then
+            Directory.Delete(options.CxxReportsRatsPath, true)
+        Directory.CreateDirectory(options.CxxReportsRatsPath) |> ignore
+
+    if options.RunCppLint then
+        if Directory.Exists(options.CxxReportsCpplintPath) then
+            Directory.Delete(options.CxxReportsCpplintPath, true)
+        Directory.CreateDirectory(options.CxxReportsCpplintPath) |> ignore
+
+    if options.RunVera then
+        if Directory.Exists(options.CxxReportsVeraPath) then
+            Directory.Delete(options.CxxReportsVeraPath, true)
+        Directory.CreateDirectory(options.CxxReportsVeraPath) |> ignore
 
     let RunTools(file:string) =
         
@@ -54,8 +65,15 @@ let RunCppLint(options : OptionsData) =
                 false
         
         if not(isExclude) then
-            let executor = new CommandExecutor(null, int64(1500000))
-            CppLintRunner.ExecuteCppLint(executor, options.HomePath, file, options.CxxReportsCpplintPath, "", options.PythonPath, options.CppLintPath, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
+            if options.RunVera && options.VeraPath <> "" then
+                let executor = new CommandExecutor(null, int64(1500000))
+                VeraRunner.ExecuteVera(executor, file, options.VeraPath, options.CxxReportsVeraPath, "", options.HomePath, (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
+            if options.RunCppLint then
+                let executor = new CommandExecutor(null, int64(1500000))
+                CppLintRunner.ExecuteCppLint(executor, options.HomePath, file, options.CxxReportsCpplintPath, "", options.PythonPath, options.CppLintPath, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
+            if options.RunRats && options.RatsPath <> "" then
+                let executor = new CommandExecutor(null, int64(1500000))
+                RatsRunner.ExecuteRats(executor, options.RatsPath, options.CxxReportsRatsPath, file, "", (options.Logger :> ICheckerLogger), options.IsVerboseOn) |> ignore
 
     let RunWithWithPattern(pattern:string) = 
         try
